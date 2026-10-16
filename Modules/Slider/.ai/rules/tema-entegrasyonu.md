@@ -1,0 +1,7 @@
+# Slider tema entegrasyonu
+
+- Ana tanıtım alanındaki hero, banner, carousel veya tek büyük görsel Slider adayıdır. Büyük görsel üzerinde başlık, destek metni, çağrı butonu ve slayt gezinme işaretleri görsel/yapısal ipuçlarıdır; bunlar kesin eşleştirme değildir. Sayfa ortasındaki her görsel bandı otomatik Slider sayma; hizmet, ekip veya başka içerik bölümünün anlamını ve mevcut modülleri birlikte değerlendir.
+- Mevcut içerik alanları `title`, `subtitle`, `image`, `extra_fields`; `features.json` içindeki `slider` formunda `button_text` ve `short_description` vardır. Başlık `title`, alt başlık `subtitle`, ana görsel `image`, buton metni `extra_fields.button_text`, kısa açıklama `extra_fields.short_description` adayıdır. Tasarımda alt başlık/kısa açıklama ayrımı belirsizse kullanıcıya sor. Buton bağlantısı için mevcut alan varmış gibi davranma.
+- Mevcut tabloda `active`, `status`, `order` alanları yoktur. Aktiflik filtresi veya sıralama uydurma. Tek görselde hangi kaydın kullanılacağı ya da carousel kayıtlarının sırası tanımlanmamışsa kullanıcıya SOR; rastgele ilk/son kayıt seçme.
+- Modül/alan eşleşmesi belirsizken entegrasyona devam etme. Veri erişimini mevcut model/servis örüntüsüyle yap; ek facade/helper oluşturma zorunluluğu yoktur.
+- Uygulama adımları için [Slider skill'ini](../../skills/slider-theme-integration/SKILL.md), ortak alan genişletme için [modül kurallarını](../../../../.ai/rules/moduller.md#tema-için-yönetilebilir-alan-genişletme) oku.

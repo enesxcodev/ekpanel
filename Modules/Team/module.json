@@ -1,0 +1,20 @@
+{
+    "name": "Team",
+    "alias": "team",
+    "description": "Ekip üyeleri yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Team\\Providers\\TeamServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "team.menu",
+            "team.view",
+            "team.create",
+            "team.update",
+            "team.delete"
+        ]
+    }
+}

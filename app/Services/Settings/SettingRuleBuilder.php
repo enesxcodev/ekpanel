@@ -48,7 +48,7 @@ class SettingRuleBuilder
         return $rules;
     }
 
-    /** @return array<string, string> */
+    /** @return array<string, string|array<string, string>> */
     public function messages(): array
     {
         return (new FieldRuleBuilder)->messages();

@@ -1,0 +1,7 @@
+# Pages tema entegrasyonu
+
+- Pages, müşterinin yönettiği içerik sayfaları içindir. “Hakkımızda”, “Misyon”, “Vizyon”, “Kurumsal” veya “Şirketimiz” gibi bölümler Pages adayı olabilir; başlık sözcüğü tek başına eşleşme kararı değildir. Bölümün içerik hiyerarşisini, sayfadaki yerini ve tekrar eden kart/listelerin başka modüllere ait olup olmadığını birlikte değerlendir.
+- Bir Pages kaydı `title`, `short_description`, `content`, `image`, `slug`, `status`, `sort_order` ve `extra_fields` alanlarını taşır. Kategori adı/açıklaması kategori içindir; kategori sayfası kaydı gibi varsayma. Tema yerleşiminde resim kullanımı belirsizse yönetilen `image` alanını incele.
+- Public sayfa URL'si kategori ağacındaki slug'larla oluşur. `Page::url_path` erişimini veya kaydın `category` ilişkisini kullan; slug'ları tema içinde yeniden birleştirecek yeni yardımcı katman ekleme. Yalnız `published` durumundaki sayfalar public route tarafından sunulur.
+- Pages, bağımsız ve uzun biçimli bilgi sayfaları sağlar. Anasayfadaki hero, hizmet kartları, ekip üyeleri veya tek bir sabit site ayarı ihtiyacını otomatik olarak Pages'e eşleme; mevcut modül ve Settings kapsamlarını birlikte değerlendir.
+- Alan genişletmede [ortak modül kurallarına](../../../../.ai/rules/moduller.md#tema-için-yönetilebilir-alan-genişletme) başvur. Veriyi mevcut `Page` / `PageCategory` modelleri ve ilişkilerinden oku; tema için facade/helper veya örnek sayfa kaydı oluşturma.

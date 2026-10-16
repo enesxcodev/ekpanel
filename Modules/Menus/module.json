@@ -1,0 +1,12 @@
+{
+    "name": "Menus",
+    "alias": "menus",
+    "description": "Yönetilebilir çok seviyeli ziyaretçi menüleri",
+    "keywords": [],
+    "priority": 0,
+    "providers": ["Modules\\Menus\\Providers\\MenusServiceProvider"],
+    "files": [],
+    "panel": {
+        "permissions": ["menus.menu", "menus.view", "menus.create", "menus.update", "menus.delete"]
+    }
+}

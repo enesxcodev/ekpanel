@@ -32,6 +32,10 @@
                     }
                 }
             ]
+        },
+        "service": {
+            "label": "Ek hizmet alanları",
+            "fields": []
         }
     }
 }

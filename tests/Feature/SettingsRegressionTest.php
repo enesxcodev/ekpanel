@@ -125,7 +125,7 @@ test('settings keeps rendering and validating every shared scalar input type', f
         ->assertSessionHasErrors(['settings.'.$definition->id => $message]);
     expect($definition->fresh()->effectiveValue())->toBe($valid);
 })->with([
-    'textarea length' => ['textarea', 'string', 'Metin', str_repeat('x', 11), ['rows' => 3], ['max' => 10], [], 'The Alan field must not be greater than 10 characters.'],
+    'textarea length' => ['textarea', 'string', 'Metin', str_repeat('x', 11), ['rows' => 3], ['max' => 10], [], 'Alan en fazla 10 karakter olabilir.'],
     'email format' => ['email', 'string', 'test@example.com', 'invalid', [], [], [], 'Alan geçerli bir e-posta adresi olmalıdır.'],
     'float steps' => ['number', 'float', 1.5, 1.6, ['step' => 0.5], ['min' => 0, 'max' => 10], [], 'Değer, minimum değerden itibaren 0.5 adımına uygun olmalıdır.'],
     'range offset steps' => ['range', 'integer', 3, 4, ['step' => 2], ['min' => 1, 'max' => 9], [], 'Değer, minimum değerden itibaren 2 adımına uygun olmalıdır.'],

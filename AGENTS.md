@@ -13,6 +13,8 @@ Before relying on a package's API, confirm its installed version:
 
 ## Skills Activation
 
+- Tema tasarımı veya ekran görüntüsünü mevcut modüllere entegre ederken önce `.claude/skills/theme-integration/SKILL.md` ve `.ai/rules/index.md` dosyalarını oku. İlgili modülün `Modules/<Modul>/.ai/rules/tema-entegrasyonu.md` ve `Modules/<Modul>/skills/<modul>-theme-integration/SKILL.md` dosyalarını keşfedip oku; eşleşme belirsizse kullanıcıya sor.
+
 This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
 ## Conventions

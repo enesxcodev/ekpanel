@@ -63,7 +63,7 @@ class FieldRuleBuilder
         return $rules;
     }
 
-    /** @return array<string, string> */
+    /** @return array<string, string|array<string, string>> */
     public function messages(): array
     {
         return [
@@ -72,9 +72,9 @@ class FieldRuleBuilder
             'numeric' => ':attribute sayı olmalıdır.', 'boolean' => ':attribute geçerli bir açık / kapalı değeri olmalıdır.',
             'email' => ':attribute geçerli bir e-posta adresi olmalıdır.', 'in' => ':attribute için tanımlı bir seçenek seçin.',
             'array' => ':attribute içerisinde yalnızca bu bölüme ait izin verilen alanları gönderin.',
-            'min.string' => ':attribute en az :min karakter olmalıdır.', 'max.string' => ':attribute en fazla :max karakter olabilir.',
-            'min.numeric' => ':attribute en az :min olmalıdır.', 'max.numeric' => ':attribute en fazla :max olabilir.',
-            'max.file' => ':attribute en fazla :max KB olabilir.', 'image' => ':attribute geçerli bir görsel olmalıdır.',
+            'min' => ['string' => ':attribute en az :min karakter olmalıdır.', 'numeric' => ':attribute en az :min olmalıdır.'],
+            'max' => ['string' => ':attribute en fazla :max karakter olabilir.', 'numeric' => ':attribute en fazla :max olabilir.', 'file' => ':attribute en fazla :max KB olabilir.'],
+            'image' => ':attribute geçerli bir görsel olmalıdır.',
             'file' => ':attribute geçerli bir dosya olmalıdır.', 'mimes' => ':attribute için izin verilen dosya türleri: :values.',
             'extensions' => ':attribute dosya uzantısı izin verilen türlerden olmalıdır.',
             'dimensions' => ':attribute görsel ölçüleri tanımlanan sınırlara uymalıdır.',

@@ -5,6 +5,10 @@
      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     @switch($name)
+        @case('users')
+            <circle cx="9" cy="7" r="4" />
+            <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3a4 4 0 0 1 0 8M21 21v-2a4 4 0 0 0-3-3.87" />
+            @break
         @case('chevron-down')
             <path d="M6 9l6 6l6 -6" />
             @break

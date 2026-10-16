@@ -1,0 +1,22 @@
+{
+    "name": "ekagent/menus",
+    "description": "ekAgent yönetilebilir ziyaretçi menüleri modülü",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^13.0",
+        "nwidart/laravel-modules": "^13.0",
+        "spatie/laravel-permission": "^8.0",
+        "yajra/laravel-datatables-oracle": "^13.0"
+    },
+    "extra": {"laravel": {"providers": [], "aliases": {}}},
+    "autoload": {
+        "psr-4": {
+            "Modules\\Menus\\": "app/",
+            "Modules\\Menus\\Database\\Factories\\": "database/factories/",
+            "Modules\\Menus\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {"psr-4": {"Modules\\Menus\\Tests\\": "tests/"}}
+}

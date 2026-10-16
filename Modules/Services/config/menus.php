@@ -6,6 +6,15 @@ return [
         'icon' => 'briefcase',
         'order' => 100,
         'children' => [
+            'list' => [
+                'label' => 'Listele',
+                'icon' => 'briefcase',
+                'route' => 'admin.services.index',
+                'active' => ['admin.services.index', 'admin.services.create'],
+                'permission' => 'services.view',
+                'menu_permission' => 'services.menu',
+                'order' => 5,
+            ],
             'categories' => [
                 'label' => 'Kategoriler',
                 'icon' => 'category',

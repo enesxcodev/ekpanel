@@ -8,6 +8,9 @@
     "files": [],
     "panel": {
         "permissions": [
+            "services.menu",
+            "services.view",
+            "services.create",
             "services.categories.menu",
             "services.categories.view",
             "services.categories.create",

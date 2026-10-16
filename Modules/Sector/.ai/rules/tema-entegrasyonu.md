@@ -1,0 +1,6 @@
+# Sector tema entegrasyonu
+
+- Firmanın çalıştığı iş alanlarını anlatan “Hizmet verdiğimiz sektörler”, “Çalıştığımız alanlar” veya “Uzmanlık alanlarımız” bölümleri Sector adayıdır. Sektör adı, görsel ve açıklama içeren kartlar ya da listeler yapısal ipuçlarıdır; başlığa bakarak tek başına eşleştirme yapma.
+- Sektör, firmanın hangi alanda çalıştığını anlatır; hizmet firmanın ne yaptığını, marka temsil ettiği veya portföyünde sunduğu markaları, referans ise müşteri ya da tamamlanmış projeyi anlatır. Bu içerik türlerini birbirinin yerine kullanma. Bölümün amacı belirsizse kullanıcıya sor.
+- Güncel model alanları `title`, `short_description`, `content`, `image`, `is_active` ve `extra_fields` içindeki tanımlı ek alanlardır. `features.json` şu anda boş; görsel modelde yer alır. Modelde slug, ilişki, sıralama ve detay bağlantısı tanımlı değildir.
+- İçeriği mevcut Sector model ve servis erişimiyle al. Alan ekleme gerekiyorsa [ortak modül kurallarına](../../../../.ai/rules/moduller.md#tema-için-yönetilebilir-alan-genişletme) başvur; sıralama, filtre ve sektör seçimi gibi kuralları kodda veya kullanıcı gereksiniminde yoksa uydurma.

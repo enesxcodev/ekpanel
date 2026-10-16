@@ -1,0 +1,20 @@
+{
+    "name": "Sector",
+    "alias": "sector",
+    "description": "Sektör yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Sector\\Providers\\SectorServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "sector.menu",
+            "sector.view",
+            "sector.create",
+            "sector.update",
+            "sector.delete"
+        ]
+    }
+}

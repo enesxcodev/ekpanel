@@ -1,1 +1,29 @@
 @import '@tabler/core/dist/css/tabler.min.css';
+@import 'select2/dist/css/select2.min.css';
+
+.category-tree-list [data-category-tree-option] {
+    cursor: pointer;
+    padding: .45rem .65rem;
+    border-radius: var(--tblr-border-radius);
+    margin-inline-start: calc(var(--category-depth, 0) * 1rem);
+}
+
+.category-tree-list [data-category-tree-option]:hover,
+.category-tree-list [data-category-tree-option][data-active="true"] {
+    background: var(--tblr-bg-surface-secondary);
+}
+
+.category-tree-list [data-category-tree-option][aria-selected="true"] {
+    color: var(--tblr-primary);
+    font-weight: 600;
+}
+
+.category-tree-option-label,
+.category-tree-option-path {
+    display: block;
+}
+
+.category-tree-option-path {
+    color: var(--tblr-secondary);
+    font-size: .75rem;
+}

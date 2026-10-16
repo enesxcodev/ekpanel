@@ -4,6 +4,7 @@ namespace Modules\Services\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Services\Database\Factories\ServiceCategoryFactory;
 
 class ServiceCategory extends Model
@@ -23,5 +24,10 @@ class ServiceCategory extends Model
     protected static function newFactory(): ServiceCategoryFactory
     {
         return ServiceCategoryFactory::new();
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
     }
 }

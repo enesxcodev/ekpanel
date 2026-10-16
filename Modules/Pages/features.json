@@ -1,0 +1,13 @@
+{
+    "schema_version": 1,
+    "forms": {
+        "page": {
+            "label": "Ek sayfa alanları",
+            "fields": []
+        },
+        "category": {
+            "label": "Ek sayfa kategorisi alanları",
+            "fields": []
+        }
+    }
+}

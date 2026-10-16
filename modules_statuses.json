@@ -1,4 +1,9 @@
 {
     "Services": true,
-    "Slider": true
+    "Slider": true,
+    "Team": true,
+    "Sector": true,
+    "Brand": true,
+    "Pages": true,
+    "Menus": true
 }
