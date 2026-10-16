@@ -1,0 +1,18 @@
+{
+    "name": "Services",
+    "alias": "services",
+    "description": "Hizmet yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": ["Modules\\Services\\Providers\\ServicesServiceProvider"],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "services.categories.menu",
+            "services.categories.view",
+            "services.categories.create",
+            "services.categories.update",
+            "services.categories.delete"
+        ]
+    }
+}

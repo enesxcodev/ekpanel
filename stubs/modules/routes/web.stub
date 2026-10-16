@@ -1,0 +1,14 @@
+<?php
+
+use App\Http\Middleware\AdminAuth\EnsureAdminIsActive;
+use Illuminate\Support\Facades\Route;
+use $MODULE_NAMESPACE$\$STUDLY_NAME$\$CONTROLLER_NAMESPACE$\$STUDLY_NAME$Controller;
+
+Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:$STUDLY_NAME$'])
+    ->prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')
+    ->name('admin.$LOWER_NAME$.')
+    ->group(function (): void {
+        Route::get('$KEBAB_NAME$', [$STUDLY_NAME$Controller::class, 'index'])
+            ->middleware('can:$LOWER_NAME$.view')
+            ->name('index');
+    });

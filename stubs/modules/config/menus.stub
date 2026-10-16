@@ -1,0 +1,13 @@
+<?php
+
+return [
+    '$LOWER_NAME$' => [
+        'label' => '$STUDLY_NAME$',
+        'icon' => 'layout-grid',
+        'route' => 'admin.$LOWER_NAME$.index',
+        'active' => 'admin.$LOWER_NAME$.*',
+        'permission' => '$LOWER_NAME$.view',
+        'menu_permission' => '$LOWER_NAME$.menu',
+        'order' => 100,
+    ],
+];

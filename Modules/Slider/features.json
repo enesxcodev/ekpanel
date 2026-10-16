@@ -1,0 +1,37 @@
+{
+    "schema_version": 1,
+    "forms": {
+        "slider": {
+            "label": "Ek slider alanları",
+            "fields": [
+                {
+                    "key": "button_text",
+                    "label": "Buton metni",
+                    "input_type": "text",
+                    "value_type": "string",
+                    "default_value": null,
+                    "validation": {
+                        "required": false,
+                        "max": 80
+                    },
+                    "attributes": {
+                        "placeholder": "Örn. Detayları incele"
+                    }
+                },
+                {
+                    "key": "short_description",
+                    "label": "Kısa açıklama",
+                    "input_type": "textarea",
+                    "value_type": "string",
+                    "validation": {
+                        "required": false,
+                        "max": 180
+                    },
+                    "attributes": {
+                        "rows": 3
+                    }
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,5 @@
+@props([
+    'title',
+])
+
+<h2 class="page-title">{{ $title }}</h2>

@@ -1,0 +1,3 @@
+<x-admin.layout title="$STUDLY_NAME$">
+    {{ $slot }}
+</x-admin.layout>

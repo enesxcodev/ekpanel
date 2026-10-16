@@ -1,0 +1,20 @@
+{
+    "name": "Slider",
+    "alias": "slider",
+    "description": "Slider yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Slider\\Providers\\SliderServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "slider.menu",
+            "slider.view",
+            "slider.create",
+            "slider.update",
+            "slider.delete"
+        ]
+    }
+}
