@@ -39,7 +39,16 @@ class SettingDefinition extends Model
 
     public function effectiveValue(): mixed
     {
+        if ($this->storedValue?->media_id !== null) {
+            return $this->storedValue->media?->path;
+        }
+
         return $this->storedValue === null ? $this->default_value : $this->storedValue->value['value'];
+    }
+
+    public function usesMediaLibrary(): bool
+    {
+        return $this->input_type === SettingInputType::Image && in_array($this->key, ['site.logo', 'site.footer_logo'], true);
     }
 
     public function hasValue(): bool

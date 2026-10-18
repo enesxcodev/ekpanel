@@ -5,5 +5,11 @@
     "Sector": true,
     "Brand": true,
     "Pages": true,
-    "Menus": true
+    "Blog": true,
+    "Menus": true,
+    "Faqs": true,
+    "Testimonials": true,
+    "Documents": true,
+    "Projects": true,
+    "Galeriler": true
 }

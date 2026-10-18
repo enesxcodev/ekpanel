@@ -5,6 +5,7 @@ namespace Modules\Services\Http\Requests;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\ContentMediaService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,9 +17,13 @@ class StoreServiceRequest extends FormRequest
     }
 
     /** @return array<string, mixed> */
-    public function rules(ModuleFeatures $features, FeatureValues $values): array
+    public function rules(ModuleFeatures $features, FeatureValues $values, ContentMediaService $media): array
     {
+        $service = $this->route('service');
+
         return [
+            'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('services', 'slug')->ignore($service?->id)],
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'title' => ['required', 'string', 'max:255'],
             'service_category_id' => ['nullable', 'integer', 'exists:service_categories,id'],
             'short_description' => ['nullable', 'string', 'max:1000'],
@@ -26,10 +31,10 @@ class StoreServiceRequest extends FormRequest
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_keywords' => ['nullable', 'string', 'max:1000'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'extensions:jpg,jpeg,png,webp', 'max:4096'],
+            ...$media->rules($media->definition()),
             'icon' => ['nullable', 'string', Rule::in(array_keys(config('services.icons')))],
             'is_active' => ['required', 'boolean'],
-            ...$values->rules($features->form('Services', 'service')['fields'], $this->all(), []),
+            ...$values->rules($features->form('Services', 'service')['fields'], $this->all(), $service?->extra_fields ?? []),
         ];
     }
 
@@ -46,7 +51,7 @@ class StoreServiceRequest extends FormRequest
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['title' => 'Hizmet başlık', 'service_category_id' => 'Kategori', 'short_description' => 'Hizmet kısa içerik', 'content' => 'Hizmet içerik', 'meta_title' => 'Meta başlık', 'meta_keywords' => 'Meta anahtar', 'meta_description' => 'Meta açıklama', 'image' => 'Hizmet resim', 'icon' => 'Hizmet ikon', 'is_active' => 'Hizmet durum']
+        return ['slug' => 'Kısa bağlantı', 'sort_order' => 'Sıralama', 'title' => 'Hizmet başlık', 'service_category_id' => 'Kategori', 'short_description' => 'Hizmet kısa içerik', 'content' => 'Hizmet içerik', 'meta_title' => 'Meta başlık', 'meta_keywords' => 'Meta anahtar', 'meta_description' => 'Meta açıklama', 'image_media_id' => 'Hizmet resim', 'icon' => 'Hizmet ikon', 'is_active' => 'Hizmet durum']
             + app(FeatureValues::class)->labels(app(ModuleFeatures::class)->form('Services', 'service')['fields']);
     }
 }

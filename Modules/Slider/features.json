@@ -5,6 +5,19 @@
             "label": "Ek slider alanları",
             "fields": [
                 {
+                    "key": "background_image",
+                    "label": "Arka plan görseli",
+                    "description": "İsteğe bağlı ek görseli medya kütüphanesinden seçin.",
+                    "input_type": "image",
+                    "value_type": "media",
+                    "default_value": null,
+                    "validation": {
+                        "required": false,
+                        "extensions": ["jpg", "jpeg", "png", "webp"],
+                        "max_size": 4096
+                    }
+                },
+                {
                     "key": "button_text",
                     "label": "Buton metni",
                     "input_type": "text",

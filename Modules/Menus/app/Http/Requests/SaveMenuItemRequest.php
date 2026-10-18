@@ -35,6 +35,7 @@ class SaveMenuItemRequest extends FormRequest
         $type = $this->input('target_type');
 
         return [
+            'icon' => ['nullable', 'string', 'max:100', 'regex:/^[a-z][a-z0-9-]*$/'],
             'label' => ['required', 'string', 'max:255'],
             'parent_id' => ['nullable', 'integer', Rule::exists('menu_items', 'id')->where('menu_id', $this->route('menu')->id)],
             'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
@@ -98,7 +99,7 @@ class SaveMenuItemRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'label' => 'Görünen metin', 'parent_id' => 'Üst öğe', 'sort_order' => 'Sıralama',
+            'icon' => 'İkon', 'label' => 'Görünen metin', 'parent_id' => 'Üst öğe', 'sort_order' => 'Sıralama',
             'is_active' => 'Durum', 'new_tab' => 'Yeni sekme', 'target_type' => 'Hedef türü',
             'url' => 'Bağlantı adresi', 'route_name' => 'Site rotası',
             'route_parameters' => 'Rota parametreleri', 'route_parameters_json' => 'Rota parametreleri',

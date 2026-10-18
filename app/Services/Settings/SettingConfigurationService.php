@@ -69,7 +69,7 @@ class SettingConfigurationService
     public function deleteDefinition(SettingDefinition $definition): void
     {
         abort_if($definition->is_system, 403);
-        $path = $definition->input_type->isFile() ? $definition->effectiveValue() : null;
+        $path = $definition->input_type->isFile() && $definition->storedValue?->media_id === null ? $definition->effectiveValue() : null;
         $definition->delete();
         $this->settings->forget($definition->key);
         if ($path !== null) {

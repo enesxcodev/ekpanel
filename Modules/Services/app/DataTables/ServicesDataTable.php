@@ -10,11 +10,12 @@ class ServicesDataTable
 {
     public function handle(): JsonResponse
     {
-        return DataTables::eloquent(Service::query()->with('category:id,name')->select(['services.id', 'services.title', 'services.service_category_id', 'services.image', 'services.icon', 'services.is_active']))
+        return DataTables::eloquent(Service::query()->with('category:id,name')->select(['services.id', 'services.title', 'services.service_category_id', 'services.image', 'services.icon', 'services.is_active', 'services.slug', 'services.sort_order']))
             ->addColumn('category_name', fn (Service $service): string => $service->category?->name ?? 'Kategorisiz')
             ->addColumn('visual', fn (Service $service): string => view('services::partials.visual', compact('service'))->render())
             ->editColumn('is_active', fn (Service $service): string => $service->is_active ? 'Aktif' : 'Pasif')
-            ->rawColumns(['visual'])
+            ->addColumn('actions', fn (Service $service): string => view('services::partials.actions', compact('service'))->render())
+            ->rawColumns(['visual', 'actions'])
             ->toJson();
     }
 }

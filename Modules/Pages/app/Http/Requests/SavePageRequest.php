@@ -5,6 +5,7 @@ namespace Modules\Pages\Http\Requests;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\ContentMediaService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,7 @@ class SavePageRequest extends FormRequest
     }
 
     /** @return array<string, mixed> */
-    public function rules(ModuleFeatures $features, FeatureValues $values): array
+    public function rules(ModuleFeatures $features, FeatureValues $values, ContentMediaService $media): array
     {
         $page = $this->route('page');
         $uniqueSlug = Rule::unique('pages', 'slug')->ignore($page?->id);
@@ -28,11 +29,13 @@ class SavePageRequest extends FormRequest
 
         return [
             'page_category_id' => ['nullable', 'integer', 'exists:page_categories,id'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_keywords' => ['nullable', 'string', 'max:1000'],
+            'meta_description' => ['nullable', 'string', 'max:1000'],
             'title' => ['required', 'string', 'max:255'],
             'short_description' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string', 'max:65535'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'extensions:jpg,jpeg,png,webp', 'max:4096'],
-            'remove_image' => ['sometimes', 'boolean'],
+            ...$media->rules($media->definition()),
             'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $uniqueSlug],
             'status' => ['required', Rule::in(['draft', 'published'])],
             'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
@@ -67,10 +70,13 @@ class SavePageRequest extends FormRequest
     {
         return [
             'page_category_id' => 'Sayfa kategorisi',
+            'meta_title' => 'Meta başlık',
+            'meta_keywords' => 'Meta anahtar',
+            'meta_description' => 'Meta açıklama',
             'title' => 'Başlık',
             'short_description' => 'Kısa açıklama',
             'content' => 'İçerik',
-            'image' => 'Resim',
+            'image_media_id' => 'Resim',
             'slug' => 'Kısa bağlantı',
             'status' => 'Yayın durumu',
             'sort_order' => 'Sıralama',

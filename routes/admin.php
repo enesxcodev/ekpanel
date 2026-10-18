@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\Forms\FormController;
+use App\Http\Controllers\Admin\Forms\FormSubmissionController;
 use App\Http\Controllers\Admin\Roles\AdminRoleController;
 use App\Http\Controllers\Admin\Settings\SettingConfigurationController;
 use App\Http\Controllers\Admin\Settings\SettingController;
@@ -7,6 +9,7 @@ use App\Http\Controllers\Admin\Settings\SettingDefinitionController;
 use App\Http\Controllers\Admin\Settings\SettingSectionController;
 use App\Http\Controllers\Admin\Users\AdminUserController;
 use App\Http\Controllers\AdminAuth\AdminAuthController;
+use App\Http\Controllers\MediaController;
 use App\Http\Middleware\AdminAuth\EnsureAdminIsActive;
 use Illuminate\Support\Facades\Route;
 
@@ -17,8 +20,35 @@ Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')-
     });
 
     Route::middleware(['auth:admin', EnsureAdminIsActive::class])->group(function (): void {
+        Route::prefix('forms')->name('forms.')->group(function (): void {
+            Route::get('submissions', [FormSubmissionController::class, 'index'])->name('submissions.index');
+            Route::get('submissions/data', [FormSubmissionController::class, 'data'])->name('submissions.data');
+            Route::get('submissions/{submission}', [FormSubmissionController::class, 'show'])->name('submissions.show');
+            Route::patch('submissions/{submission}', [FormSubmissionController::class, 'update'])->name('submissions.update');
+            Route::delete('submissions/{submission}', [FormSubmissionController::class, 'destroy'])->name('submissions.destroy');
+            Route::get('submissions/{submission}/files/{field}', [FormSubmissionController::class, 'download'])->name('submissions.download');
+            Route::post('import', [FormController::class, 'import'])->name('import');
+            Route::get('data', [FormController::class, 'data'])->name('data');
+        });
+        Route::resource('forms', FormController::class)->except('show')->parameters(['forms' => 'form']);
         Route::view('/', 'admin.dashboard')->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
+
+        Route::prefix('media')->name('media.')->group(function (): void {
+            Route::get('/', [MediaController::class, 'index'])->name('index');
+            Route::get('/data', [MediaController::class, 'data'])->name('data');
+            Route::post('/files', [MediaController::class, 'store'])->middleware('throttle:30,1')->name('store');
+            Route::post('/sync', [MediaController::class, 'synchronize'])->middleware('throttle:4,1')->name('sync');
+            Route::get('/files/{mediaFile}', [MediaController::class, 'show'])->name('show');
+            Route::patch('/files/{mediaFile}', [MediaController::class, 'update'])->name('update');
+            Route::delete('/files/{mediaFile}', [MediaController::class, 'destroy'])->name('destroy');
+            Route::post('/files/{mediaFile}/restore', [MediaController::class, 'restore'])->withTrashed()->name('restore');
+            Route::put('/files/{mediaFile}/favorite', [MediaController::class, 'favorite'])->name('favorite');
+            Route::get('/files/{mediaFile}/download', [MediaController::class, 'download'])->name('download');
+            Route::post('/folders', [MediaController::class, 'storeFolder'])->name('folders.store');
+            Route::patch('/folders/{folder}', [MediaController::class, 'updateFolder'])->name('folders.update');
+            Route::delete('/folders/{folder}', [MediaController::class, 'destroyFolder'])->name('folders.destroy');
+        });
 
         Route::resource('roles', AdminRoleController::class)->only(['index', 'edit', 'update'])->middleware('can:manage-admin-roles');
 

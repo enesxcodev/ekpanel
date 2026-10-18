@@ -1,0 +1,7 @@
+{
+    "schema_version": 1,
+    "forms": {
+        "content": { "label": "Ek içerik alanları", "fields": [] },
+        "category": { "label": "Ek içerik kategorisi alanları", "fields": [] }
+    }
+}

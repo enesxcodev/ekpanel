@@ -4,13 +4,17 @@
     "description": "Hizmet yönetimi",
     "keywords": [],
     "priority": 0,
-    "providers": ["Modules\\Services\\Providers\\ServicesServiceProvider"],
+    "providers": [
+        "Modules\\Services\\Providers\\ServicesServiceProvider"
+    ],
     "files": [],
     "panel": {
         "permissions": [
             "services.menu",
             "services.view",
             "services.create",
+            "services.update",
+            "services.delete",
             "services.categories.menu",
             "services.categories.view",
             "services.categories.create",

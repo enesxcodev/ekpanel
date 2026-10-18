@@ -5,6 +5,7 @@ namespace Modules\Services\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\MediaService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,8 @@ use Modules\Services\Services\ServiceCategoryService;
 
 class ServiceCategoryController extends Controller
 {
+    public function __construct(private MediaService $media) {}
+
     public function index(): View
     {
         $this->authorize('services.categories.view');
@@ -37,12 +40,12 @@ class ServiceCategoryController extends Controller
         $featureForm = $features->form('Services', 'category');
         $featureFields = $values->fields($featureForm['fields'], []);
 
-        return view('services::categories.create', compact('featureForm', 'featureFields'));
+        return view('services::categories.create', compact('featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function store(StoreServiceCategoryRequest $request, ServiceCategoryService $service): RedirectResponse
     {
-        $service->save($request->validated());
+        $service->save($request->validated(), null, $request->user('admin'));
 
         return redirect()->route('admin.services.categories.index')->with('notification', [
             'type' => 'success', 'message' => 'Hizmet kategorisi başarıyla eklendi.',
@@ -56,12 +59,12 @@ class ServiceCategoryController extends Controller
         $featureForm = $features->form('Services', 'category');
         $featureFields = $values->fields($featureForm['fields'], $category->extra_fields ?? []);
 
-        return view('services::categories.edit', compact('category', 'featureForm', 'featureFields'));
+        return view('services::categories.edit', compact('category', 'featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function update(UpdateServiceCategoryRequest $request, ServiceCategory $category, ServiceCategoryService $service): RedirectResponse
     {
-        $service->save($request->validated(), $category);
+        $service->save($request->validated(), $category, $request->user('admin'));
 
         return redirect()->route('admin.services.categories.index')->with('notification', [
             'type' => 'success', 'message' => 'Hizmet kategorisi başarıyla güncellendi.',

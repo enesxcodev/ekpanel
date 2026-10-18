@@ -29,7 +29,7 @@ test('super admins can manage service categories from the panel', function () {
         ->assertRedirectToRoute('admin.services.categories.index')
         ->assertSessionHas('notification.type', 'success');
     $this->assertDatabaseHas('service_categories', ['id' => $category->id, 'name' => 'Teknik Danışmanlık']);
-    expect($category->fresh()->getAttributes())->toHaveKeys(['id', 'name', 'extra_fields'])->toHaveCount(3);
+    expect($category->fresh()->getAttributes())->toHaveKeys(['id', 'name', 'extra_fields', 'sort_order', 'is_active'])->toHaveCount(5);
 
     $this->delete(route('admin.services.categories.destroy', $category))
         ->assertRedirectToRoute('admin.services.categories.index')

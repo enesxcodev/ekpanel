@@ -5,6 +5,7 @@ namespace Modules\Slider\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\MediaService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -29,34 +30,35 @@ class SliderController extends Controller
         return $dataTable->handle();
     }
 
-    public function create(ModuleFeatures $features, FeatureValues $values): View
+    public function create(ModuleFeatures $features, FeatureValues $values, MediaService $media): View
     {
         $this->authorize('slider.create');
         $featureForm = $features->form('Slider', 'slider');
         $featureFields = $values->fields($featureForm['fields'], []);
 
-        return view('slider::create', compact('featureForm', 'featureFields'));
+        return view('slider::create', ['featureForm' => $featureForm, 'featureFields' => $featureFields, 'mediaConfig' => $media->configuration(auth('admin')->user())]);
     }
 
     public function store(SaveSliderRequest $request, SliderService $service): RedirectResponse
     {
-        $service->save($request->validated());
+        $service->save($request->validated(), $request->user('admin'));
 
         return redirect()->route('admin.slider.index')->with('notification', ['type' => 'success', 'message' => 'Slider başarıyla eklendi.']);
     }
 
-    public function edit(Slider $slider, ModuleFeatures $features, FeatureValues $values): View
+    public function edit(Slider $slider, ModuleFeatures $features, FeatureValues $values, MediaService $media): View
     {
         $this->authorize('slider.update');
+        $slider->load('imageMedia');
         $featureForm = $features->form('Slider', 'slider');
         $featureFields = $values->fields($featureForm['fields'], $slider->extra_fields ?? []);
 
-        return view('slider::edit', compact('slider', 'featureForm', 'featureFields'));
+        return view('slider::edit', ['slider' => $slider, 'featureForm' => $featureForm, 'featureFields' => $featureFields, 'mediaConfig' => $media->configuration(auth('admin')->user())]);
     }
 
     public function update(SaveSliderRequest $request, Slider $slider, SliderService $service): RedirectResponse
     {
-        $service->save($request->validated(), $slider);
+        $service->save($request->validated(), $request->user('admin'), $slider);
 
         return redirect()->route('admin.slider.index')->with('notification', ['type' => 'success', 'message' => 'Slider başarıyla güncellendi.']);
     }

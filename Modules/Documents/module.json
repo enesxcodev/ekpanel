@@ -1,0 +1,25 @@
+{
+    "name": "Documents",
+    "alias": "documents",
+    "description": "Belgeler, sertifikalar, indirmeler ve ürün katalogları yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Documents\\Providers\\DocumentsServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "documents.menu",
+            "documents.view",
+            "documents.create",
+            "documents.update",
+            "documents.delete",
+            "documents.categories.menu",
+            "documents.categories.view",
+            "documents.categories.create",
+            "documents.categories.update",
+            "documents.categories.delete"
+        ]
+    }
+}

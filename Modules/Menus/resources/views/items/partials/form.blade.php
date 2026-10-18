@@ -10,6 +10,7 @@
         : null;
 @endphp
 <x-admin.form.input name="label" label="Görünen metin" :value="$item->label ?? null" required maxlength="255" data-menu-label />
+<x-admin.form.input name="icon" label="İkon" :value="$item->icon ?? null" maxlength="100" placeholder="briefcase" help="İkon adı girin (örn. briefcase, users, category); isteğe bağlı." />
 <div class="row">
     <div class="col-md-8">
         <x-admin.form.select name="parent_id" label="Üst öğe" :options="$parentOptions" :value="$item->parent_id ?? null" placeholder="Üst öğe yok (ana seviye)" help="Alt menü oluşturmak için bir üst öğe seçin." />

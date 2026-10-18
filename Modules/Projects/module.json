@@ -1,0 +1,25 @@
+{
+    "name": "Projects",
+    "alias": "projects",
+    "description": "Projeler",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Projects\\Providers\\ProjectsServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "projects.menu",
+            "projects.view",
+            "projects.create",
+            "projects.update",
+            "projects.delete",
+            "projects.categories.menu",
+            "projects.categories.view",
+            "projects.categories.create",
+            "projects.categories.update",
+            "projects.categories.delete"
+        ]
+    }
+}

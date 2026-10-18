@@ -16,6 +16,7 @@ class SettingsSeeder extends Seeder
     {
         $definitions = [
             ['section' => 'site', 'key' => 'site.title', 'label' => 'Site Başlık (Türkçe)', 'input_type' => 'text', 'validation' => ['required' => true, 'max' => 150], 'default_value' => config('app.name')],
+            ['section' => 'site', 'key' => 'site.company_name', 'label' => 'Firma Adı', 'input_type' => 'text', 'validation' => ['required' => true, 'max' => 150], 'default_value' => 'EkAgent'],
             ['section' => 'site', 'key' => 'site.description', 'label' => 'Site Açıklama (Türkçe)', 'input_type' => 'textarea', 'validation' => ['required' => false, 'max' => 1000], 'attributes' => ['rows' => 4]],
             ['section' => 'site', 'key' => 'site.meta_title', 'label' => 'Meta Başlık', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 255]],
             ['section' => 'site', 'key' => 'site.meta_keywords', 'label' => 'Meta Anahtar', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 1000]],
@@ -25,8 +26,11 @@ class SettingsSeeder extends Seeder
             ['section' => 'site', 'key' => 'site.favicon', 'label' => 'Favicon', 'input_type' => 'image', 'validation' => ['required' => false, 'max_size' => 1024, 'extensions' => ['jpg', 'jpeg', 'png', 'webp']]],
             ['section' => 'contact', 'key' => 'contact.email', 'label' => 'E-Posta', 'input_type' => 'email', 'validation' => ['required' => false, 'max' => 255]],
             ['section' => 'contact', 'key' => 'contact.phone', 'label' => 'Telefon Numarası', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 50]],
+            ['section' => 'contact', 'key' => 'contact.whatsapp', 'label' => 'WhatsApp numarası', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 50]],
+            ['section' => 'contact', 'key' => 'contact.working_hours', 'label' => 'Çalışma saatleri', 'input_type' => 'textarea', 'validation' => ['required' => false, 'max' => 1000], 'attributes' => ['rows' => 3]],
             ['section' => 'contact', 'key' => 'contact.address', 'label' => 'Adres', 'input_type' => 'textarea', 'validation' => ['required' => false, 'max' => 1000], 'attributes' => ['rows' => 3]],
             ['section' => 'contact', 'key' => 'contact.map_iframe', 'label' => 'İframe Link', 'input_type' => 'textarea', 'validation' => ['required' => false, 'max' => 5000], 'attributes' => ['rows' => 4]],
+            ['section' => 'social', 'key' => 'social.linkedin', 'label' => 'LinkedIn', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 255]],
             ['section' => 'social', 'key' => 'social.facebook', 'label' => 'Facebook', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 255]],
             ['section' => 'social', 'key' => 'social.twitter', 'label' => 'Twitter', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 255]],
             ['section' => 'social', 'key' => 'social.instagram', 'label' => 'İnstagram', 'input_type' => 'text', 'validation' => ['required' => false, 'max' => 255]],

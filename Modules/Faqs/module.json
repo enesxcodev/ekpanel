@@ -1,0 +1,25 @@
+{
+    "name": "Faqs",
+    "alias": "faqs",
+    "description": "Sıkça sorulan sorular ve kategoriler yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Faqs\\Providers\\FaqsServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "faqs.menu",
+            "faqs.view",
+            "faqs.create",
+            "faqs.update",
+            "faqs.delete",
+            "faqs.categories.menu",
+            "faqs.categories.view",
+            "faqs.categories.create",
+            "faqs.categories.update",
+            "faqs.categories.delete"
+        ]
+    }
+}

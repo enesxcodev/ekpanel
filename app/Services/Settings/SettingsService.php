@@ -3,6 +3,7 @@
 namespace App\Services\Settings;
 
 use App\Models\Admin\Admin;
+use App\Models\Media\MediaFile;
 use App\Models\Settings\SettingDefinition;
 use App\Models\Settings\SettingSection;
 use Illuminate\Http\UploadedFile;
@@ -20,7 +21,7 @@ class SettingsService
 
     public function get(string $key, mixed $fallback = null): mixed
     {
-        $definition = SettingDefinition::query()->where('key', $key)->first();
+        $definition = SettingDefinition::query()->with('storedValue.media')->where('key', $key)->first();
         if ($definition === null) {
             return $fallback;
         }
@@ -36,8 +37,44 @@ class SettingsService
     /** @return array<string, mixed> */
     public function all(): array
     {
-        return SettingDefinition::query()->where('is_sensitive', false)->with('storedValue')->get()
+        return SettingDefinition::query()->where('is_sensitive', false)->with('storedValue.media')->get()
             ->mapWithKeys(fn (SettingDefinition $definition): array => [$definition->key => $definition->effectiveValue()])->all();
+    }
+
+    public function mediaUrl(string $key, ?string $fallback = null): ?string
+    {
+        $definition = SettingDefinition::query()->with('storedValue.media')->where('key', $key)->first();
+        if ($definition === null || ! $definition->input_type->isFile()) {
+            return $fallback;
+        }
+        $media = $definition->storedValue?->media;
+        $path = $definition->effectiveValue();
+
+        return $path ? Storage::disk($media?->disk ?? 'public')->url($path) : $fallback;
+    }
+
+    public function linkExistingLogoMedia(): int
+    {
+        return DB::transaction(function (): int {
+            $linked = 0;
+            $definitions = SettingDefinition::query()->whereIn('key', ['site.logo', 'site.footer_logo'])
+                ->with('storedValue')->lockForUpdate()->get();
+            foreach ($definitions as $definition) {
+                if (! $definition->usesMediaLibrary() || $definition->storedValue?->media_id !== null) {
+                    continue;
+                }
+                $path = $definition->effectiveValue();
+                $media = is_string($path) ? MediaFile::query()->where('disk', 'public')->where('kind', 'image')->where('path', $path)->lockForUpdate()->first() : null;
+                if ($media === null) {
+                    continue;
+                }
+                $definition->storedValue()->updateOrCreate([], ['media_id' => $media->id, 'value' => ['value' => null]]);
+                $this->forget($definition->key);
+                $linked++;
+            }
+
+            return $linked;
+        });
     }
 
     /**
@@ -51,7 +88,7 @@ class SettingsService
         try {
             DB::transaction(function () use ($section, $payload, $actor, &$newFiles, &$oldFiles): void {
                 SettingSection::query()->whereKey($section->id)->lockForUpdate()->firstOrFail();
-                $definitions = $section->definitions()->with('storedValue')->get();
+                $definitions = $section->definitions()->with('storedValue.media')->get();
                 $labels = $definitions->mapWithKeys(fn (SettingDefinition $definition): array => ['settings.'.$definition->id => $definition->label])->all();
                 Validator::make($payload, $this->ruleBuilder->forSection($definitions, $payload), $this->ruleBuilder->messages(), $labels)->validate();
 
@@ -65,6 +102,17 @@ class SettingsService
                     }
                     if ($removing && $input !== null && $input !== '') {
                         throw ValidationException::withMessages(['settings.'.$definition->id => 'Yeni değer girme ve mevcut değeri kaldırma işlemlerinden birini seçin.']);
+                    }
+                    if ($definition->usesMediaLibrary()) {
+                        if (! $removing && (int) $input !== $definition->storedValue?->media_id) {
+                            abort_unless($actor->can('media.view'), 403, 'Medya kütüphanesinden seçim yapma izniniz bulunmuyor.');
+                        }
+                        $media = $removing ? null : MediaFile::query()->lockForUpdate()->findOrFail((int) $input);
+                        $definition->storedValue()->updateOrCreate([], [
+                            'media_id' => $media?->id, 'value' => ['value' => null], 'updated_by' => $actor->id,
+                        ]);
+
+                        continue;
                     }
                     if ($isFile) {
                         $previous = $definition->effectiveValue();
@@ -80,6 +128,7 @@ class SettingsService
                         }
                     }
                     $definition->storedValue()->updateOrCreate([], [
+                        'media_id' => null,
                         'value' => ['value' => $definition->value_type->normalize($removing ? null : $input)],
                         'updated_by' => $actor->id,
                     ]);

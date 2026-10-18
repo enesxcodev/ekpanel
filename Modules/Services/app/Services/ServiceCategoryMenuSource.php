@@ -15,7 +15,7 @@ class ServiceCategoryMenuSource implements MenuSource
     /** @return list<array{value: string, label: string}> */
     public function options(): array
     {
-        return ServiceCategory::query()->orderBy('name')->orderBy('id')
+        return ServiceCategory::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->orderBy('id')
             ->get(['id', 'name'])->map(fn (ServiceCategory $category): array => ['value' => (string) $category->id, 'label' => $category->name.' (grup başlığı)'])->all();
     }
 
@@ -27,7 +27,7 @@ class ServiceCategoryMenuSource implements MenuSource
         return $category === null ? null : [
             'label' => $category->name,
             'url' => null,
-            'error' => null,
+            'error' => $category->is_active ? null : 'Hizmet kategorisi devre dışı.',
         ];
     }
 

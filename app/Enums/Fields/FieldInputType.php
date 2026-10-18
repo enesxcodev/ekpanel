@@ -42,7 +42,7 @@ enum FieldInputType: string
         return match ($this) {
             self::Number, self::Range => [FieldValueType::Integer, FieldValueType::Float],
             self::Boolean => [FieldValueType::Boolean],
-            self::File, self::Image => [FieldValueType::File],
+            self::File, self::Image => [FieldValueType::File, FieldValueType::Media],
             default => [FieldValueType::String],
         };
     }

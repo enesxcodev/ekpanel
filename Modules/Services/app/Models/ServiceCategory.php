@@ -14,11 +14,11 @@ class ServiceCategory extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['name', 'extra_fields'];
+    protected $fillable = ['name', 'sort_order', 'is_active', 'extra_fields'];
 
     protected function casts(): array
     {
-        return ['extra_fields' => 'array'];
+        return ['sort_order' => 'integer', 'is_active' => 'boolean', 'extra_fields' => 'array'];
     }
 
     protected static function newFactory(): ServiceCategoryFactory

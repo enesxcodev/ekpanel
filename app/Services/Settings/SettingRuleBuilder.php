@@ -2,9 +2,15 @@
 
 namespace App\Services\Settings;
 
+use App\Models\Media\MediaFile;
 use App\Models\Settings\SettingDefinition;
 use App\Services\Fields\FieldRuleBuilder;
+use Closure;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class SettingRuleBuilder
 {
@@ -38,7 +44,10 @@ class SettingRuleBuilder
             $canKeep = $definition->input_type->isFile() || $definition->is_sensitive;
             $removing = filter_var($payload['remove'][$definition->id] ?? false, FILTER_VALIDATE_BOOL);
             $hasExisting = $definition->hasValue();
-            $rules['settings.'.$definition->id] = $this->forDefinition($definition, $required && ! ($canKeep && $hasExisting && ! $removing));
+            $fieldRequired = $required && ! ($canKeep && $hasExisting && ! $removing);
+            $rules['settings.'.$definition->id] = $definition->usesMediaLibrary()
+                ? $this->forMedia($definition, $fieldRequired)
+                : $this->forDefinition($definition, $fieldRequired);
 
             if ($canKeep) {
                 $rules['remove.'.$definition->id] = ['sometimes', 'boolean'];
@@ -51,6 +60,28 @@ class SettingRuleBuilder
     /** @return array<string, string|array<string, string>> */
     public function messages(): array
     {
-        return (new FieldRuleBuilder)->messages();
+        return (new FieldRuleBuilder)->messages() + ['exists' => ':attribute için kütüphaneden aktif bir görsel seçin.'];
+    }
+
+    /** @return list<mixed> */
+    private function forMedia(SettingDefinition $definition, bool $required): array
+    {
+        return [
+            'bail', $required ? 'required' : 'nullable', 'integer',
+            Rule::exists('media_files', 'id')->where('kind', 'image')->whereNull('deleted_at'),
+            function (string $attribute, mixed $value, Closure $fail) use ($definition): void {
+                $media = MediaFile::query()->find($value);
+                if ($media === null || ! Storage::disk($media->disk)->exists($media->path)) {
+                    $fail('Seçilen görsel bulunamadı.');
+
+                    return;
+                }
+                $file = new UploadedFile(Storage::disk($media->disk)->path($media->path), basename($media->path), test: true);
+                $check = Validator::make(['image' => $file], ['image' => $this->forDefinition($definition, false)], $this->messages(), ['image' => $definition->label]);
+                foreach ($check->errors()->all() as $message) {
+                    $fail($message);
+                }
+            },
+        ];
     }
 }

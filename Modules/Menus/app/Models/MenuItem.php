@@ -13,7 +13,7 @@ class MenuItem extends Model
     /** @use HasFactory<MenuItemFactory> */
     use HasFactory;
 
-    protected $fillable = ['parent_id', 'label', 'target_type', 'url', 'route_name', 'route_parameters', 'anchor', 'source', 'source_id', 'dynamic_children', 'is_active', 'new_tab', 'sort_order'];
+    protected $fillable = ['parent_id', 'label', 'icon', 'target_type', 'url', 'route_name', 'route_parameters', 'anchor', 'source', 'source_id', 'dynamic_children', 'is_active', 'new_tab', 'sort_order'];
 
     protected function casts(): array
     {

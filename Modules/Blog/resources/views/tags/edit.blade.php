@@ -1,0 +1,1 @@
+<x-admin.layout title="Etiketi düzenle"><div class="card"><div class="card-body"><form method="POST" action="{{ route('admin.blog.tags.update', $tag) }}">@include('blog::tags.partials.form')</form></div></div></x-admin.layout>

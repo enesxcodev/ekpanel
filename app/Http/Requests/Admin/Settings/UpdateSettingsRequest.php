@@ -17,7 +17,7 @@ class UpdateSettingsRequest extends FormRequest
 
     public function rules(SettingRuleBuilder $builder): array
     {
-        $this->route('section')->load('definitions.storedValue');
+        $this->route('section')->load('definitions.storedValue.media');
 
         return $builder->forSection($this->route('section')->definitions, $this->all());
     }

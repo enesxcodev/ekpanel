@@ -1,4 +1,4 @@
-@props(['form', 'fields'])
+@props(['form', 'fields', 'mediaConfig' => null])
 @if ($form['fields'] !== [])
     <fieldset class="mt-4" data-feature-fields>
         <legend class="h3">{{ $form['label'] }}</legend>
@@ -7,6 +7,7 @@
                 :definition="$definition" :field="$fields[$key]"
                 :name="'extra_fields['.$key.']'" :error-key="'extra_fields.'.$key"
                 :id="'feature-'.$key" :remove-name="'remove_features['.$key.']'"
+                :media-config="$mediaConfig"
             />
         @endforeach
     </fieldset>

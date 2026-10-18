@@ -5,6 +5,7 @@ namespace Modules\Pages\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\MediaService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,8 @@ use Modules\Pages\Services\PageService;
 
 class PageController extends Controller
 {
+    public function __construct(private MediaService $media) {}
+
     public function index(): View
     {
         $this->authorize('pages.view');
@@ -37,12 +40,12 @@ class PageController extends Controller
         $featureFields = $values->fields($featureForm['fields'], []);
         $categoryTree = $this->categoryTree();
 
-        return view('pages::pages.create', compact('featureForm', 'featureFields', 'categoryTree'));
+        return view('pages::pages.create', compact('featureForm', 'featureFields', 'categoryTree') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function store(SavePageRequest $request, PageService $service): RedirectResponse
     {
-        $service->save($request->validated());
+        $service->save($request->validated(), null, $request->user('admin'));
 
         return redirect()->route('admin.pages.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa başarıyla eklendi.']);
     }
@@ -51,15 +54,16 @@ class PageController extends Controller
     {
         $this->authorize('pages.update');
         $featureForm = $features->form('Pages', 'page');
+        $page->load('imageMedia');
         $featureFields = $values->fields($featureForm['fields'], $page->extra_fields ?? []);
         $categoryTree = $this->categoryTree();
 
-        return view('pages::pages.edit', compact('page', 'featureForm', 'featureFields', 'categoryTree'));
+        return view('pages::pages.edit', compact('page', 'featureForm', 'featureFields', 'categoryTree') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function update(SavePageRequest $request, Page $page, PageService $service): RedirectResponse
     {
-        $service->save($request->validated(), $page);
+        $service->save($request->validated(), $page, $request->user('admin'));
 
         return redirect()->route('admin.pages.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa başarıyla güncellendi.']);
     }
@@ -92,7 +96,7 @@ class PageController extends Controller
         $query = Page::query()
             ->where('slug', $pageSlug)
             ->where('status', 'published')
-            ->with('category.parent.parent');
+            ->with(['category.parent.parent', 'imageMedia']);
         $category === null
             ? $query->whereNull('page_category_id')
             : $query->where('page_category_id', $category->id);

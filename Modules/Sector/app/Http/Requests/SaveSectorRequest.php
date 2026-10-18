@@ -5,7 +5,9 @@ namespace Modules\Sector\Http\Requests;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\ContentMediaService;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SaveSectorRequest extends FormRequest
 {
@@ -14,19 +16,20 @@ class SaveSectorRequest extends FormRequest
         return $this->user('admin')?->can($this->route('sector') ? 'sector.update' : 'sector.create') ?? false;
     }
 
-    public function rules(ModuleFeatures $features, FeatureValues $values): array
+    public function rules(ModuleFeatures $features, FeatureValues $values, ContentMediaService $media): array
     {
         $sector = $this->route('sector');
 
         return [
+            'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('sectors', 'slug')->ignore($sector?->id)],
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'title' => ['required', 'string', 'max:255'],
             'short_description' => ['nullable', 'string', 'max:1000'],
             'content' => ['nullable', 'string', 'max:65535'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_keywords' => ['nullable', 'string', 'max:1000'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
-            'image' => ['nullable', 'prohibited_if:remove_image,1', 'image', 'mimes:jpg,jpeg,png,webp', 'extensions:jpg,jpeg,png,webp', 'max:4096'],
-            'remove_image' => ['sometimes', 'boolean'],
+            ...$media->rules($media->definition()),
             'is_active' => ['required', 'boolean'],
             ...$values->rules($features->form('Sector', 'sector')['fields'], $this->all(), $sector?->extra_fields ?? []),
         ];
@@ -40,7 +43,7 @@ class SaveSectorRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['title' => 'Başlık', 'short_description' => 'Kısa içerik', 'content' => 'İçerik', 'meta_title' => 'Meta başlık', 'meta_keywords' => 'Meta anahtar', 'meta_description' => 'Meta açıklama', 'image' => 'Görsel', 'is_active' => 'Durum', 'remove_image' => 'Görseli kaldır']
+        return ['slug' => 'Kısa bağlantı', 'sort_order' => 'Sıralama', 'title' => 'Başlık', 'short_description' => 'Kısa içerik', 'content' => 'İçerik', 'meta_title' => 'Meta başlık', 'meta_keywords' => 'Meta anahtar', 'meta_description' => 'Meta açıklama', 'image_media_id' => 'Görsel', 'is_active' => 'Durum', 'remove_image' => 'Görseli kaldır']
             + app(FeatureValues::class)->labels(app(ModuleFeatures::class)->form('Sector', 'sector')['fields']);
     }
 }

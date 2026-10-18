@@ -21,4 +21,5 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Pag
 Route::middleware('module.enabled:Pages')
     ->get('/{path}', [PageController::class, 'show'])
     ->where('path', '.*')
+    ->fallback()
     ->name('pages.show');

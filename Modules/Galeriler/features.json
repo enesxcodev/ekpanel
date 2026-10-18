@@ -1,0 +1,13 @@
+{
+    "schema_version": 1,
+    "forms": {
+        "category": {
+            "label": "Ek kategori alanları",
+            "fields": []
+        },
+        "item": {
+            "label": "Ek galeri alanları",
+            "fields": []
+        }
+    }
+}

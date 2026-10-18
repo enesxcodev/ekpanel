@@ -17,6 +17,8 @@ class AdminPermissionSeeder extends Seeder
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->call(MediaPermissionSeeder::class);
+        $this->call(FormsPermissionSeeder::class);
         foreach (['users.menu', 'users.view', 'users.create', 'users.update'] as $permission) {
             Permission::findOrCreate($permission, 'admin');
         }

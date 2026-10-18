@@ -4,6 +4,7 @@ namespace App\Services\Fields;
 
 use App\Enums\Fields\FieldInputType;
 use App\Enums\Fields\FieldValueType;
+use App\Services\Media\MediaFileInspector;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use JsonException;
@@ -73,9 +74,9 @@ class ModuleFeatures
             'document.forms.*.fields.*.validation.required' => ['sometimes', 'boolean'],
             'document.forms.*.fields.*.validation.min' => ['sometimes', 'numeric', 'between:-1000000000,1000000000'],
             'document.forms.*.fields.*.validation.max' => ['sometimes', 'numeric', 'between:-1000000000,1000000000'],
-            'document.forms.*.fields.*.validation.max_size' => ['sometimes', 'integer', 'between:1,10240'],
+            'document.forms.*.fields.*.validation.max_size' => ['sometimes', 'integer', 'between:1,51200'],
             'document.forms.*.fields.*.validation.extensions' => ['sometimes', 'list', 'min:1', 'max:15'],
-            'document.forms.*.fields.*.validation.extensions.*' => ['required', Rule::in(['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'txt', 'csv', 'docx', 'xlsx', 'zip'])],
+            'document.forms.*.fields.*.validation.extensions.*' => ['required', Rule::in(array_unique([...MediaFileInspector::EXTENSIONS, 'gif', 'csv', 'xlsx', 'zip']))],
             'document.forms.*.fields.*.validation.min_width' => ['sometimes', 'integer', 'between:1,10000'],
             'document.forms.*.fields.*.validation.max_width' => ['sometimes', 'integer', 'between:1,10000'],
             'document.forms.*.fields.*.validation.min_height' => ['sometimes', 'integer', 'between:1,10000'],
@@ -95,6 +96,9 @@ class ModuleFeatures
                 $invalid = in_array($field->key, $keys, true) || ! in_array($field->value_type, $field->input_type->valueTypes(), true);
                 $keys[] = $field->key;
                 $validation = $field->validation;
+                if ($field->value_type === FieldValueType::Media) {
+                    $invalid = $invalid || strlen('extra_fields.'.$field->key) > 80 || array_diff($validation['extensions'] ?? [], MediaFileInspector::EXTENSIONS) !== [];
+                }
                 foreach ([['min', 'max'], ['min_width', 'max_width'], ['min_height', 'max_height']] as [$min, $max]) {
                     $invalid = $invalid || (isset($validation[$min], $validation[$max]) && $validation[$min] > $validation[$max]);
                 }

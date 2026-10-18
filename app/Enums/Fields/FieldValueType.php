@@ -9,6 +9,7 @@ enum FieldValueType: string
     case Float = 'float';
     case Boolean = 'boolean';
     case File = 'file';
+    case Media = 'media';
 
     public function normalize(mixed $value): mixed
     {
@@ -17,7 +18,7 @@ enum FieldValueType: string
         }
 
         return match ($this) {
-            self::Integer => (int) $value,
+            self::Integer, self::Media => (int) $value,
             self::Float => (float) $value,
             self::Boolean => (bool) $value,
             default => (string) $value,

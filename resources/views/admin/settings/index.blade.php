@@ -1,6 +1,7 @@
 <x-admin.layout title="Ayarlar">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
         <p class="text-secondary mb-0">Düzenlemek istediğiniz bölümü seçin. Her bölüm ayrı kaydedilir.</p>
+        @can('forms.view')<a href="{{ route('admin.forms.index') }}" class="btn btn-outline-primary">Form yönetimi</a>@endcan
         @can('manage-setting-definitions')
             <a href="{{ route('admin.settings.configuration.index') }}" class="btn btn-outline-primary"><x-admin.icon name="settings" class="me-2" />Ayar yapılandırması</a>
         @endcan
@@ -32,7 +33,7 @@
                             <input type="hidden" name="_section" value="{{ $section->id }}">
                             <fieldset @disabled(! auth('admin')->user()->can('update', $section))>
                                 @forelse ($section->definitions as $definition)
-                                    <x-admin.settings.field :definition="$definition" :field="$fields[$definition->id]" />
+                                    <x-admin.settings.field :definition="$definition" :field="$fields[$definition->id]" :media-config="$mediaConfig" />
                                 @empty
                                     <p class="text-secondary mb-0">Bu bölümde henüz alan bulunmuyor.</p>
                                 @endforelse

@@ -15,7 +15,7 @@ class ServiceMenuSource implements MenuSource
     /** @return list<array{value: string, label: string}> */
     public function options(): array
     {
-        return Service::query()->where('is_active', true)->orderBy('title')->orderBy('id')
+        return Service::query()->where('is_active', true)->orderBy('sort_order')->orderBy('title')->orderBy('id')
             ->get(['id', 'title'])->map(fn (Service $service): array => ['value' => (string) $service->id, 'label' => $service->title.' (genel bağlantı yok)'])->all();
     }
 

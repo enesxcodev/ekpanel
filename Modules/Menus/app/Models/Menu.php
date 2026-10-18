@@ -12,7 +12,7 @@ class Menu extends Model
     /** @use HasFactory<MenuFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'key', 'is_active'];
+    protected $fillable = ['name', 'icon', 'key', 'is_active'];
 
     protected function casts(): array
     {

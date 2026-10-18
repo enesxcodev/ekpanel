@@ -1,0 +1,16 @@
+.ek-form { --ek-form-accent:var(--tblr-primary,#0669ef); --ek-form-border:#d6dce5; color:inherit; font:inherit; }
+.ek-form .ek-form__fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.25rem; }
+.ek-form .ek-form__field { min-width:0; }
+.ek-form .ek-form__field--full { grid-column:1/-1; }
+.ek-form .ek-form__label { display:block; font-weight:500; margin-bottom:.45rem; }
+.ek-form .ek-form__input { display:block; box-sizing:border-box; width:100%; border:1px solid var(--ek-form-border); border-radius:.35rem; padding:.65rem .8rem; background:var(--tblr-bg-surface,#fff); color:inherit; font:inherit; }
+.ek-form input[type=checkbox] { width:1.1rem; height:1.1rem; }
+.ek-form .ek-form__input:focus { outline:2px solid var(--ek-form-accent); outline-offset:2px; }
+.ek-form .ek-form__submit { border:0; border-radius:.35rem; padding:.7rem 1.8rem; margin-top:1.25rem; background:var(--ek-form-accent); color:white; font:inherit; cursor:pointer; }
+.ek-form .ek-form__choice { display:inline-flex; gap:.45rem; margin-right:1rem; }
+.ek-form .ek-form__help { display:block; margin-top:.35rem; opacity:.7; }
+.ek-form .ek-form__error, .ek-form .ek-form__errors { color:#c0392b; }
+.ek-form .ek-form__success { padding:1rem; margin-bottom:1rem; border:1px solid #198754; border-radius:.35rem; }
+.ek-form-page { margin:0; padding:3rem 1.25rem; background:#f5f7fb; font-family:system-ui,sans-serif; color:#182433; }
+.ek-form-page main { max-width:48rem; margin:auto; background:white; padding:2rem; border-radius:.75rem; border:1px solid #e2e7ef; }
+@media(max-width:600px) { .ek-form .ek-form__field { grid-column:1/-1; } .ek-form-page { padding:1rem; } }

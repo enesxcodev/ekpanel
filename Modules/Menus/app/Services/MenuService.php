@@ -55,6 +55,7 @@ class MenuService
             $item->fill([
                 'parent_id' => $parentId,
                 'label' => $data['label'],
+                'icon' => $data['icon'] ?? null,
                 'target_type' => $type,
                 'url' => in_array($type, ['url', 'anchor'], true) ? ($data['url'] ?? null) : null,
                 'route_name' => $type === 'route' ? $data['route_name'] : null,
@@ -83,6 +84,41 @@ class MenuService
             $item->delete();
 
             return true;
+        });
+    }
+
+    /** @param list<array{id: int, parent_id: ?int, sort_order: int}> $positions */
+    public function reorder(Menu $menu, array $positions): void
+    {
+        DB::transaction(function () use ($menu, $positions): void {
+            Menu::query()->lockForUpdate()->findOrFail($menu->id);
+            $items = $menu->items()->get()->keyBy('id');
+            $proposed = collect($positions)->keyBy('id');
+            if ($proposed->count() !== $items->count() || $proposed->keys()->diff($items->keys())->isNotEmpty()) {
+                throw ValidationException::withMessages(['items' => 'Menü yapısı değişmiş olabilir. Güncel yapıyı yükleyip yeniden deneyin.']);
+            }
+            foreach ($positions as $position) {
+                $parentId = isset($position['parent_id']) ? (int) $position['parent_id'] : null;
+                $parent = $parentId === null ? null : $items->get($parentId);
+                if (($parentId !== null && $parent === null) || $parent?->dynamic_children) {
+                    throw ValidationException::withMessages(['items' => 'Üst öğe bu menüye ait olmalı ve otomatik alt öğe üretmemelidir.']);
+                }
+                $visited = [(int) $position['id'] => true];
+                $cursor = $parentId;
+                while ($cursor !== null) {
+                    if (isset($visited[$cursor]) || ! $proposed->has($cursor)) {
+                        throw ValidationException::withMessages(['items' => 'Öğe kendisinin veya alt öğelerinin altına taşınamaz.']);
+                    }
+                    $visited[$cursor] = true;
+                    $cursor = isset($proposed[$cursor]['parent_id']) ? (int) $proposed[$cursor]['parent_id'] : null;
+                }
+            }
+            foreach ($positions as $position) {
+                $items[$position['id']]->fill([
+                    'parent_id' => $position['parent_id'],
+                    'sort_order' => $position['sort_order'],
+                ])->save();
+            }
         });
     }
 

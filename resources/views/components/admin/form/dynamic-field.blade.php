@@ -1,4 +1,4 @@
-@props(['definition', 'field', 'name', 'errorKey', 'id', 'removeName' => null])
+@props(['definition', 'field', 'name', 'errorKey', 'id', 'removeName' => null, 'mediaConfig' => null])
 @php
     $required = (bool) ($definition->validation['required'] ?? false);
     $config = $definition->attributes ?? [];
@@ -20,7 +20,19 @@
         @break
     @case('file')
     @case('image')
+        @if ($definition->value_type === \App\Enums\Fields\FieldValueType::Media)
+            <div class="mb-3">
+                <x-admin.media.picker :name="$name" :label="$definition->label.($required ? ' *' : '')" :config="$mediaConfig"
+                    :kind="$type === 'image' ? 'image' : ''" :extensions="$validation['extensions'] ?? ($type === 'image' ? ['jpg', 'jpeg', 'png', 'webp'] : \App\Services\Media\MediaFileInspector::EXTENSIONS)"
+                    :value="old($errorKey, $field['value'])" :preview-url="$field['fileUrl']" :remove-name="$removeName"
+                    :remove-value="(bool) old('remove_features.'.$definition->key, false)" :disabled="!auth('admin')->user()?->can('media.view')" />
+                @if ($definition->description)<div class="form-hint">{{ $definition->description }}</div>@endif
+                <div class="form-hint">En fazla {{ $validation['max_size'] ?? 2048 }} KB. Seçimi kaldırmak dosyayı kütüphaneden silmez.</div>
+                @error($errorKey)<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+            </div>
+        @else
         <x-admin.form.file :name="$name" :id="$id" :error-key="$errorKey" :label="$definition->label" :help="$definition->description" :required="$required" :current-url="$field['fileUrl']" :is-image="$type === 'image'" :remove-name="$removeName" :accept="implode(',', array_map(fn ($extension) => '.'.$extension, $validation['extensions'] ?? []))" />
+        @endif
         @break
     @case('password')
         <x-admin.form.input :name="$name" :id="$id" :error-key="$errorKey" :label="$definition->label" type="password" :help="$field['hasValue'] ? 'Kayıtlı değer mevcut. Boş bırakırsanız korunur.' : $definition->description" :required="$required && ! $field['hasValue']" autocomplete="new-password" :maxlength="$validation['max'] ?? null" />

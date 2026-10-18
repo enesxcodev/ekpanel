@@ -1,3 +1,5 @@
+@props(['companyName'])
+
 <aside class="navbar navbar-vertical navbar-expand-md bg-dark" data-bs-theme="dark">
     <div class="container-fluid">
         <button
@@ -13,8 +15,8 @@
         </button>
 
         <h1 class="navbar-brand navbar-brand-autodark">
-            <a href="{{ route('admin.dashboard') }}" class="text-reset text-decoration-none">
-                {{ config('app.name', 'Laravel') }}
+            <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-brand" aria-label="{{ $companyName }}">
+                <img src="{{ asset('images/ekagent-logo-dark.png') }}" alt="{{ $companyName }}" class="admin-sidebar-brand-logo">
             </a>
         </h1>
 
@@ -79,6 +81,41 @@
                             <span class="nav-link-icon d-md-none d-lg-inline-block"><x-admin.icon name="settings" /></span>
                             <span class="nav-link-title">Ayarlar</span>
                         </a>
+                    </li>
+                @endif
+                @if (auth('admin')->user()->can('media.menu') && auth('admin')->user()->can('media.view'))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.media.*') ? 'active' : '' }}" href="{{ route('admin.media.index') }}">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block"><x-admin.icon name="photo" /></span>
+                            <span class="nav-link-title">Medya</span>
+                        </a>
+                    </li>
+                @endif
+                @if (auth('admin')->user()->can('forms.menu') && auth('admin')->user()->canAny(['forms.view', 'forms.submissions.view']))
+                    <li class="nav-item">
+                        <a class="nav-link dropdown-toggle {{ request()->routeIs('admin.forms.*') ? 'active' : '' }}" href="#forms-navigation" data-bs-toggle="collapse" role="button" aria-expanded="{{ request()->routeIs('admin.forms.*') ? 'true' : 'false' }}" aria-controls="forms-navigation">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block"><x-admin.icon name="file-text" /></span><span class="nav-link-title">Formlar</span>
+                        </a>
+                        <div class="collapse {{ request()->routeIs('admin.forms.*') ? 'show' : '' }}" id="forms-navigation">
+                            <ul class="navbar-nav ps-3">
+                                @can('forms.view')
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.forms.*') && ! request()->routeIs('admin.forms.submissions.*') ? 'active' : '' }}" href="{{ route('admin.forms.index') }}"
+                                           @if (request()->routeIs('admin.forms.*') && ! request()->routeIs('admin.forms.submissions.*')) aria-current="page" @endif>
+                                            <span class="nav-link-title">Form yönetimi</span>
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('forms.submissions.view')
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('admin.forms.submissions.*') ? 'active' : '' }}" href="{{ route('admin.forms.submissions.index') }}"
+                                           @if (request()->routeIs('admin.forms.submissions.*')) aria-current="page" @endif>
+                                            <span class="nav-link-title">Gelen başvurular</span>
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </div>
                     </li>
                 @endif
                 @foreach ($moduleMenus as $menu)

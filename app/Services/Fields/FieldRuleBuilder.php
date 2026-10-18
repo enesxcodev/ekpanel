@@ -4,6 +4,7 @@ namespace App\Services\Fields;
 
 use App\Enums\Fields\FieldInputType;
 use App\Enums\Fields\FieldValueType;
+use App\Rules\SelectedFeatureMedia;
 use Closure;
 use Illuminate\Validation\Rule;
 
@@ -15,6 +16,10 @@ class FieldRuleBuilder
         $rules = ['bail', $required ? 'required' : 'nullable'];
         $validation = $definition->validation ?? [];
         $type = $definition->input_type;
+
+        if ($definition->value_type === FieldValueType::Media) {
+            return [...$rules, 'integer', new SelectedFeatureMedia($definition)];
+        }
 
         if ($type->isFile()) {
             $extensions = $validation['extensions'] ?? ($type === FieldInputType::Image ? ['jpg', 'jpeg', 'png', 'webp'] : ['pdf']);

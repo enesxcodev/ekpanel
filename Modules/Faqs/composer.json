@@ -1,0 +1,39 @@
+{
+    "name": "ekagent/faqs",
+    "description": "ekAgent sıkça sorulan sorular yönetimi modülü",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^13.0",
+        "nwidart/laravel-modules": "^13.0",
+        "spatie/laravel-permission": "^8.0",
+        "yajra/laravel-datatables-oracle": "^13.0"
+    },
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Faqs\\": "app/",
+            "Modules\\Faqs\\Database\\Factories\\": "database/factories/",
+            "Modules\\Faqs\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Faqs\\Tests\\": "tests/"
+        }
+    }
+}

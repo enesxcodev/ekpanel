@@ -11,8 +11,10 @@
             :options="['order' => [[0, 'desc']]]"
             :columns="[
                 ['title' => 'ID', 'data' => 'id', 'name' => 'id'],
+                ['title' => 'Görsel', 'data' => 'image', 'name' => 'image', 'orderable' => false, 'searchable' => false],
                 ['title' => 'Başlık', 'data' => 'title', 'name' => 'title'],
                 ['title' => 'Alt başlık', 'data' => 'subtitle', 'name' => 'subtitle'],
+                ['title' => 'Durum', 'data' => 'is_active', 'name' => 'is_active'],
                 ['title' => 'İşlemler', 'data' => 'actions', 'name' => 'actions', 'orderable' => false, 'searchable' => false],
             ]"
         />

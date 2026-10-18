@@ -1,5 +1,11 @@
 @import '@tabler/core/dist/css/tabler.min.css';
 @import 'select2/dist/css/select2.min.css';
+@import './media.css';
+@import './admin-panel-refresh.css';
+@import './menu.css';
+@import './admin-forms.css';
+@import './site-forms.css';
+@import './form-builder.css';
 
 .category-tree-list [data-category-tree-option] {
     cursor: pointer;

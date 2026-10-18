@@ -1,0 +1,1 @@
+<x-admin.layout title="Etiket ekle"><div class="card"><div class="card-body"><form method="POST" action="{{ route('admin.blog.tags.store') }}">@include('blog::tags.partials.form')</form></div></div></x-admin.layout>

@@ -2,6 +2,7 @@
 
 namespace Modules\Slider\Http\Requests;
 
+use App\Rules\SelectedMediaImage;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
@@ -17,9 +18,11 @@ class SaveSliderRequest extends FormRequest
         $slider = $this->route('slider');
 
         return [
+            'is_active' => ['sometimes', 'boolean'],
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:10000'],
-            'image' => [$slider?->image ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'extensions:jpg,jpeg,png,webp', 'max:4096'],
+            'image_media_id' => ['bail', $slider && ! $slider->image_media_id && $slider->image ? 'nullable' : 'required', 'integer', new SelectedMediaImage(4096)],
+            'image' => ['prohibited'],
             ...$values->rules($features->form('Slider', 'slider')['fields'], $this->all(), $slider?->extra_fields ?? []),
         ];
     }
@@ -39,7 +42,7 @@ class SaveSliderRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['title' => 'Başlık', 'subtitle' => 'Alt başlık', 'image' => 'Görsel']
+        return ['is_active' => 'Durum', 'title' => 'Başlık', 'subtitle' => 'Alt başlık', 'image_media_id' => 'Görsel']
             + app(FeatureValues::class)->labels(app(ModuleFeatures::class)->form('Slider', 'slider')['fields']);
     }
 }

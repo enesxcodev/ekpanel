@@ -4,6 +4,7 @@
             <div class="d-flex flex-wrap gap-3 align-items-start">
                 <div class="flex-fill text-break">
                     <div class="d-flex flex-wrap gap-2 align-items-center">
+                        @if ($node['item']->icon)<x-admin.icon :name="$node['item']->icon" />@endif
                         <strong>{{ $node['item']->label }}</strong>
                         <span class="badge {{ $node['item']->is_active ? 'bg-green-lt' : 'bg-secondary-lt' }}">{{ $node['item']->is_active ? 'Var' : 'Yok' }}</span>
                         <span class="badge bg-secondary-lt">Sıra: {{ $node['item']->sort_order }}</span>

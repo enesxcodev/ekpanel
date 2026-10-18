@@ -1,0 +1,1 @@
+@if($project->cover_url)<img src="{{ $project->cover_url }}" alt="{{ $project->title }}" class="avatar avatar-sm object-fit-cover" loading="lazy">@else<span class="text-secondary">—</span>@endif

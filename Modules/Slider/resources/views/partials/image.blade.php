@@ -1,0 +1,1 @@
+<x-admin.media.thumbnail :url="$slider->image_url" :alt="$slider->imageMedia?->alt_text ?: $slider->title" />

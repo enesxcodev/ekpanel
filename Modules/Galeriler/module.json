@@ -1,0 +1,25 @@
+{
+    "name": "Galeriler",
+    "alias": "galeriler",
+    "description": "Fotoğraf ve Video Galerisi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Galeriler\\Providers\\GalerilerServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "galeriler.menu",
+            "galeriler.view",
+            "galeriler.create",
+            "galeriler.update",
+            "galeriler.delete",
+            "galeriler.categories.menu",
+            "galeriler.categories.view",
+            "galeriler.categories.create",
+            "galeriler.categories.update",
+            "galeriler.categories.delete"
+        ]
+    }
+}

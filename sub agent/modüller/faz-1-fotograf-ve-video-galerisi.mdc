@@ -1,0 +1,46 @@
+---
+description: Fotoğraf ve Video Galerisi modülü için Faz 1 yapılacakları
+alwaysApply: false
+---
+
+# Faz 1 — Fotoğraf ve Video Galerisi
+
+Bu belge uygulanan faz kapsamını ve doğrulanan yapılacakları izler. Fotoğraf/video içerik modülünün adı Galeriler’dir (Modules/Galeriler, galeriler.*). Mevcut Gallery / Media Library ortak dosya kütüphanesiyle karıştırılmaz; kütüphanenin admin.media.* route’ları ve medya seçicisi korunur. Galeriler, Slider’dan bağımsız çalışır. Ofis, tesis, etkinlik ve uygulama görselleri kategori ağacı altında yönetilecektir.
+
+## Kategoriler
+
+- [x] `parent_id` ile üst/alt kategori ağacını oluştur.
+- [x] Kategori adını zorunlu; ikon ve kısa açıklamayı isteğe bağlı tut.
+- [x] Kategori yönetimini ağaç liste olarak sun.
+
+## Galeri ekleme ve düzenleme
+
+- [x] Formda kategori seçimi ve fotoğraf/video tür seçimi sun.
+- [x] Başlık ve açıklama alanlarını isteğe bağlı tut.
+- [x] Fotoğraf seçildiğinde mevcut Media Library picker’ını aç.
+- [x] Picker’ın mevcut çoklu seçim desteğini kullanarak birden fazla fotoğraf seçilmesini sağla.
+- [x] Seçilen her fotoğrafı ayrı bir galeri kaydı olarak kaydet.
+- [x] Video seçildiğinde YouTube, Vimeo ve benzeri servislerin bağlantısının girileceği alanı göster.
+- [x] Video bağlantısını doğrula; video dosyası yükleme akışı ekleme.
+
+## Galeri ana ekranı
+
+- [x] Kayıtları kart görünümünde listele.
+- [x] Kartta fotoğraf veya video kapağı önizlemesini göster.
+- [x] Kartta kategori, varsa başlık ve fotoğraf/video tür bilgisini göster.
+- [x] Kartlara düzenle ve sil aksiyonlarını ekle.
+- [x] Üstteki sekmeleri tanımlanan kategorilerden dinamik oluştur; sekmeye tıklanınca o kategorinin kayıtlarını filtrele.
+- [x] Kategori sekmelerinin yanında ayrı bir fotoğraf/video tür filtresi ve arama sun; sabit Fotoğraf/Video sekmeleri oluşturma.
+- [x] Toplu seçimle silme ve kategori değiştirme işlemlerini ekle.
+- [x] Kategori seçiliyken sürükle bırak sıralamayı ve sıranın kaydedilmesini sağla.
+- [x] Arama veya ek tür filtresi açıkken sıra değiştirmeyi kapat.
+- [x] Kartın tamamını sürükleyerek sıralamayı sağla; düzenle/sil butonlarını ve seçim kutularını sürükleme dışında tut.
+
+## Tamamlama kontrolü
+
+- [x] Mevcut modül, panel, izin ve ortak medya konvansiyonlarıyla uyumu doğrula.
+- [x] Kategori ağacı, çoklu fotoğraf seçimi, video bağlantısı, filtreleme, toplu işlemler ve sıralama davranışlarını ilgili testlerle doğrula.
+
+## Kapsam sınırları
+
+Albüm tabanlı ayrı bir yapı ve video dosyası yükleme bu fazda yoktur. Yayın durumu yalnızca öneri olarak konuşulmuştur; kesin gereksinim değildir.

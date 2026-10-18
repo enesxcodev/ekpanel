@@ -5,6 +5,7 @@ namespace Modules\Pages\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\MediaService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,8 @@ use Modules\Pages\Services\PageCategoryService;
 
 class PageCategoryController extends Controller
 {
+    public function __construct(private MediaService $media) {}
+
     public function index(): View
     {
         $this->authorize('pages.categories.view');
@@ -36,12 +39,12 @@ class PageCategoryController extends Controller
         $featureFields = $values->fields($featureForm['fields'], []);
         $categoryOptions = $this->categoryOptions();
 
-        return view('pages::categories.create', compact('featureForm', 'featureFields', 'categoryOptions'));
+        return view('pages::categories.create', compact('featureForm', 'featureFields', 'categoryOptions') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function store(SavePageCategoryRequest $request, PageCategoryService $service): RedirectResponse
     {
-        $service->save($request->validated());
+        $service->save($request->validated(), null, $request->user('admin'));
 
         return redirect()->route('admin.pages.categories.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa kategorisi başarıyla eklendi.']);
     }
@@ -53,12 +56,12 @@ class PageCategoryController extends Controller
         $featureFields = $values->fields($featureForm['fields'], $category->extra_fields ?? []);
         $categoryOptions = $this->categoryOptions($category);
 
-        return view('pages::categories.edit', compact('category', 'featureForm', 'featureFields', 'categoryOptions'));
+        return view('pages::categories.edit', compact('category', 'featureForm', 'featureFields', 'categoryOptions') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function update(SavePageCategoryRequest $request, PageCategory $category, PageCategoryService $service): RedirectResponse
     {
-        $service->save($request->validated(), $category);
+        $service->save($request->validated(), $category, $request->user('admin'));
 
         return redirect()->route('admin.pages.categories.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa kategorisi başarıyla güncellendi.']);
     }

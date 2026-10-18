@@ -15,6 +15,8 @@
                 ['title' => 'Marka ismi', 'data' => 'name', 'name' => 'name'],
                 ['title' => 'Kısa açıklama', 'data' => 'short_description', 'name' => 'short_description'],
                 ['title' => 'Link', 'data' => 'link', 'name' => 'link'],
+                ['title' => 'Sıra', 'data' => 'sort_order', 'name' => 'sort_order'],
+                ['title' => 'Durum', 'data' => 'is_active', 'name' => 'is_active'],
                 ['title' => 'İşlemler', 'data' => 'actions', 'name' => 'actions', 'orderable' => false, 'searchable' => false],
             ]"
         />

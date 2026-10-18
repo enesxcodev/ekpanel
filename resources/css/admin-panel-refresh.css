@@ -1,0 +1,199 @@
+/*
+ * Reversible visual layer for the admin panel.
+ * Remove its import from admin.css to restore the previous component styling.
+ * Keep this stylesheet visual-only: do not change layout or component behavior here.
+ */
+
+html[data-bs-theme="light"] .page {
+    --panel-accent: #19a96b;
+    --panel-accent-strong: #118653;
+    --panel-accent-soft: #e8f8ef;
+    --panel-accent-border: #b9e8cd;
+    --panel-ink: #172b27;
+    --panel-muted: #71817c;
+    --panel-line: #e5ece9;
+}
+
+/* Sidebar */
+html[data-bs-theme="light"] .page .navbar-vertical {
+    background-color: #14211e;
+    border-color: #253631;
+}
+
+html[data-bs-theme="light"] .page .navbar-vertical .nav-link {
+    border-radius: .625rem;
+    transition: background-color .18s ease, color .18s ease;
+}
+
+html[data-bs-theme="light"] .page .navbar-vertical .nav-link:hover,
+html[data-bs-theme="light"] .page .navbar-vertical .nav-link:focus-visible {
+    color: #f3fff8;
+    background-color: rgb(255 255 255 / 6%);
+}
+
+html[data-bs-theme="light"] .page .navbar-vertical .nav-link.active {
+    color: #f3fff8;
+    background: linear-gradient(100deg, rgb(25 169 107 / 28%), rgb(25 169 107 / 12%));
+    box-shadow: inset 3px 0 var(--panel-accent);
+}
+
+html[data-bs-theme="light"] .page .navbar-vertical .nav-link-icon {
+    display: inline-flex !important;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: .5rem;
+    color: #58d99a;
+    background-color: rgb(25 169 107 / 16%);
+}
+
+html[data-bs-theme="light"] .page .navbar-vertical .nav-link.active .nav-link-icon {
+    color: #e7fff1;
+    background-color: rgb(25 169 107 / 32%);
+}
+
+/* Primary actions */
+html[data-bs-theme="light"] .page .btn-primary {
+    color: #fff;
+    border-color: var(--panel-accent);
+    background: linear-gradient(135deg, #25bd7b, var(--panel-accent));
+    box-shadow: 0 .25rem .75rem rgb(25 169 107 / 16%);
+}
+
+html[data-bs-theme="light"] .page .btn-primary:hover,
+html[data-bs-theme="light"] .page .btn-primary:focus-visible {
+    color: #fff;
+    border-color: var(--panel-accent-strong);
+    background: linear-gradient(135deg, #1eae70, var(--panel-accent-strong));
+}
+
+html[data-bs-theme="light"] .page .btn-primary:focus-visible {
+    box-shadow: 0 0 0 .2rem rgb(25 169 107 / 22%);
+}
+
+html[data-bs-theme="light"] .page .btn-primary:disabled,
+html[data-bs-theme="light"] .page .btn-primary.disabled {
+    color: #fff;
+    border-color: #a7d9bd;
+    background: #a7d9bd;
+    box-shadow: none;
+}
+
+/* Cards and forms */
+html[data-bs-theme="light"] .page .card {
+    border-color: var(--panel-line);
+    border-radius: .875rem;
+    box-shadow: 0 .25rem 1rem rgb(23 43 39 / 4%);
+}
+
+html[data-bs-theme="light"] .page .card-header {
+    border-bottom-color: var(--panel-line);
+}
+
+html[data-bs-theme="light"] .page .form-label {
+    color: var(--panel-ink);
+    font-weight: 600;
+}
+
+html[data-bs-theme="light"] .page .form-hint,
+html[data-bs-theme="light"] .page .form-text {
+    color: var(--panel-muted);
+}
+
+html[data-bs-theme="light"] .page .form-control,
+html[data-bs-theme="light"] .page .form-select {
+    border-color: #d9e3df;
+    border-radius: .625rem;
+}
+
+html[data-bs-theme="light"] .page .form-control:focus,
+html[data-bs-theme="light"] .page .form-select:focus {
+    border-color: var(--panel-accent);
+    box-shadow: 0 0 0 .2rem rgb(25 169 107 / 14%);
+}
+
+/* DataTables controls, table header, actions, and pagination */
+html[data-bs-theme="light"] .page .dt-container .dt-search input,
+html[data-bs-theme="light"] .page .dt-container .dt-length select {
+    border-color: #d9e3df;
+    border-radius: .625rem;
+}
+
+html[data-bs-theme="light"] .page table .btn-outline-primary {
+    color: #3974c6;
+    border-color: #b8cfee;
+    background-color: #f8fbff;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgb(23 43 39 / 5%);
+}
+
+html[data-bs-theme="light"] .page table .btn-outline-primary:hover,
+html[data-bs-theme="light"] .page table .btn-outline-primary:focus-visible {
+    color: #245da8;
+    border-color: #8fb4e6;
+    background-color: #edf5ff;
+}
+
+html[data-bs-theme="light"] .page table .btn-outline-primary:focus-visible {
+    box-shadow: 0 0 0 .2rem rgb(57 116 198 / 16%);
+}
+
+html[data-bs-theme="light"] .page table .btn-outline-danger {
+    color: #c84c5c;
+    border-color: #edc1c7;
+    background-color: #fff9fa;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgb(23 43 39 / 5%);
+}
+
+html[data-bs-theme="light"] .page table .btn-outline-danger:hover,
+html[data-bs-theme="light"] .page table .btn-outline-danger:focus-visible {
+    color: #a93243;
+    border-color: #df9da7;
+    background-color: #fff0f2;
+}
+
+html[data-bs-theme="light"] .page table .btn-outline-danger:focus-visible {
+    box-shadow: 0 0 0 .2rem rgb(200 76 92 / 16%);
+}
+
+html[data-bs-theme="light"] .page table.js-data-table thead th {
+    padding-block: .9rem;
+    color: #60716b;
+    background-color: #f6faf8;
+    border-bottom-color: var(--panel-line);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+}
+
+html[data-bs-theme="light"] .page table.js-data-table tbody td {
+    padding-block: .8rem;
+    border-bottom-color: #edf2ef;
+}
+
+html[data-bs-theme="light"] .page table.js-data-table tbody tr:hover > * {
+    background-color: #f5fbf7;
+}
+
+html[data-bs-theme="light"] .page .dt-container .dt-paging .dt-paging-button.current,
+html[data-bs-theme="light"] .page .dt-container .dt-paging .dt-paging-button.current:hover {
+    color: #fff !important;
+    border-color: var(--panel-accent) !important;
+    background: var(--panel-accent) !important;
+    border-radius: .55rem;
+}
+
+html[data-bs-theme="light"] .page .dt-container .dt-paging .dt-paging-button:not(.current):hover {
+    color: var(--panel-accent-strong) !important;
+    border-color: var(--panel-accent-border) !important;
+    background: var(--panel-accent-soft) !important;
+}

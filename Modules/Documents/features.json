@@ -1,0 +1,13 @@
+{
+    "schema_version": 1,
+    "forms": {
+        "category": {
+            "label": "Ek belge kategorisi alanları",
+            "fields": []
+        },
+        "document": {
+            "label": "Ek belge alanları",
+            "fields": []
+        }
+    }
+}

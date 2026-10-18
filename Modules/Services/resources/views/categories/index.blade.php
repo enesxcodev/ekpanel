@@ -13,6 +13,8 @@
             :columns="[
                 ['title' => 'ID', 'data' => 'id', 'name' => 'id'],
                 ['title' => 'Kategori adı', 'data' => 'name', 'name' => 'name'],
+                ['title' => 'Sıra', 'data' => 'sort_order', 'name' => 'sort_order'],
+                ['title' => 'Durum', 'data' => 'is_active', 'name' => 'is_active'],
                 ['title' => 'İşlemler', 'data' => 'actions', 'name' => 'actions', 'orderable' => false, 'searchable' => false],
             ]"
         />

@@ -10,9 +10,11 @@ class SlidersDataTable
 {
     public function handle(): JsonResponse
     {
-        return DataTables::eloquent(Slider::query()->select(['id', 'title', 'subtitle']))
+        return DataTables::eloquent(Slider::query()->with('imageMedia')->select(['id', 'title', 'subtitle', 'is_active', 'image', 'image_media_id']))
+            ->addColumn('image', fn (Slider $slider): string => view('slider::partials.image', compact('slider'))->render())
+            ->editColumn('is_active', fn (Slider $slider): string => $slider->is_active ? 'Aktif' : 'Pasif')
             ->addColumn('actions', fn (Slider $slider): string => view('slider::partials.actions', compact('slider'))->render())
-            ->rawColumns(['actions'])
+            ->rawColumns(['image', 'actions'])
             ->toJson();
     }
 }

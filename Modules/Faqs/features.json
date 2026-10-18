@@ -1,0 +1,13 @@
+{
+    "schema_version": 1,
+    "forms": {
+        "category": {
+            "label": "Ek SSS kategorisi alanları",
+            "fields": []
+        },
+        "faq": {
+            "label": "Ek SSS kaydı alanları",
+            "fields": []
+        }
+    }
+}

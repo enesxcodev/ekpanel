@@ -10,7 +10,7 @@ class SectorsDataTable
 {
     public function handle(): JsonResponse
     {
-        return DataTables::eloquent(Sector::query()->select(['id', 'title', 'image', 'is_active', 'created_at']))
+        return DataTables::eloquent(Sector::query()->select(['id', 'title', 'slug', 'sort_order', 'image', 'is_active', 'created_at']))
             ->addColumn('photo', fn (Sector $sector): string => view('sector::partials.photo', compact('sector'))->render())
             ->editColumn('is_active', fn (Sector $sector): string => view('sector::partials.status', compact('sector'))->render())
             ->editColumn('created_at', fn (Sector $sector): ?string => $sector->created_at?->format('d.m.Y H:i'))

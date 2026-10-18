@@ -21,7 +21,7 @@ test('sector list has a single menu and create button and its forms render all c
     expect(substr_count($response->getContent(), 'href="'.route('admin.sector.index').'"'))->toBe(1);
     $this->get(route('admin.sector.create'))->assertOk()->assertSeeInOrder([
         'name="image"', 'name="title"', 'name="short_description"', 'name="content"',
-        'name="meta_title"', 'name="meta_keywords"', 'name="meta_description"', 'name="is_active"',
+        'name="is_active"', 'name="meta_title"', 'name="meta_keywords"', 'name="meta_description"',
     ], false);
     $this->get(route('admin.sector.edit', $sector))->assertOk()
         ->assertSee('&lt;script&gt;Title&lt;/script&gt;', false)->assertSee('&lt;script&gt;Content&lt;/script&gt;', false)

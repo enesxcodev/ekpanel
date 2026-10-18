@@ -15,6 +15,9 @@
                 ['title' => 'Resim / ikon', 'data' => 'visual', 'name' => 'visual', 'orderable' => false, 'searchable' => false],
                 ['title' => 'Hizmet başlık', 'data' => 'title', 'name' => 'services.title'],
                 ['title' => 'Kategori', 'data' => 'category_name', 'name' => 'category.name'],
+                ['title' => 'Kısa bağlantı', 'data' => 'slug', 'name' => 'services.slug'],
+                ['title' => 'Sıra', 'data' => 'sort_order', 'name' => 'services.sort_order'],
+                ['title' => 'İşlemler', 'data' => 'actions', 'name' => 'actions', 'orderable' => false, 'searchable' => false],
                 ['title' => 'Durum', 'data' => 'is_active', 'name' => 'services.is_active', 'searchable' => false],
             ]"
         />

@@ -29,7 +29,7 @@ class AdminRoleController extends Controller
             'role' => $role,
             'groups' => Permission::query()->where('guard_name', 'admin')->orderBy('name')->get()->groupBy(fn (Permission $permission): string => str($permission->name)->beforeLast('.')->toString()),
             'selected' => $role->permissions->pluck('name')->all(),
-            'permissionLabels' => $modulePanel->permissionLabels() + ['settings' => 'Ayarlar'] + SettingSection::query()->get()
+            'permissionLabels' => $modulePanel->permissionLabels() + ['settings' => 'Ayarlar', 'media' => 'Medya Kütüphanesi', 'forms' => 'Form yönetimi', 'forms.submissions' => 'Gelen başvurular'] + SettingSection::query()->get()
                 ->mapWithKeys(fn (SettingSection $section): array => ['settings.sections.'.$section->key => 'Ayarlar / '.$section->label])->all(),
             'actions' => ['menu' => 'Menü Show', 'view' => 'Listele', 'show' => 'Görüntüle', 'create' => 'Oluştur', 'update' => 'Güncelle', 'delete' => 'Sil'],
         ]);

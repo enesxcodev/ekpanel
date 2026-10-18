@@ -1,0 +1,1 @@
+<h1>{{ $submission->form_name }}</h1><p>Yeni bir başvuru alındı.</p><p><a href="{{ route('admin.forms.submissions.show',$submission) }}">Başvuruyu panelde görüntüle</a></p>

@@ -16,6 +16,7 @@ class SaveMenuRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'icon' => ['nullable', 'string', 'max:100', 'regex:/^[a-z][a-z0-9-]*$/'],
             'name' => ['required', 'string', 'max:255'],
             'key' => ['required', 'string', 'max:100', 'regex:/^[a-z][a-z0-9_-]*$/', Rule::unique('menus', 'key')->ignore($this->route('menu')?->id)],
             'is_active' => ['required', 'boolean'],
@@ -31,6 +32,6 @@ class SaveMenuRequest extends FormRequest
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['name' => 'Menü adı', 'key' => 'Menü anahtarı', 'is_active' => 'Durum'];
+        return ['icon' => 'İkon', 'name' => 'Menü adı', 'key' => 'Menü anahtarı', 'is_active' => 'Durum'];
     }
 }

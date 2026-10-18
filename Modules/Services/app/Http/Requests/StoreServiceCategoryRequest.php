@@ -20,6 +20,8 @@ class StoreServiceCategoryRequest extends FormRequest
         $category = $this->route('category');
 
         return [
+            'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
+            'is_active' => ['sometimes', 'boolean'],
             'name' => ['required', 'string', 'max:255'],
             ...$values->rules($features->form('Services', 'category')['fields'], $this->all(), $category?->extra_fields ?? []),
         ];
@@ -38,7 +40,7 @@ class StoreServiceCategoryRequest extends FormRequest
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['name' => 'Kategori adı']
+        return ['sort_order' => 'Sıralama', 'is_active' => 'Durum', 'name' => 'Kategori adı']
             + app(FeatureValues::class)->labels(app(ModuleFeatures::class)->form('Services', 'category')['fields']);
     }
 }

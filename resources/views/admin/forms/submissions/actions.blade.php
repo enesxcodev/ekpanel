@@ -1,0 +1,1 @@
+<a class="btn btn-sm btn-outline-primary" href="{{ route('admin.forms.submissions.show',$submission) }}">Başvuruyu aç</a>

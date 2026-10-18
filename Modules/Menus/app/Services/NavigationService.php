@@ -14,7 +14,7 @@ class NavigationService
 {
     public function __construct(private MenuSources $sources) {}
 
-    /** @return list<array{label: string, url: ?string, new_tab: bool, children: array}> */
+    /** @return list<array{label: string, icon: ?string, url: ?string, new_tab: bool, children: array}> */
     public function tree(string $menuKey): array
     {
         if (! Module::find('Menus')?->isEnabled()) {
@@ -173,7 +173,7 @@ class NavigationService
     /**
      * @param  Collection<string, Collection<int, MenuItem>>  $byParent
      * @param  list<int>  $ancestors
-     * @return list<array{label: string, url: ?string, new_tab: bool, children: array}>
+     * @return list<array{label: string, icon: ?string, url: ?string, new_tab: bool, children: array}>
      */
     private function branches(Collection $byParent, int $parentId = 0, array $ancestors = []): array
     {
@@ -200,7 +200,7 @@ class NavigationService
                 }
             }
 
-            $nodes[] = ['label' => $item->label, 'url' => $target['url'], 'new_tab' => (bool) $item->new_tab, 'children' => $children];
+            $nodes[] = ['label' => $item->label, 'icon' => $item->icon, 'url' => $target['url'], 'new_tab' => (bool) $item->new_tab, 'children' => $children];
         }
 
         return $nodes;
@@ -218,7 +218,7 @@ class NavigationService
             $url = $this->safeUrl($child['url']);
 
             if ($url !== null) {
-                $nodes[] = [...$child, 'url' => $url, 'children' => $this->safeChildren($child['children'])];
+                $nodes[] = [...$child, 'icon' => $child['icon'] ?? null, 'url' => $url, 'children' => $this->safeChildren($child['children'])];
             }
         }
 

@@ -1,0 +1,1 @@
+<x-admin.layout title="Kategori ekle"><div class="card"><div class="card-body"><form method="POST" action="{{ route('admin.blog.categories.store') }}">@include('blog::categories.partials.form')</form></div></div></x-admin.layout>
