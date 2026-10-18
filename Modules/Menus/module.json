@@ -1,12 +1,18 @@
 {
     "name": "Menus",
     "alias": "menus",
+    "version": "0.1.0",
     "description": "Yönetilebilir çok seviyeli ziyaretçi menüleri",
     "keywords": [],
     "priority": 0,
     "providers": ["Modules\\Menus\\Providers\\MenusServiceProvider"],
     "files": [],
     "panel": {
+        "assets": {
+            "routes": ["admin.menus.*"],
+            "js": ["resources/dist/panel.js"],
+            "css": ["resources/dist/panel.css"]
+        },
         "permissions": ["menus.menu", "menus.view", "menus.create", "menus.update", "menus.delete"]
     }
 }

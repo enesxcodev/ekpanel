@@ -12,6 +12,7 @@
         <title>{{ $title }} · {{ $companyName }}</title>
 
         @vite(['resources/css/admin.css', 'resources/js/panel.js'])
+        <x-admin.module-assets />
     </head>
     <body>
         <x-admin.notifications />

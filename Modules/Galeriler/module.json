@@ -1,6 +1,7 @@
 {
     "name": "Galeriler",
     "alias": "galeriler",
+    "version": "0.1.0",
     "description": "Fotoğraf ve Video Galerisi",
     "keywords": [],
     "priority": 0,

@@ -1,6 +1,7 @@
 {
     "name": "Services",
     "alias": "services",
+    "version": "0.1.0",
     "description": "Hizmet yönetimi",
     "keywords": [],
     "priority": 0,

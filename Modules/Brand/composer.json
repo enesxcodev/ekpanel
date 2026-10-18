@@ -1,6 +1,6 @@
 {
     "name": "ekagent/brand",
-    "description": "ekAgent ekip yönetimi modülü",
+    "description": "Çalışılan markaların yönetimi",
     "type": "library",
     "license": "proprietary",
     "require": {

@@ -10,12 +10,6 @@
         "spatie/laravel-permission": "^8.0",
         "yajra/laravel-datatables-oracle": "^13.0"
     },
-    "authors": [
-        {
-            "name": "Nicolas Widart",
-            "email": "n.widart@gmail.com"
-        }
-    ],
     "extra": {
         "laravel": {
             "providers": [],

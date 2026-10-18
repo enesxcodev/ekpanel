@@ -1,6 +1,7 @@
 {
     "name": "Pages",
     "alias": "pages",
+    "version": "0.1.0",
     "description": "Sayfa ve sayfa kategorisi yönetimi",
     "keywords": [],
     "priority": 0,

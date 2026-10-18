@@ -3,7 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
+        "build": "vite build && npm run build:modules",
+        "build:modules": "node resources/js/build-module-assets.js",
         "dev": "vite"
     },
     "devDependencies": {

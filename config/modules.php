@@ -1,6 +1,6 @@
 <?php
 
-use Nwidart\Modules\Activators\FileActivator;
+use App\Services\Admin\Modules\LockedFileActivator;
 use Nwidart\Modules\Providers\ConsoleServiceProvider;
 
 return [
@@ -306,7 +306,7 @@ return [
     */
     'activators' => [
         'file' => [
-            'class' => FileActivator::class,
+            'class' => LockedFileActivator::class,
             'statuses-file' => base_path('modules_statuses.json'),
         ],
     ],

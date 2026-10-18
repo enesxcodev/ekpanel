@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Forms\FormController;
 use App\Http\Controllers\Admin\Forms\FormSubmissionController;
+use App\Http\Controllers\Admin\Modules\ModuleController;
 use App\Http\Controllers\Admin\Roles\AdminRoleController;
 use App\Http\Controllers\Admin\Settings\SettingConfigurationController;
 use App\Http\Controllers\Admin\Settings\SettingController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Admin\Users\AdminUserController;
 use App\Http\Controllers\AdminAuth\AdminAuthController;
 use App\Http\Controllers\MediaController;
 use App\Http\Middleware\AdminAuth\EnsureAdminIsActive;
+use App\Http\Middleware\AdminAuth\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')->name('admin.')->group(function (): void {
@@ -51,6 +53,17 @@ Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')-
         });
 
         Route::resource('roles', AdminRoleController::class)->only(['index', 'edit', 'update'])->middleware('can:manage-admin-roles');
+
+        Route::prefix('modules')->name('modules.')->middleware(EnsureSuperAdmin::class)->group(function (): void {
+            Route::get('/', [ModuleController::class, 'index'])->name('index');
+            Route::get('/catalog', [ModuleController::class, 'create'])->name('create');
+            Route::get('/catalog/{id}', [ModuleController::class, 'show'])->name('show');
+            Route::get('/installations/{installation}', [ModuleController::class, 'installation'])->whereUuid('installation')->name('installations.show');
+            Route::post('/', [ModuleController::class, 'store'])->middleware('throttle:6,1')->name('store');
+            Route::post('/{module}/enable', [ModuleController::class, 'enable'])->name('enable');
+            Route::post('/{module}/disable', [ModuleController::class, 'disable'])->name('disable');
+            Route::delete('/{module}', [ModuleController::class, 'destroy'])->name('destroy');
+        });
 
         Route::prefix('settings')->name('settings.')->group(function (): void {
             Route::get('/', [SettingController::class, 'index'])->name('index');

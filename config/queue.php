@@ -31,6 +31,15 @@ return [
 
     'connections' => [
 
+        'module-installations' => [
+            'driver' => 'database',
+            'connection' => null,
+            'table' => 'jobs',
+            'queue' => 'module-installations',
+            'retry_after' => 3600,
+            'after_commit' => false,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

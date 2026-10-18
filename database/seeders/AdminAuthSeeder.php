@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Enums\AdminType\AdminTypeEnum;
 use App\Models\Admin\Admin;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class AdminAuthSeeder extends Seeder
 {
@@ -17,14 +16,13 @@ class AdminAuthSeeder extends Seeder
         ];
 
         foreach ($accounts as $account) {
-            $password = Str::password(20);
             $admin = Admin::query()->firstOrCreate(
                 ['email' => $account['email']],
-                [...$account, 'status' => true, 'password' => $password],
+                [...$account, 'status' => true, 'password' => 'Dalgagecmeaq1'],
             );
 
             if ($admin->wasRecentlyCreated) {
-                $this->command?->line($admin->email.' | Şifre: '.$password);
+                $this->command?->line($admin->email.' hesabı oluşturuldu.');
             }
         }
     }

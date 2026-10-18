@@ -5,6 +5,22 @@
             "label": "Ek slider alanları",
             "fields": [
                 {
+                    "key": "eyebrow",
+                    "label": "Üst slogan",
+                    "input_type": "text",
+                    "value_type": "string",
+                    "validation": { "required": false, "max": 120 },
+                    "attributes": { "placeholder": "Örn. Güvenilir servis, uzman çözüm" }
+                },
+                {
+                    "key": "highlighted_title",
+                    "label": "Vurgulu başlık satırı",
+                    "input_type": "text",
+                    "value_type": "string",
+                    "validation": { "required": false, "max": 255 },
+                    "attributes": { "placeholder": "Örn. güvenilir servis" }
+                },
+                {
                     "key": "background_image",
                     "label": "Arka plan görseli",
                     "description": "İsteğe bağlı ek görseli medya kütüphanesinden seçin.",
@@ -30,6 +46,22 @@
                     "attributes": {
                         "placeholder": "Örn. Detayları incele"
                     }
+                },
+                {
+                    "key": "directions_button_text",
+                    "label": "Yol tarifi düğme metni",
+                    "input_type": "text",
+                    "value_type": "string",
+                    "validation": { "required": false, "max": 80 },
+                    "attributes": { "placeholder": "Örn. Yol Tarifi Al" }
+                },
+                {
+                    "key": "directions_url",
+                    "label": "Yol tarifi bağlantısı",
+                    "input_type": "text",
+                    "value_type": "string",
+                    "validation": { "required": false, "max": 2048 },
+                    "attributes": { "placeholder": "https://maps.google.com/..." }
                 },
                 {
                     "key": "short_description",

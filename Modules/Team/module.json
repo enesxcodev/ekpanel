@@ -1,6 +1,7 @@
 {
     "name": "Team",
     "alias": "team",
+    "version": "0.1.0",
     "description": "Ekip üyeleri yönetimi",
     "keywords": [],
     "priority": 0,

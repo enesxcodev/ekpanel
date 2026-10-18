@@ -1,6 +1,7 @@
 {
     "name": "Sector",
     "alias": "sector",
+    "version": "0.1.0",
     "description": "Sektör yönetimi",
     "keywords": [],
     "priority": 0,

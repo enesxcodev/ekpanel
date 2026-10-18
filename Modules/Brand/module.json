@@ -1,6 +1,7 @@
 {
     "name": "Brand",
     "alias": "brand",
+    "version": "0.1.0",
     "description": "Çalışılan markaların yönetimi",
     "keywords": [],
     "priority": 0,

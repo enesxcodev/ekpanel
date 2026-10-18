@@ -1,6 +1,7 @@
 {
     "name": "Slider",
     "alias": "slider",
+    "version": "0.1.0",
     "description": "Slider yönetimi",
     "keywords": [],
     "priority": 0,

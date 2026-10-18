@@ -10,11 +10,11 @@ import { initializeSettings } from './admin/settings';
 import { initializeFormTabs } from './admin/form-tabs';
 import { initializeSlugs } from './admin/slug';
 import { initializePages } from './admin/pages';
-import { initializeMenuWorkspace } from './admin/menu';
+import { initializeModuleAssets } from './admin/module-assets';
+import { initializeModuleInstallations } from './admin/module-installations';
 import { initializeMedia } from './admin/media';
 import { initializeDatepickers } from './admin/datepicker';
 import { initializeFormBuilder } from './admin/form-builder';
-const modulePanelAssets = import.meta.glob('../../Modules/*/resources/assets/js/panel.js', { eager: true });
 
 select2(window, $);
 window.$ = $;
@@ -34,8 +34,8 @@ initializePages();
 if (document.querySelector('[data-hugerte]')) {
     import('./admin/pages-editor');
 }
-initializeMenuWorkspace();
 initializeMedia();
 initializeDatepickers();
 initializeFormBuilder();
-Object.values(modulePanelAssets).forEach((module) => module.default?.());
+initializeModuleAssets(window.Panel);
+initializeModuleInstallations();

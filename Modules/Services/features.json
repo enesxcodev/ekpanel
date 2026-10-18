@@ -30,6 +30,21 @@
                     "attributes": {
                         "placeholder": "Örn. Öne çıkan"
                     }
+                },
+                {
+                    "key": "homepage_display",
+                    "label": "Ana sayfa gösterimi",
+                    "description": "Bu kategorideki hizmetleri öne çıkan kartlarda veya diğer hizmetler listesinde gösterin.",
+                    "input_type": "select",
+                    "value_type": "string",
+                    "default_value": "cards",
+                    "options": [
+                        { "label": "Hizmet kartları", "value": "cards" },
+                        { "label": "Diğer hizmetler listesi", "value": "compact" }
+                    ],
+                    "validation": {
+                        "required": false
+                    }
                 }
             ]
         },

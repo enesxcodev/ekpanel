@@ -1,6 +1,7 @@
 {
     "name": "Faqs",
     "alias": "faqs",
+    "version": "0.1.0",
     "description": "Sıkça sorulan sorular ve kategoriler yönetimi",
     "keywords": [],
     "priority": 0,

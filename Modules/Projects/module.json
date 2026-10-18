@@ -1,6 +1,7 @@
 {
     "name": "Projects",
     "alias": "projects",
+    "version": "0.1.0",
     "description": "Projeler",
     "keywords": [],
     "priority": 0,

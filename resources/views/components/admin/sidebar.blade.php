@@ -61,6 +61,14 @@
                     </li>
                 @endif
                 @can('manage-admin-roles')
+                    @if (auth('admin')->user()?->type === \App\Enums\AdminType\AdminTypeEnum::SuperAdmin)
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}" href="{{ route('admin.modules.index') }}">
+                                <span class="nav-link-icon d-md-none d-lg-inline-block"><x-admin.icon name="settings" /></span>
+                                <span class="nav-link-title">Modüller</span>
+                            </a>
+                        </li>
+                    @endif
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}" href="{{ route('admin.roles.index') }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
