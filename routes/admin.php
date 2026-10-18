@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\Forms\FormController;
 use App\Http\Controllers\Admin\Forms\FormSubmissionController;
 use App\Http\Controllers\Admin\Modules\ModuleController;
@@ -9,10 +10,9 @@ use App\Http\Controllers\Admin\Settings\SettingController;
 use App\Http\Controllers\Admin\Settings\SettingDefinitionController;
 use App\Http\Controllers\Admin\Settings\SettingSectionController;
 use App\Http\Controllers\Admin\Users\AdminUserController;
-use App\Http\Controllers\AdminAuth\AdminAuthController;
 use App\Http\Controllers\MediaController;
-use App\Http\Middleware\AdminAuth\EnsureAdminIsActive;
-use App\Http\Middleware\AdminAuth\EnsureSuperAdmin;
+use App\Http\Middleware\Admin\EnsureAdminIsActive;
+use App\Http\Middleware\Admin\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')->name('admin.')->group(function (): void {

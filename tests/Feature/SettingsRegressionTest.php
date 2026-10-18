@@ -78,6 +78,23 @@ test('settings uploads preserves replaces and removes images', function () {
     Storage::disk('public')->assertMissing($second);
 });
 
+test('favicon setting uses the media library picker', function () {
+    $section = SettingSection::factory()->create();
+    $favicon = SettingDefinition::factory()->for($section, 'section')->image()->create([
+        'key' => 'site.favicon', 'label' => 'Favicon',
+        'validation' => ['extensions' => ['png', 'webp'], 'max_size' => 1024],
+    ]);
+
+    expect($favicon->usesMediaLibrary())->toBeTrue();
+
+    $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
+        ->get(route('admin.settings.index'))
+        ->assertOk()
+        ->assertSee('Favicon')
+        ->assertSee('Medyadan seç')
+        ->assertSee('data-media-kind="image"', false);
+});
+
 test('settings mail enabled still requires its connection fields', function () {
     $section = SettingSection::factory()->create();
     $enabled = SettingDefinition::factory()->for($section, 'section')->create(['key' => 'mail.enabled', 'input_type' => 'boolean', 'value_type' => 'boolean']);

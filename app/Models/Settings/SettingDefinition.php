@@ -48,7 +48,7 @@ class SettingDefinition extends Model
 
     public function usesMediaLibrary(): bool
     {
-        return $this->input_type === SettingInputType::Image && in_array($this->key, ['site.logo', 'site.footer_logo'], true);
+        return $this->input_type === SettingInputType::Image && in_array($this->key, ['site.logo', 'site.footer_logo', 'site.favicon'], true);
     }
 
     public function hasValue(): bool

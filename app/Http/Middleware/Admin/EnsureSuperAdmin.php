@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware\AdminAuth;
+namespace App\Http\Middleware\Admin;
 
 use App\Enums\AdminType\AdminTypeEnum;
 use Closure;

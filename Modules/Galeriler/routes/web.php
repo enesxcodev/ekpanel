@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\AdminAuth\EnsureAdminIsActive;
+use App\Http\Middleware\Admin\EnsureAdminIsActive;
 use Illuminate\Support\Facades\Route;
 use Modules\Galeriler\Http\Controllers\GalerilerCategoryController;
 use Modules\Galeriler\Http\Controllers\GalerilerItemController;
