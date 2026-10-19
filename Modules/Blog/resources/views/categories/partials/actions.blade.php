@@ -1,1 +1,4 @@
-<div class="d-flex gap-2">@can('blog.categories.update')<a href="{{ route('admin.blog.categories.edit', $category) }}" class="btn btn-sm btn-outline-primary">Düzenle</a>@endcan @can('blog.categories.delete')<form method="POST" action="{{ route('admin.blog.categories.destroy', $category) }}" data-confirm="İçerik veya alt kategori varsa kategori silinemez. Devam edilsin mi?">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">Sil</button></form>@endcan</div>
+<x-admin.table.actions :actions="[
+    ['icon' => 'edit', 'label' => 'Düzenle', 'url' => route('admin.blog.categories.edit', $category), 'permission' => 'blog.categories.update'],
+    ['type' => 'form', 'icon' => 'trash', 'label' => 'Sil', 'url' => route('admin.blog.categories.destroy', $category), 'permission' => 'blog.categories.delete', 'method' => 'DELETE', 'confirm' => 'İçerik veya alt kategori varsa kategori silinemez. Devam edilsin mi?'],
+]" />

@@ -78,7 +78,7 @@ class SettingDefinitionController extends Controller
     {
         return view('admin.settings.configuration.definition', [
             'definition' => $definition,
-            'sections' => SettingSection::query()->orderBy('sort_order')->orderBy('id')->get(),
+            'sections' => SettingSection::query()->with('definitions')->orderBy('sort_order')->orderBy('id')->get(),
             'inputTypes' => SettingInputType::cases(),
         ]);
     }

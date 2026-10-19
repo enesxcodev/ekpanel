@@ -59,6 +59,17 @@ class SettingConfigurationService
             $definition ??= new SettingDefinition;
             $definition->fill($data)->save();
 
+            $attributes = $definition->getAttribute('attributes');
+            if (! empty($attributes['group'])) {
+                foreach (SettingDefinition::query()->where('section_id', $definition->section_id)->whereKeyNot($definition->id)->get() as $sibling) {
+                    $siblingAttributes = $sibling->getAttribute('attributes') ?? [];
+                    if (($siblingAttributes['group'] ?? null) === $attributes['group']) {
+                        $sibling->setAttribute('attributes', array_replace($siblingAttributes, Arr::only($attributes, ['group_order', 'columns'])));
+                        $sibling->save();
+                    }
+                }
+            }
+
             return $definition;
         });
         $this->settings->forget($definition->key);
@@ -101,7 +112,15 @@ class SettingConfigurationService
             default => [],
         };
 
-        return array_filter(Arr::only($attributes, $allowed), fn (mixed $value): bool => $value !== null && $value !== '');
+        $allowed = [...$allowed, 'group', 'group_order', 'columns', 'width'];
+        $attributes = array_filter(Arr::only($attributes, $allowed), fn (mixed $value): bool => $value !== null && $value !== '');
+        foreach (['group_order', 'columns', 'width'] as $key) {
+            if (isset($attributes[$key])) {
+                $attributes[$key] = (int) $attributes[$key];
+            }
+        }
+
+        return $attributes;
     }
 
     /** @param array<string, mixed> $validation @return array<string, mixed> */

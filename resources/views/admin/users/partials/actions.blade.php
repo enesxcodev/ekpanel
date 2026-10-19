@@ -1,5 +1,7 @@
-@can('update', $admin)
-<a href="{{ route('admin.users.edit', $admin) }}" class="btn btn-sm btn-outline-primary">
-    Düzenle
-</a>
-@endcan
+<x-admin.table.actions :actions="[[
+    'icon' => 'edit',
+    'label' => 'Düzenle',
+    'url' => route('admin.users.edit', $admin),
+    'permission' => 'update',
+    'model' => $admin,
+]]" />

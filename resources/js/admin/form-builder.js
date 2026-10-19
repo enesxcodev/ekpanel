@@ -108,7 +108,7 @@ export function initializeFormBuilder() {
             selected = fields.length - 1; render();
             editor.querySelector('[data-field-prop="label"]').focus();
         });
-        list.addEventListener('click', (event) => {
+        list.addEventListener('click', async (event) => {
             const choose = event.target.closest('[data-field-select]');
             if (choose) { selected = Number(choose.dataset.fieldSelect); renderList(); showEditor(); return; }
             const button = event.target.closest('[data-field-action]');
@@ -116,7 +116,12 @@ export function initializeFormBuilder() {
             const index = Number(button.dataset.index);
             const action = button.dataset.fieldAction;
             if (action === 'remove') {
-                if (!window.confirm('Bu alanı formdan kaldırmak istediğinizden emin misiniz? Eski başvurular korunur.')) return;
+                const confirmed = await window.Panel.confirm({
+                    title: 'Form alanını kaldır',
+                    message: 'Bu alanı formdan kaldırmak istediğinizden emin misiniz? Eski başvurular korunur.',
+                    confirmLabel: 'Kaldır',
+                });
+                if (!confirmed) return;
                 fields.splice(index, 1); selected = Math.min(index, fields.length - 1);
             } else {
                 const target = index + (action === 'up' ? -1 : 1);

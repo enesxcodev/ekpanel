@@ -3,9 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $page->meta_title ?: $page->title.' · '.config('app.name') }}</title>
-    @if ($page->meta_description)<meta name="description" content="{{ $page->meta_description }}">@endif
-    @if ($page->meta_keywords)<meta name="keywords" content="{{ $page->meta_keywords }}">@endif
+    <x-seo-meta :metadata="$seoMetadata" />
     <style>
         .page-content { line-height: 1.75; }
         .page-content :is(h1, h2, h3, h4, h5, h6) { margin-block: 1.5em .5em; font-weight: 600; line-height: 1.25; }

@@ -15,7 +15,11 @@
                                     {{ $role->permissions_count }} izin
                                 @endif
                             </td>
-                            <td><a class="btn btn-sm btn-outline-primary" href="{{ route('admin.roles.edit', $role) }}">{{ $role->name === 'super-admin' ? 'İzinleri görüntüle' : 'İzinleri düzenle' }}</a></td>
+                            <td><x-admin.table.actions :actions="[[
+                                'icon' => $role->name === 'super-admin' ? 'eye' : 'edit',
+                                'label' => $role->name === 'super-admin' ? 'İzinleri görüntüle' : 'İzinleri düzenle',
+                                'url' => route('admin.roles.edit', $role),
+                            ]]" /></td>
                         </tr>
                     @endforeach
                 </tbody>

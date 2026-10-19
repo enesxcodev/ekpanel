@@ -1,35 +1,35 @@
 //#region Modules/Menus/resources/assets/js/workspace.js
-function e({ notify: e }) {
-	let t = document.querySelector("[data-menu-workspace]");
-	if (!t || t.dataset.initialized) return;
-	t.dataset.initialized = "true";
-	let n = JSON.parse(t.querySelector("[data-menu-configuration]").textContent), r = (e) => t.querySelector(e), i = r("[data-menu-selector]"), a = r("[data-menu-form]"), o = r("[data-item-form]"), s = r("[data-item-editor]"), c = r("[data-menu-tree]"), l = r("[data-menu-error]"), u = new Map([...t.querySelectorAll("[data-menu-icon]")].map((e) => [e.dataset.menuIcon, e])), d = n.menus, f = null, p = null, m = !1, h = !1, g = !1, _ = !1, v = null, y = /* @__PURE__ */ new Set(), b = {
+function e({ notify: e, confirm: t }) {
+	let n = document.querySelector("[data-menu-workspace]");
+	if (!n || n.dataset.initialized) return;
+	n.dataset.initialized = "true";
+	let r = JSON.parse(n.querySelector("[data-menu-configuration]").textContent), i = (e) => n.querySelector(e), a = i("[data-menu-selector]"), o = i("[data-menu-form]"), s = i("[data-item-form]"), c = i("[data-item-editor]"), l = i("[data-menu-tree]"), u = i("[data-menu-error]"), d = new Map([...n.querySelectorAll("[data-menu-icon]")].map((e) => [e.dataset.menuIcon, e])), f = r.menus, p = null, m = null, h = !1, g = !1, _ = !1, v = !1, y = null, b = /* @__PURE__ */ new Set(), x = {
 		group: "Bağlantısız grup",
 		url: "Özel URL",
 		route: "Site rotası",
 		anchor: "Sayfa içi bağlantı",
 		content: "İçerik"
 	};
-	function x(e, t = "", n = "") {
+	function S(e, t = "", n = "") {
 		let r = document.createElement(e);
 		return r.className = t, r.textContent = n, r;
 	}
-	function S(e) {
-		return (u.get(e) ?? u.get("file")).content.cloneNode(!0);
-	}
 	function C(e) {
-		r("[data-menu-live]").textContent = e;
+		return (d.get(e) ?? d.get("file")).content.cloneNode(!0);
 	}
 	function w(e) {
-		let t = e?.querySelector("[data-form-errors]") ?? l;
+		i("[data-menu-live]").textContent = e;
+	}
+	function T(e) {
+		let t = e?.querySelector("[data-form-errors]") ?? u;
 		t.replaceChildren(), t.hidden = !0, e?.querySelectorAll("[aria-invalid]").forEach((e) => {
 			e.removeAttribute("aria-invalid"), e.classList.remove("is-invalid");
 		});
 	}
-	function T(e, t) {
-		w(t);
-		let n = t?.querySelector("[data-form-errors]") ?? l, r = e.fields ? Object.values(e.fields).flat() : [e.message];
-		[...new Set(r)].forEach((e) => n.append(x("div", "", e))), n.hidden = !1, Object.keys(e.fields ?? {}).forEach((e) => {
+	function E(e, t) {
+		T(t);
+		let n = t?.querySelector("[data-form-errors]") ?? u, r = e.fields ? Object.values(e.fields).flat() : [e.message];
+		[...new Set(r)].forEach((e) => n.append(S("div", "", e))), n.hidden = !1, Object.keys(e.fields ?? {}).forEach((e) => {
 			[...t?.elements ?? []].filter((t) => t.name === e && !t.disabled).forEach((e) => {
 				e.classList.add("is-invalid"), e.setAttribute("aria-invalid", "true");
 			});
@@ -38,7 +38,7 @@ function e({ notify: e }) {
 			behavior: "auto"
 		});
 	}
-	async function E(e, t = "GET", n) {
+	async function D(e, t = "GET", n) {
 		let r = await fetch(e, {
 			method: t,
 			credentials: "same-origin",
@@ -56,114 +56,114 @@ function e({ notify: e }) {
 		}
 		return i;
 	}
-	async function D(e, n = null) {
-		if (_) return;
-		_ = !0, w(n), t.classList.add("is-busy"), t.setAttribute("aria-busy", "true");
-		let i = document.activeElement;
-		t.inert = !0;
+	async function O(e, t = null) {
+		if (v) return;
+		v = !0, T(t), n.classList.add("is-busy"), n.setAttribute("aria-busy", "true");
+		let r = document.activeElement;
+		n.inert = !0;
 		try {
 			await e();
 		} catch (e) {
-			T(e instanceof TypeError ? /* @__PURE__ */ Error("Sunucuya ulaşılamadı. Bağlantınızı kontrol edip yeniden deneyin.") : e, e.recorded ? null : n);
+			E(e instanceof TypeError ? /* @__PURE__ */ Error("Sunucuya ulaşılamadı. Bağlantınızı kontrol edip yeniden deneyin.") : e, e.recorded ? null : t);
 		} finally {
-			t.inert = !1, _ = !1, t.classList.remove("is-busy"), t.removeAttribute("aria-busy"), v ? (r(v)?.focus({ preventScroll: !0 }), v = null) : i?.isConnected && i.checkVisibility?.() && i.focus({ preventScroll: !0 });
+			n.inert = !1, v = !1, n.classList.remove("is-busy"), n.removeAttribute("aria-busy"), y ? (i(y)?.focus({ preventScroll: !0 }), y = null) : r?.isConnected && r.checkVisibility?.() && r.focus({ preventScroll: !0 });
 		}
 	}
-	function O() {
-		return !(h || g) || window.confirm("Kaydedilmemiş değişiklikler var. Değişikliklerden vazgeçilsin mi?");
+	function k() {
+		return !(g || _) || window.confirm("Kaydedilmemiş değişiklikler var. Değişikliklerden vazgeçilsin mi?");
 	}
-	function k(e = null) {
+	function A(e = null) {
 		if (e) {
-			let t = d.findIndex((t) => t.id === e.id);
-			t < 0 ? d.push(e) : d[t] = e;
+			let t = f.findIndex((t) => t.id === e.id);
+			t < 0 ? f.push(e) : f[t] = e;
 		}
-		i.replaceChildren(new Option(d.length ? "Menü seçin" : "Henüz menü yok", "")), d.forEach((e) => i.add(new Option(`${e.name} · ${e.key}`, String(e.id)))), i.value = String(f?.menu.id ?? "");
+		a.replaceChildren(new Option(f.length ? "Menü seçin" : "Henüz menü yok", "")), f.forEach((e) => a.add(new Option(`${e.name} · ${e.key}`, String(e.id)))), a.value = String(p?.menu.id ?? "");
 	}
-	function A(e) {
-		return x("span", `menu-status${e ? " is-active" : ""}`, e ? "Aktif" : "Pasif");
+	function j(e) {
+		return S("span", `menu-status${e ? " is-active" : ""}`, e ? "Aktif" : "Pasif");
 	}
-	function j() {
-		r("[data-menu-builder]").hidden = !f, r("[data-menu-empty]").hidden = !!f, r("[data-menu-key]").textContent = f?.menu.key ?? "—", r("[data-menu-count]").textContent = String(f?.items.length ?? 0), r("[data-menu-status]").replaceChildren(f ? A(f.menu.is_active) : document.createTextNode("—")), r("[data-menu-edit]") && (r("[data-menu-edit]").hidden = !f);
-	}
-	async function M(e, t = null) {
-		let n = await E(e.workspace_url);
-		f = n, p = null, h = !1, g = !1, a.hidden = !0, s && (s.hidden = !0), k(n.menu), j(), I(), t && f.items.some((e) => e.id === t) && L(t, !1);
-		let r = new URL(window.location.href);
-		r.searchParams.set("menu", n.menu.id), r.searchParams.delete("new"), r.searchParams.delete("item"), window.history.replaceState(null, "", r), C(`${n.menu.name} yüklendi. ${n.items.length} öğe.`);
+	function M() {
+		i("[data-menu-builder]").hidden = !p, i("[data-menu-empty]").hidden = !!p, i("[data-menu-key]").textContent = p?.menu.key ?? "—", i("[data-menu-count]").textContent = String(p?.items.length ?? 0), i("[data-menu-status]").replaceChildren(p ? j(p.menu.is_active) : document.createTextNode("—")), i("[data-menu-edit]") && (i("[data-menu-edit]").hidden = !p);
 	}
 	async function N(e, t = null) {
-		h = !1, g = !1;
+		let n = await D(e.workspace_url);
+		p = n, m = null, g = !1, _ = !1, o.hidden = !0, c && (c.hidden = !0), A(n.menu), M(), L(), t && p.items.some((e) => e.id === t) && R(t, !1);
+		let r = new URL(window.location.href);
+		r.searchParams.set("menu", n.menu.id), r.searchParams.delete("new"), r.searchParams.delete("item"), window.history.replaceState(null, "", r), w(`${n.menu.name} yüklendi. ${n.items.length} öğe.`);
+	}
+	async function P(e, t = null) {
+		g = !1, _ = !1;
 		try {
-			await M(e, t);
+			await N(e, t);
 		} catch {
 			let e = /* @__PURE__ */ Error("İşlem kaydedildi ancak güncel görünüm yüklenemedi. Menü seçicisinden menüyü tekrar seçerek yenileyin.");
 			throw e.recorded = !0, e;
 		}
 	}
-	function P(e) {
+	function F(e) {
 		let t = /* @__PURE__ */ new Set([e]), n = [e];
 		for (; n.length;) {
 			let e = n.pop();
-			f.items.filter((n) => n.parent_id === e && !t.has(n.id)).forEach((e) => {
+			p.items.filter((n) => n.parent_id === e && !t.has(n.id)).forEach((e) => {
 				t.add(e.id), n.push(e.id);
 			});
 		}
 		return t;
 	}
-	function F(e) {
+	function I(e) {
 		let t = /* @__PURE__ */ new Set([e.id]), n = 0, r = e.parent_id;
-		for (; r !== null && !t.has(r);) t.add(r), n++, r = f.items.find((e) => e.id === r)?.parent_id ?? null;
+		for (; r !== null && !t.has(r);) t.add(r), n++, r = p.items.find((e) => e.id === r)?.parent_id ?? null;
 		return n;
 	}
-	function I() {
-		c.replaceChildren(), r("[data-menu-tree-empty]").hidden = f.items.length > 0;
+	function L() {
+		l.replaceChildren(), i("[data-menu-tree-empty]").hidden = p.items.length > 0;
 		let e = /* @__PURE__ */ new Set();
-		f.items.forEach((t) => {
-			if (t.parent_id !== null && (y.has(t.parent_id) || e.has(t.parent_id))) {
+		p.items.forEach((t) => {
+			if (t.parent_id !== null && (b.has(t.parent_id) || e.has(t.parent_id))) {
 				e.add(t.id);
 				return;
 			}
-			let r = x("div", `menu-row${t.id === p ? " is-selected" : ""}`);
-			if (r.dataset.id = t.id, r.setAttribute("role", "listitem"), r.style.setProperty("--menu-depth", F(t)), n.permissions.update) {
-				let e = x("button", "menu-drag-handle", "⠿");
-				e.type = "button", e.dataset.move = t.id, e.setAttribute("aria-label", `${t.label} öğesini taşı`), e.setAttribute("aria-describedby", "menu-drag-help"), r.append(e);
+			let n = S("div", `menu-row${t.id === m ? " is-selected" : ""}`);
+			if (n.dataset.id = t.id, n.setAttribute("role", "listitem"), n.style.setProperty("--menu-depth", I(t)), r.permissions.update) {
+				let e = S("button", "menu-drag-handle", "⠿");
+				e.type = "button", e.dataset.move = t.id, e.setAttribute("aria-label", `${t.label} öğesini taşı`), e.setAttribute("aria-describedby", "menu-drag-help"), n.append(e);
 			}
-			r.append(S(t.icon || (t.target_type === "group" ? "folder" : t.target_type === "content" ? "file" : "link")));
-			let i = x("div", "menu-row-label"), a = x(n.permissions.update ? "button" : "span", "menu-row-title btn-reset", t.label);
-			n.permissions.update && (a.type = "button", a.dataset.edit = t.id);
-			let o = n.sources.find((e) => e.key === t.source);
-			i.append(a, x("span", "badge bg-secondary-lt", t.target_type === "content" ? o?.label ?? "İçerik" : b[t.target_type]));
-			let s = x("span", `menu-row-target${t.target.error ? " text-danger" : ""}`, t.target.error ?? t.target.url ?? (t.dynamic_children ? "Otomatik alt içerikler" : ""));
-			if (i.append(s), r.append(i, A(t.is_active)), f.items.some((e) => e.parent_id === t.id)) {
-				let e = x("button", "btn btn-sm btn-ghost-secondary", y.has(t.id) ? "›" : "⌄");
-				e.type = "button", e.dataset.collapse = t.id, e.setAttribute("aria-expanded", String(!y.has(t.id))), e.setAttribute("aria-label", `${t.label} alt öğelerini aç/kapat`), r.append(e);
+			n.append(C(t.icon || (t.target_type === "group" ? "folder" : t.target_type === "content" ? "file" : "link")));
+			let i = S("div", "menu-row-label"), a = S(r.permissions.update ? "button" : "span", "menu-row-title btn-reset", t.label);
+			r.permissions.update && (a.type = "button", a.dataset.edit = t.id);
+			let o = r.sources.find((e) => e.key === t.source);
+			i.append(a, S("span", "badge bg-secondary-lt", t.target_type === "content" ? o?.label ?? "İçerik" : x[t.target_type]));
+			let s = S("span", `menu-row-target${t.target.error ? " text-danger" : ""}`, t.target.error ?? t.target.url ?? (t.dynamic_children ? "Otomatik alt içerikler" : ""));
+			if (i.append(s), n.append(i, j(t.is_active)), p.items.some((e) => e.parent_id === t.id)) {
+				let e = S("button", "btn btn-sm btn-ghost-secondary", b.has(t.id) ? "›" : "⌄");
+				e.type = "button", e.dataset.collapse = t.id, e.setAttribute("aria-expanded", String(!b.has(t.id))), e.setAttribute("aria-label", `${t.label} alt öğelerini aç/kapat`), n.append(e);
 			}
-			if (n.permissions.update) {
-				let e = x("button", "btn btn-sm btn-outline-secondary", "✎");
+			if (r.permissions.update) {
+				let e = S("button", "btn btn-sm btn-outline-secondary", "✎");
 				e.type = "button", e.dataset.edit = t.id, e.setAttribute("aria-label", `${t.label} öğesini düzenle`);
-				let n = x("button", "btn btn-sm btn-outline-danger");
-				n.type = "button", n.dataset.delete = t.id, n.setAttribute("aria-label", `${t.label} öğesini sil`), n.append(S("trash")), r.append(e, n);
+				let r = S("button", "btn btn-sm btn-outline-danger");
+				r.type = "button", r.dataset.delete = t.id, r.setAttribute("aria-label", `${t.label} öğesini sil`), r.append(C("trash")), n.append(e, r);
 			}
-			c.append(r);
+			l.append(n);
 		});
 	}
-	function L(e, i = !0) {
-		if (!o || p === e && h || !O()) return;
-		let c = f.items.find((t) => t.id === e);
-		if (!c) return;
-		p = e, h = !1, g = !1, a.hidden = !0, o.reset(), w(o);
+	function R(e, t = !0) {
+		if (!s || m === e && g || !k()) return;
+		let a = p.items.find((t) => t.id === e);
+		if (!a) return;
+		m = e, g = !1, _ = !1, o.hidden = !0, s.reset(), T(s);
 		for (let e of [
 			"label",
 			"icon",
 			"target_type",
 			"source",
 			"sort_order"
-		]) o.elements.namedItem(e).value = c[e] ?? "";
-		for (let e of ["is_active", "new_tab"]) o.elements.namedItem(e).checked = !!c[e];
-		t.querySelectorAll("[data-item-target]").forEach((e) => {
-			e.hidden = e.dataset.itemTarget !== c.target_type, e.disabled = e.hidden;
+		]) s.elements.namedItem(e).value = a[e] ?? "";
+		for (let e of ["is_active", "new_tab"]) s.elements.namedItem(e).checked = !!a[e];
+		n.querySelectorAll("[data-item-target]").forEach((e) => {
+			e.hidden = e.dataset.itemTarget !== a.target_type, e.disabled = e.hidden;
 		});
-		let l = r(`[data-item-target="${c.target_type}"]`);
+		let l = i(`[data-item-target="${a.target_type}"]`);
 		for (let e of [
 			"url",
 			"route_name",
@@ -171,63 +171,67 @@ function e({ notify: e }) {
 			"source_id"
 		]) {
 			let t = l.querySelector(`[name="${e}"]`);
-			t && e !== "source_id" && (t.value = c[e] ?? "");
+			t && e !== "source_id" && (t.value = a[e] ?? "");
 		}
 		let u = l.querySelector("[name=\"route_parameters_json\"]");
-		if (u && (u.value = c.route_parameters && Object.keys(c.route_parameters).length ? JSON.stringify(c.route_parameters, null, 2) : ""), c.target_type === "content") {
-			let e = n.sources.find((e) => e.key === c.source), t = l.querySelector("[name=\"source_id\"]");
-			t.replaceChildren(new Option("İçerik seçin", "")), (e?.options ?? []).forEach((e) => t.add(new Option(e.label, String(e.value)))), [...t.options].some((e) => e.value === String(c.source_id)) || t.add(new Option(`${c.source_id} (kayıt kullanılamıyor)`, String(c.source_id))), t.value = String(c.source_id), l.querySelector("[data-item-source-label]").textContent = `Bağlantı (${e?.label ?? "Kullanılamayan kaynak"})`, l.querySelector("[data-item-source-status]").textContent = c.target.error ?? "Seçili içeriğin ziyaretçi bağlantısı kullanılır.";
-			let r = l.querySelector("[name=\"dynamic_children\"]");
-			l.querySelector("[data-item-dynamic]").hidden = !e?.supports_children, r.disabled = !e?.supports_children, r.checked = !!c.dynamic_children;
+		if (u && (u.value = a.route_parameters && Object.keys(a.route_parameters).length ? JSON.stringify(a.route_parameters, null, 2) : ""), a.target_type === "content") {
+			let e = r.sources.find((e) => e.key === a.source), t = l.querySelector("[name=\"source_id\"]");
+			t.replaceChildren(new Option("İçerik seçin", "")), (e?.options ?? []).forEach((e) => t.add(new Option(e.label, String(e.value)))), [...t.options].some((e) => e.value === String(a.source_id)) || t.add(new Option(`${a.source_id} (kayıt kullanılamıyor)`, String(a.source_id))), t.value = String(a.source_id), l.querySelector("[data-item-source-label]").textContent = `Bağlantı (${e?.label ?? "Kullanılamayan kaynak"})`, l.querySelector("[data-item-source-status]").textContent = a.target.error ?? "Seçili içeriğin ziyaretçi bağlantısı kullanılır.";
+			let n = l.querySelector("[name=\"dynamic_children\"]");
+			l.querySelector("[data-item-dynamic]").hidden = !e?.supports_children, n.disabled = !e?.supports_children, n.checked = !!a.dynamic_children;
 		}
-		let d = P(e), m = o.elements.namedItem("parent_id");
-		m.replaceChildren(new Option("Ana öğe (en üst seviye)", "")), f.items.filter((e) => !d.has(e.id) && !e.dynamic_children).forEach((e) => m.add(new Option(`${"— ".repeat(F(e))}${e.label}`, String(e.id)))), m.value = String(c.parent_id ?? ""), r("[data-item-unsaved]").hidden = !0, s.hidden = !1, I(), i && (s.scrollIntoView({
+		let d = F(e), f = s.elements.namedItem("parent_id");
+		f.replaceChildren(new Option("Ana öğe (en üst seviye)", "")), p.items.filter((e) => !d.has(e.id) && !e.dynamic_children).forEach((e) => f.add(new Option(`${"— ".repeat(I(e))}${e.label}`, String(e.id)))), f.value = String(a.parent_id ?? ""), i("[data-item-unsaved]").hidden = !0, c.hidden = !1, L(), t && (c.scrollIntoView({
 			block: "nearest",
 			behavior: "auto"
-		}), o.elements.namedItem("label").focus({ preventScroll: !0 }));
+		}), s.elements.namedItem("label").focus({ preventScroll: !0 }));
 	}
-	function R(e) {
-		if (O()) {
-			if (m = e, a.reset(), w(a), g = !1, h = !1, s && (s.hidden = !0), r("[data-menu-form-title]").textContent = e ? "Yeni menü oluştur" : "Menü bilgileri", !e && f) {
+	function z(e) {
+		if (k()) {
+			if (h = e, o.reset(), T(o), _ = !1, g = !1, c && (c.hidden = !0), i("[data-menu-form-title]").textContent = e ? "Yeni menü oluştur" : "Menü bilgileri", !e && p) {
 				for (let e of [
 					"name",
 					"key",
 					"icon"
-				]) a.elements.namedItem(e).value = f.menu[e] ?? "";
-				a.elements.namedItem("is_active").checked = f.menu.is_active;
+				]) o.elements.namedItem(e).value = p.menu[e] ?? "";
+				o.elements.namedItem("is_active").checked = p.menu.is_active;
 			}
-			r("[data-menu-delete]") && (r("[data-menu-delete]").hidden = e), a.hidden = !1, e ? (r("[data-menu-builder]").hidden = !0, r("[data-menu-empty]").hidden = !0) : j(), _ && (v = "#menu-name"), a.elements.namedItem("name").focus();
+			i("[data-menu-delete]") && (i("[data-menu-delete]").hidden = e), o.hidden = !1, e ? (i("[data-menu-builder]").hidden = !0, i("[data-menu-empty]").hidden = !0) : M(), v && (y = "#menu-name"), o.elements.namedItem("name").focus();
 		}
 	}
-	i.addEventListener("change", () => {
-		let e = d.find((e) => e.id === Number(i.value));
-		!e || !O() ? i.value = String(f?.menu.id ?? "") : D(async () => {
+	a.addEventListener("change", () => {
+		let e = f.find((e) => e.id === Number(a.value));
+		!e || !k() ? a.value = String(p?.menu.id ?? "") : O(async () => {
 			try {
-				await M(e);
+				await N(e);
 			} catch (e) {
-				throw i.value = String(f?.menu.id ?? ""), e;
+				throw a.value = String(p?.menu.id ?? ""), e;
 			}
 		});
-	}), r("[data-menu-new]")?.addEventListener("click", () => R(!0)), r("[data-menu-edit]")?.addEventListener("click", () => R(!1)), r("[data-menu-cancel]")?.addEventListener("click", () => {
-		O() && (g = !1, a.hidden = !0, j());
-	}), a.addEventListener("input", () => {
-		g = !0;
-	}), a.addEventListener("submit", (t) => {
+	}), i("[data-menu-new]")?.addEventListener("click", () => z(!0)), i("[data-menu-edit]")?.addEventListener("click", () => z(!1)), i("[data-menu-cancel]")?.addEventListener("click", () => {
+		k() && (_ = !1, o.hidden = !0, M());
+	}), o.addEventListener("input", () => {
+		_ = !0;
+	}), o.addEventListener("submit", (t) => {
 		t.preventDefault();
-		let r = Object.fromEntries(new FormData(a));
-		r.is_active = a.elements.namedItem("is_active").checked, D(async () => {
-			let t = await E(m ? n.storeUrl : f.urls.update, m ? "POST" : "PUT", r);
-			a.hidden = !0, k(t.menu), e({
+		let n = Object.fromEntries(new FormData(o));
+		n.is_active = o.elements.namedItem("is_active").checked, O(async () => {
+			let t = await D(h ? r.storeUrl : p.urls.update, h ? "POST" : "PUT", n);
+			o.hidden = !0, A(t.menu), e({
 				type: "success",
 				message: t.message
-			}), await N(t.menu);
-		}, a);
-	}), r("[data-menu-delete]")?.addEventListener("click", () => {
-		f && window.confirm("Bu menü ve tüm öğeleri silinsin mi?") && D(async () => {
-			let t = await E(f.urls.delete, "DELETE");
-			if (d = d.filter((e) => e.id !== f.menu.id), f = null, p = null, g = !1, h = !1, a.hidden = !0, s && (s.hidden = !0), d.length) await M(d[0]);
+			}), await P(t.menu);
+		}, o);
+	}), i("[data-menu-delete]")?.addEventListener("click", async () => {
+		p && await t({
+			title: "Menüyü sil",
+			message: "Bu menü ve tüm öğeleri silinsin mi?",
+			confirmLabel: "Sil"
+		}) && O(async () => {
+			let t = await D(p.urls.delete, "DELETE");
+			if (f = f.filter((e) => e.id !== p.menu.id), p = null, m = null, _ = !1, g = !1, o.hidden = !0, c && (c.hidden = !0), f.length) await N(f[0]);
 			else {
-				k(), j();
+				A(), M();
 				let e = new URL(window.location.href);
 				e.searchParams.delete("menu"), window.history.replaceState(null, "", e);
 			}
@@ -236,136 +240,140 @@ function e({ notify: e }) {
 				message: t.message
 			});
 		});
-	}), t.querySelectorAll("[data-source-search]").forEach((e) => e.addEventListener("input", () => {
+	}), n.querySelectorAll("[data-source-search]").forEach((e) => e.addEventListener("input", () => {
 		let t = e.closest("form"), n = e.value.toLocaleLowerCase("tr").trim(), r = [...t.querySelectorAll(".menu-source-option")];
 		r.forEach((e) => {
 			e.hidden = !e.textContent.toLocaleLowerCase("tr").includes(n), e.hidden && (e.querySelector("input").checked = !1);
 		}), t.querySelector("[data-source-no-results]").hidden = r.some((e) => !e.hidden);
-	})), t.querySelectorAll("[data-menu-add]").forEach((t) => t.addEventListener("submit", (n) => {
-		if (n.preventDefault(), !f || !O()) return;
+	})), n.querySelectorAll("[data-menu-add]").forEach((t) => t.addEventListener("submit", (n) => {
+		if (n.preventDefault(), !p || !k()) return;
 		let r = Object.fromEntries(new FormData(t));
-		r.target_type = t.dataset.type, r.is_active = t.elements.namedItem("is_active")?.checked ?? !0, r.new_tab = !1, r.sort_order = Math.min(65535, Math.max(-1, ...f.items.filter((e) => e.parent_id === null).map((e) => e.sort_order)) + 1), r.target_type === "content" && (r.source = t.dataset.source, r.label = t.querySelector("input[name=\"source_id\"]:checked")?.dataset.label ?? ""), D(async () => {
-			let n = await E(f.urls.add, "POST", r);
+		r.target_type = t.dataset.type, r.is_active = t.elements.namedItem("is_active")?.checked ?? !0, r.new_tab = !1, r.sort_order = Math.min(65535, Math.max(-1, ...p.items.filter((e) => e.parent_id === null).map((e) => e.sort_order)) + 1), r.target_type === "content" && (r.source = t.dataset.source, r.label = t.querySelector("input[name=\"source_id\"]:checked")?.dataset.label ?? ""), O(async () => {
+			let n = await D(p.urls.add, "POST", r);
 			t.reset(), t.querySelectorAll(".menu-source-option").forEach((e) => {
 				e.hidden = !1;
 			}), t.querySelector("[data-source-no-results]") && (t.querySelector("[data-source-no-results]").hidden = !0), e({
 				type: "success",
 				message: n.message
-			}), await N(f.menu, n.id);
+			}), await P(p.menu, n.id);
 		}, t);
-	})), o?.addEventListener("input", () => {
-		h = !0, r("[data-item-unsaved]").hidden = !1;
-	}), o?.addEventListener("change", () => {
-		h = !0, r("[data-item-unsaved]").hidden = !1;
-	}), o?.addEventListener("submit", (t) => {
+	})), s?.addEventListener("input", () => {
+		g = !0, i("[data-item-unsaved]").hidden = !1;
+	}), s?.addEventListener("change", () => {
+		g = !0, i("[data-item-unsaved]").hidden = !1;
+	}), s?.addEventListener("submit", (t) => {
 		t.preventDefault();
-		let n = f.items.find((e) => e.id === p), r = Object.fromEntries(new FormData(o));
-		r.is_active = o.elements.namedItem("is_active").checked, r.new_tab = o.elements.namedItem("new_tab").checked, r.dynamic_children = o.querySelector("[name=\"dynamic_children\"]").checked && !o.querySelector("[name=\"dynamic_children\"]").disabled, r.parent_id = r.parent_id ? Number(r.parent_id) : null, r.sort_order = Number(r.sort_order), D(async () => {
+		let n = p.items.find((e) => e.id === m), r = Object.fromEntries(new FormData(s));
+		r.is_active = s.elements.namedItem("is_active").checked, r.new_tab = s.elements.namedItem("new_tab").checked, r.dynamic_children = s.querySelector("[name=\"dynamic_children\"]").checked && !s.querySelector("[name=\"dynamic_children\"]").disabled, r.parent_id = r.parent_id ? Number(r.parent_id) : null, r.sort_order = Number(r.sort_order), O(async () => {
 			e({
 				type: "success",
-				message: (await E(n.update_url, "PUT", r)).message
-			}), await N(f.menu, n.id);
-		}, o);
-	}), r("[data-item-cancel]")?.addEventListener("click", () => {
-		O() && (h = !1, L(p, !1));
+				message: (await D(n.update_url, "PUT", r)).message
+			}), await P(p.menu, n.id);
+		}, s);
+	}), i("[data-item-cancel]")?.addEventListener("click", () => {
+		k() && (g = !1, R(m, !1));
 	});
-	function z(t) {
-		let n = f.items.find((e) => e.id === t);
-		n && O() && window.confirm(`“${n.label}” öğesi silinsin mi?`) && D(async () => {
+	async function B(n) {
+		let r = p.items.find((e) => e.id === n);
+		r && k() && await t({
+			title: "Menü öğesini sil",
+			message: `“${r.label}” öğesi silinsin mi?`,
+			confirmLabel: "Sil"
+		}) && O(async () => {
 			e({
 				type: "success",
-				message: (await E(n.delete_url, "DELETE")).message
-			}), await N(f.menu, p === t ? null : p);
+				message: (await D(r.delete_url, "DELETE")).message
+			}), await P(p.menu, m === n ? null : m);
 		});
 	}
-	r("[data-item-delete]")?.addEventListener("click", () => z(p)), c.addEventListener("click", (e) => {
+	i("[data-item-delete]")?.addEventListener("click", () => B(m)), l.addEventListener("click", (e) => {
 		let t = e.target.closest("[data-edit]"), n = e.target.closest("[data-delete]"), r = e.target.closest("[data-collapse]");
-		if (!_ && (t && L(Number(t.dataset.edit)), n && z(Number(n.dataset.delete)), r)) {
+		if (!v && (t && R(Number(t.dataset.edit)), n && B(Number(n.dataset.delete)), r)) {
 			let e = Number(r.dataset.collapse);
-			y.has(e) ? y.delete(e) : y.add(e), I();
+			b.has(e) ? b.delete(e) : b.add(e), L();
 		}
-	}), r("[data-menu-expand]").addEventListener("click", () => {
-		y.clear(), I();
-	}), r("[data-menu-collapse]").addEventListener("click", () => {
-		f.items.forEach((e) => y.add(e.id)), I();
+	}), i("[data-menu-expand]").addEventListener("click", () => {
+		b.clear(), L();
+	}), i("[data-menu-collapse]").addEventListener("click", () => {
+		p.items.forEach((e) => b.add(e.id)), L();
 	});
-	function B(e, t, n) {
-		if (_ || !O()) return;
-		let r = P(e), i = f.items.find((e) => e.id === t);
+	function V(e, t, n) {
+		if (v || !k()) return;
+		let r = F(e), i = p.items.find((e) => e.id === t);
 		if (!i || r.has(t) || n === "inside" && i.dynamic_children) return;
-		let a = structuredClone(f.items), o = f.items.filter((e) => r.has(e.id)), s = P(t), c = f.items.filter((e) => !r.has(e.id)), l = c.findIndex((e) => e.id === t);
+		let a = structuredClone(p.items), o = p.items.filter((e) => r.has(e.id)), s = F(t), c = p.items.filter((e) => !r.has(e.id)), l = c.findIndex((e) => e.id === t);
 		if (n !== "before") for (l++; l < c.length && s.has(c[l].id);) l++;
-		o[0].parent_id = n === "inside" ? t : i.parent_id, f.items = [
+		o[0].parent_id = n === "inside" ? t : i.parent_id, p.items = [
 			...c.slice(0, l),
 			...o,
 			...c.slice(l)
 		];
 		let u = /* @__PURE__ */ new Map();
-		f.items.forEach((e) => {
+		p.items.forEach((e) => {
 			let t = e.parent_id;
 			e.sort_order = u.get(t) ?? 0, u.set(t, e.sort_order + 1);
-		}), y.delete(t), I(), D(async () => {
+		}), b.delete(t), L(), O(async () => {
 			try {
-				await E(f.urls.reorder, "PUT", { items: f.items.map((e) => ({
+				await D(p.urls.reorder, "PUT", { items: p.items.map((e) => ({
 					id: e.id,
 					parent_id: e.parent_id,
 					sort_order: e.sort_order
 				})) });
 			} catch (e) {
-				throw f.items = a, I(), e;
+				throw p.items = a, L(), e;
 			}
-			await N(f.menu, p), C("Yeni sıra ve üst öğe ilişkisi kaydedildi."), v = `[data-move="${e}"]`;
+			await P(p.menu, m), w("Yeni sıra ve üst öğe ilişkisi kaydedildi."), y = `[data-move="${e}"]`;
 		});
 	}
-	c.addEventListener("keydown", (e) => {
+	l.addEventListener("keydown", (e) => {
 		let t = e.target.closest("[data-move]");
 		if (!t || ![
 			"ArrowUp",
 			"ArrowDown",
 			"ArrowRight",
 			"ArrowLeft"
-		].includes(e.key) || _) return;
+		].includes(e.key) || v) return;
 		e.preventDefault();
-		let n = Number(t.dataset.move), r = f.items.find((e) => e.id === n), i = f.items.filter((e) => e.parent_id === r.parent_id), a = i.findIndex((e) => e.id === n);
-		e.key === "ArrowUp" && a > 0 && B(n, i[a - 1].id, "before"), e.key === "ArrowDown" && a < i.length - 1 && B(n, i[a + 1].id, "after"), e.key === "ArrowRight" && a > 0 && B(n, i[a - 1].id, "inside"), e.key === "ArrowLeft" && r.parent_id !== null && B(n, r.parent_id, "after");
+		let n = Number(t.dataset.move), r = p.items.find((e) => e.id === n), i = p.items.filter((e) => e.parent_id === r.parent_id), a = i.findIndex((e) => e.id === n);
+		e.key === "ArrowUp" && a > 0 && V(n, i[a - 1].id, "before"), e.key === "ArrowDown" && a < i.length - 1 && V(n, i[a + 1].id, "after"), e.key === "ArrowRight" && a > 0 && V(n, i[a - 1].id, "inside"), e.key === "ArrowLeft" && r.parent_id !== null && V(n, r.parent_id, "after");
 	});
-	let V = null, H = null;
-	function U() {
-		c.querySelectorAll(".drop-before, .drop-after, .drop-inside").forEach((e) => e.classList.remove("drop-before", "drop-after", "drop-inside"));
-	}
+	let H = null, U = null;
 	function W() {
-		if (!V?.started) return;
-		U(), V.target = null;
-		let e = document.elementFromPoint(V.x, V.y)?.closest(".menu-row");
-		if (!e || !c.contains(e)) return;
+		l.querySelectorAll(".drop-before, .drop-after, .drop-inside").forEach((e) => e.classList.remove("drop-before", "drop-after", "drop-inside"));
+	}
+	function G() {
+		if (!H?.started) return;
+		W(), H.target = null;
+		let e = document.elementFromPoint(H.x, H.y)?.closest(".menu-row");
+		if (!e || !l.contains(e)) return;
 		let t = Number(e.dataset.id);
-		if (P(V.id).has(t)) return;
-		let n = e.getBoundingClientRect(), r = (V.y - n.top) / n.height, i = r < .27 ? "before" : r > .73 ? "after" : "inside";
-		if (i === "inside" && f.items.find((e) => e.id === t).dynamic_children) return;
-		V.target = {
+		if (F(H.id).has(t)) return;
+		let n = e.getBoundingClientRect(), r = (H.y - n.top) / n.height, i = r < .27 ? "before" : r > .73 ? "after" : "inside";
+		if (i === "inside" && p.items.find((e) => e.id === t).dynamic_children) return;
+		H.target = {
 			id: t,
 			placement: i
 		};
 		let a = e;
 		if (i === "after") {
-			let n = P(t), r = [...c.querySelectorAll(".menu-row")].filter((e) => n.has(Number(e.dataset.id)));
+			let n = F(t), r = [...l.querySelectorAll(".menu-row")].filter((e) => n.has(Number(e.dataset.id)));
 			a = r[r.length - 1] ?? e;
 		}
 		a.classList.add(`drop-${i}`);
 	}
-	function G() {
-		if (!V?.started) return;
-		let e = V.y < 90 ? -9 : V.y > window.innerHeight - 90 ? 9 : 0;
-		e && (window.scrollBy(0, e), W()), H = requestAnimationFrame(G);
+	function K() {
+		if (!H?.started) return;
+		let e = H.y < 90 ? -9 : H.y > window.innerHeight - 90 ? 9 : 0;
+		e && (window.scrollBy(0, e), G()), U = requestAnimationFrame(K);
 	}
-	function K(e, t = !1) {
-		if (!V || e.pointerId !== void 0 && e.pointerId !== V.pointerId) return;
-		let n = V;
-		V = null, H && cancelAnimationFrame(H), n.preview?.remove(), n.handle.classList.remove("is-dragging"), c.querySelectorAll(".is-dragging").forEach((e) => e.classList.remove("is-dragging")), U(), n.handle.hasPointerCapture(n.pointerId) && n.handle.releasePointerCapture(n.pointerId), !t && n.target && B(n.id, n.target.id, n.target.placement);
+	function q(e, t = !1) {
+		if (!H || e.pointerId !== void 0 && e.pointerId !== H.pointerId) return;
+		let n = H;
+		H = null, U && cancelAnimationFrame(U), n.preview?.remove(), n.handle.classList.remove("is-dragging"), l.querySelectorAll(".is-dragging").forEach((e) => e.classList.remove("is-dragging")), W(), n.handle.hasPointerCapture(n.pointerId) && n.handle.releasePointerCapture(n.pointerId), !t && n.target && V(n.id, n.target.id, n.target.placement);
 	}
-	c.addEventListener("pointerdown", (e) => {
+	l.addEventListener("pointerdown", (e) => {
 		let t = e.target.closest("[data-move]");
-		t && !_ && e.button === 0 && (e.preventDefault(), t.focus({ preventScroll: !0 }), V = {
+		t && !v && e.button === 0 && (e.preventDefault(), t.focus({ preventScroll: !0 }), H = {
 			id: Number(t.dataset.move),
 			pointerId: e.pointerId,
 			startX: e.clientX,
@@ -375,17 +383,17 @@ function e({ notify: e }) {
 			handle: t,
 			started: !1
 		}, t.setPointerCapture(e.pointerId));
-	}), c.addEventListener("pointermove", (e) => {
-		V && V.pointerId === e.pointerId && (V.x = e.clientX, V.y = e.clientY, !(!V.started && Math.hypot(V.x - V.startX, V.y - V.startY) < 6) && (V.started || (V.started = !0, V.preview = x("div", "menu-drag-preview", f.items.find((e) => e.id === V.id).label), document.body.append(V.preview), V.handle.closest(".menu-row").classList.add("is-dragging"), H = requestAnimationFrame(G)), V.preview.style.left = `${V.x + 12}px`, V.preview.style.top = `${V.y + 12}px`, W()));
-	}), c.addEventListener("pointerup", (e) => K(e)), c.addEventListener("pointercancel", (e) => K(e, !0)), c.addEventListener("lostpointercapture", (e) => K(e, !0)), document.addEventListener("keydown", (e) => {
-		e.key === "Escape" && V && K({}, !0);
+	}), l.addEventListener("pointermove", (e) => {
+		H && H.pointerId === e.pointerId && (H.x = e.clientX, H.y = e.clientY, !(!H.started && Math.hypot(H.x - H.startX, H.y - H.startY) < 6) && (H.started || (H.started = !0, H.preview = S("div", "menu-drag-preview", p.items.find((e) => e.id === H.id).label), document.body.append(H.preview), H.handle.closest(".menu-row").classList.add("is-dragging"), U = requestAnimationFrame(K)), H.preview.style.left = `${H.x + 12}px`, H.preview.style.top = `${H.y + 12}px`, G()));
+	}), l.addEventListener("pointerup", (e) => q(e)), l.addEventListener("pointercancel", (e) => q(e, !0)), l.addEventListener("lostpointercapture", (e) => q(e, !0)), document.addEventListener("keydown", (e) => {
+		e.key === "Escape" && H && q({}, !0);
 	}), window.addEventListener("beforeunload", (e) => {
-		(h || g) && (e.preventDefault(), e.returnValue = "");
-	}), i.replaceChildren(new Option(d.length ? "Menü seçin" : "Henüz menü yok", "")), d.forEach((e) => i.add(new Option(`${e.name} · ${e.key}`, String(e.id)))), j();
-	let q = d.find((e) => e.id === n.initialMenu) ?? d[0];
-	q ? D(async () => {
-		await M(q, n.initialItem), n.newMenu && n.permissions.create && R(!0);
-	}) : n.permissions.create && R(!0);
+		(g || _) && (e.preventDefault(), e.returnValue = "");
+	}), a.replaceChildren(new Option(f.length ? "Menü seçin" : "Henüz menü yok", "")), f.forEach((e) => a.add(new Option(`${e.name} · ${e.key}`, String(e.id)))), M();
+	let J = f.find((e) => e.id === r.initialMenu) ?? f[0];
+	J ? O(async () => {
+		await N(J, r.initialItem), r.newMenu && r.permissions.create && z(!0);
+	}) : r.permissions.create && z(!0);
 }
 //#endregion
 //#region Modules/Menus/resources/assets/js/menus.js

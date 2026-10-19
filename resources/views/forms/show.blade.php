@@ -1,1 +1,0 @@
-<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ $form->name }}</title>@once('site-form-styles')@vite('resources/css/site-forms.css')@endonce</head><body class="ek-form-page"><main><h1>{{ $form->name }}</h1><x-site-form :key="$form->key" /></main></body></html>

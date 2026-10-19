@@ -11,6 +11,7 @@ use App\Services\Admin\Modules\ModulePanelService;
 use App\Services\Admin\NotificationService;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Forms\FormContext;
+use App\Services\Settings\SeoMetadata;
 use App\Services\Settings\SettingsMailConfigurator;
 use App\Services\Settings\SettingsService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -40,6 +41,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(ModulePanelService $modulePanel, SettingsService $settings, NotificationService $notifications): void
     {
+        ViewFacade::composer(['frontend.themes.*.layouts.app', 'pages::pages.show', 'blog::public.index', 'blog::public.show'], function (View $view) use ($settings): void {
+            $data = $view->getData();
+            if ($view->name() === 'blog::public.index') {
+                $data['seoTitle'] = 'Blog · '.($settings->get('site.title') ?: config('app.name'));
+            }
+            $view->with('seoMetadata', $this->app->make(SeoMetadata::class)->build($data));
+        });
         ViewFacade::composer('components.admin.topbar', function (View $view) use ($notifications): void {
             $admin = auth('admin')->user();
             $view->with($admin && $admin->status ? $notifications->header($admin) : ['notificationItems' => collect(), 'unreadNotificationCount' => 0]);

@@ -7,6 +7,21 @@ const valueTypesByInput = {
 };
 
 function initializeDefinitionForm(form) {
+    const sectionInput = form.querySelector('[name="section_id"]');
+    const groupInput = form.querySelector('[data-setting-group]');
+    const groupOptions = form.querySelectorAll('#setting-group-options option');
+    groupInput?.addEventListener('change', () => {
+        const option = [...groupOptions].find((item) => item.dataset.section === sectionInput.value && item.value === groupInput.value);
+        if (option) {
+            form.querySelector('[name="attributes[columns]"]').value = option.dataset.columns;
+            form.querySelector('[name="attributes[group_order]"]').value = option.dataset.order;
+        }
+    });
+    const refreshGroups = () => {
+        groupOptions.forEach((option) => { option.disabled = option.dataset.section !== sectionInput.value; });
+    };
+    sectionInput?.addEventListener('change', refreshGroups);
+    refreshGroups();
     const inputType = form.querySelector('[data-setting-type]');
     const valueType = form.querySelector('[data-setting-value-type]');
     const options = form.querySelector('[data-setting-options]');

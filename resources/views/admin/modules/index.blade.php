@@ -56,7 +56,7 @@
                             @csrf
                             <button class="btn btn-sm">{{ $module->isEnabled() ? 'Devre dışı bırak' : 'Etkinleştir' }}</button>
                         </form>
-                        <form method="POST" action="{{ route('admin.modules.destroy', $module->getName()) }}" data-confirm="Modül kaldırılacak. İçerik verileri korunacaktır. Devam edilsin mi?">
+                        <form method="POST" action="{{ route('admin.modules.destroy', $module->getName()) }}" data-confirm-modal data-confirm-title="Modülü kaldır" data-confirm-message="Modül kaldırılacak. İçerik verileri korunacaktır. Devam edilsin mi?" data-confirm-button="Kaldır">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-sm btn-outline-danger">Kaldır</button>

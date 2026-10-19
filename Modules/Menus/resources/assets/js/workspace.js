@@ -1,4 +1,4 @@
-export function initializeMenuWorkspace({ notify }) {
+export function initializeMenuWorkspace({ notify, confirm }) {
     const root = document.querySelector('[data-menu-workspace]');
     if (!root || root.dataset.initialized) return;
     root.dataset.initialized = 'true';
@@ -324,8 +324,8 @@ export function initializeMenuWorkspace({ notify }) {
             await refreshSaved(response.menu);
         }, menuForm);
     });
-    find('[data-menu-delete]')?.addEventListener('click', () => {
-        if (!state || !window.confirm('Bu menü ve tüm öğeleri silinsin mi?')) return;
+    find('[data-menu-delete]')?.addEventListener('click', async () => {
+        if (!state || !await confirm({ title: 'Menüyü sil', message: 'Bu menü ve tüm öğeleri silinsin mi?', confirmLabel: 'Sil' })) return;
         perform(async () => {
             const response = await request(state.urls.delete, 'DELETE');
             menus = menus.filter((menu) => menu.id !== state.menu.id);
@@ -392,9 +392,9 @@ export function initializeMenuWorkspace({ notify }) {
         selectItem(selectedId, false);
     });
 
-    function deleteItem(id) {
+    async function deleteItem(id) {
         const item = state.items.find((node) => node.id === id);
-        if (!item || !discardChanges() || !window.confirm(`“${item.label}” öğesi silinsin mi?`)) return;
+        if (!item || !discardChanges() || !await confirm({ title: 'Menü öğesini sil', message: `“${item.label}” öğesi silinsin mi?`, confirmLabel: 'Sil' })) return;
         perform(async () => {
             const response = await request(item.delete_url, 'DELETE');
             notify({ type: 'success', message: response.message });

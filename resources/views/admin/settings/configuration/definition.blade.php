@@ -34,6 +34,22 @@
                             @if ($definition->exists)<input type="hidden" name="value_type" value="{{ $definition->value_type->value }}">@endif
                         </div>
                     </div>
+                    <h3 class="mt-3">Alan grubu ve yerleşim</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <x-admin.form.input name="attributes[group]" error-key="attributes.group" label="Grup başlığı" :value="$definition->attributes['group'] ?? null" list="setting-group-options" maxlength="150" help="Mevcut bir grup seçin veya yeni grup başlığı yazın. Boş bırakırsanız alan gruplandırılmaz." data-setting-group />
+                            <datalist id="setting-group-options">
+                                @foreach ($sections as $section)
+                                    @foreach ($section->definitions->filter(fn ($item) => ! empty($item->attributes['group']))->unique(fn ($item) => $item->attributes['group']) as $item)
+                                        <option value="{{ $item->attributes['group'] }}" data-section="{{ $section->id }}" data-columns="{{ $item->attributes['columns'] ?? 1 }}" data-order="{{ $item->attributes['group_order'] ?? 0 }}"></option>
+                                    @endforeach
+                                @endforeach
+                            </datalist>
+                        </div>
+                        <div class="col-md-6"><x-admin.form.input name="attributes[group_order]" error-key="attributes.group_order" label="Grup sırası" type="number" :value="$definition->attributes['group_order'] ?? 0" min="0" max="100000" help="Aynı gruptaki bütün alanlara uygulanır." /></div>
+                        <div class="col-md-6"><x-admin.form.select name="attributes[columns]" error-key="attributes.columns" label="Grubun sütun sayısı" :options="[['label' => 'Tek sütun', 'value' => 1], ['label' => 'İki sütun', 'value' => 2], ['label' => 'Dört sütun', 'value' => 4]]" :value="$definition->attributes['columns'] ?? 1" :placeholder="false" help="Aynı gruptaki bütün alanlara uygulanır." /></div>
+                        <div class="col-md-6"><x-admin.form.select name="attributes[width]" error-key="attributes.width" label="Bu alanın genişliği" :options="[['label' => 'Grubun düzenini kullan', 'value' => 0], ['label' => 'Tam genişlik', 'value' => 12], ['label' => 'Yarım genişlik', 'value' => 6], ['label' => 'Çeyrek genişlik', 'value' => 3]]" :value="$definition->attributes['width'] ?? 0" :placeholder="false" /></div>
+                    </div>
                     <x-admin.form.textarea name="description" label="Yardım metni" :value="$definition->description" rows="2" maxlength="1000" />
                     <x-admin.form.boolean name="validation[required]" error-key="validation.required" label="Zorunlu alan" :value="$definition->validation['required'] ?? false" />
                     <div data-for-types="text textarea email number range boolean select radio">

@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdateSettingsRequest;
+use App\Models\Settings\SettingDefinition;
 use App\Models\Settings\SettingSection;
 use App\Services\Media\MediaService;
 use App\Services\Settings\SettingsService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
@@ -21,7 +23,29 @@ class SettingController extends Controller
             ->filter(fn (SettingSection $section): bool => $admin->can('view', $section))->values();
         $sections->load('definitions.storedValue.media');
         $fields = [];
+        $sectionGroups = [];
         foreach ($sections as $section) {
+            $sectionGroups[$section->id] = $section->definitions
+                ->groupBy(fn (SettingDefinition $definition): string => $definition->getAttribute('attributes')['group'] ?? '')
+                ->map(function (Collection $definitions, string $label): array {
+                    $attributes = $definitions->first()->getAttribute('attributes') ?? [];
+                    $columns = $label !== '' && in_array((int) ($attributes['columns'] ?? 1), [1, 2, 4], true) ? (int) ($attributes['columns'] ?? 1) : 1;
+
+                    return [
+                        'label' => $label,
+                        'order' => $label !== '' ? ($attributes['group_order'] ?? 0) : 100000,
+                        'fields' => $definitions->map(function (SettingDefinition $definition) use ($columns): array {
+                            $width = (int) ($definition->getAttribute('attributes')['width'] ?? 0);
+                            $width = in_array($width, [3, 6, 12], true) ? $width : (int) (12 / $columns);
+
+                            return ['definition' => $definition, 'class' => match ($width) {
+                                3 => 'col-12 col-md-6 col-xl-3',
+                                6 => 'col-12 col-md-6',
+                                default => 'col-12',
+                            }];
+                        }),
+                    ];
+                })->sortBy('order')->values();
             foreach ($section->definitions as $definition) {
                 $value = $definition->is_sensitive ? null : $definition->effectiveValue();
                 $fields[$definition->id] = [
@@ -32,7 +56,7 @@ class SettingController extends Controller
             }
         }
 
-        return view('admin.settings.index', ['sections' => $sections, 'fields' => $fields, 'mediaConfig' => $mediaService->configuration($admin)]);
+        return view('admin.settings.index', ['sections' => $sections, 'sectionGroups' => $sectionGroups, 'fields' => $fields, 'mediaConfig' => $mediaService->configuration($admin)]);
     }
 
     public function update(UpdateSettingsRequest $request, SettingSection $section, SettingsService $settings): RedirectResponse

@@ -43,26 +43,7 @@
                 @foreach ($moduleMenus as $menu)
                     <x-admin.sidebar-menu :menu="$menu" />
                 @endforeach
-                @if (auth('admin')->user()?->can('users.menu') && auth('admin')->user()?->can('viewAny', \App\Models\Admin\Admin::class))
-                    <li class="nav-item">
-                        <a
-                            class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
-                            href="{{ route('admin.users.index') }}"
-                            @if (request()->routeIs('admin.users.*')) aria-current="page" @endif
-                        >
-                            <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                    <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-                                    <path d="M3 21v-2a4 4 0 0 1 4 -4h4" />
-                                    <path d="M16 19h6" />
-                                    <path d="M19 16v6" />
-                                </svg>
-                            </span>
-                            <span class="nav-link-title">Yöneticiler</span>
-                        </a>
-                    </li>
-                @endif
+               
                 @can('manage-admin-roles')
                     @if (auth('admin')->user()?->type === \App\Enums\AdminType\AdminTypeEnum::SuperAdmin)
                         <li class="nav-item">
@@ -86,14 +67,7 @@
                         </a>
                     </li>
                 @endcan
-                @if (auth('admin')->user()->can('settings.menu') && auth('admin')->user()->can('settings.view'))
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
-                            <span class="nav-link-icon d-md-none d-lg-inline-block"><x-admin.icon name="settings" /></span>
-                            <span class="nav-link-title">Ayarlar</span>
-                        </a>
-                    </li>
-                @endif
+               
                 @if (auth('admin')->user()->can('media.menu') && auth('admin')->user()->can('media.view'))
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('admin.media.*') ? 'active' : '' }}" href="{{ route('admin.media.index') }}">
@@ -131,7 +105,34 @@
                         </div>
                     </li>
                 @endif
-                
+                 @if (auth('admin')->user()?->can('admins.menu') && auth('admin')->user()?->can('viewAny', \App\Models\Admin\Admin::class))
+                    <li class="nav-item">
+                        <a
+                            class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}"
+                            href="{{ route('admin.users.index') }}"
+                            @if (request()->routeIs('admin.users.*')) aria-current="page" @endif
+                        >
+                            <span class="nav-link-icon d-md-none d-lg-inline-block">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                                    <path d="M3 21v-2a4 4 0 0 1 4 -4h4" />
+                                    <path d="M16 19h6" />
+                                    <path d="M19 16v6" />
+                                </svg>
+                            </span>
+                            <span class="nav-link-title">Yöneticiler</span>
+                        </a>
+                    </li>
+                @endif
+                 @if (auth('admin')->user()->can('settings.menu') && auth('admin')->user()->can('settings.view'))
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
+                            <span class="nav-link-icon d-md-none d-lg-inline-block"><x-admin.icon name="settings" /></span>
+                            <span class="nav-link-title">Ayarlar</span>
+                        </a>
+                    </li>
+                @endif
                 {{ $slot }}
             </ul>
         </div>

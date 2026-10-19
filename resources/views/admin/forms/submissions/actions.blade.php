@@ -1,1 +1,5 @@
-<a class="btn btn-sm btn-outline-primary" href="{{ route('admin.forms.submissions.show',$submission) }}">Başvuruyu aç</a>
+<x-admin.table.actions :actions="[[
+    'icon' => 'eye',
+    'label' => 'Başvuruyu aç',
+    'url' => route('admin.forms.submissions.show', $submission),
+]]" />

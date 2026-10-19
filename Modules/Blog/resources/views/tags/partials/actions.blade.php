@@ -1,1 +1,4 @@
-<div class="d-flex gap-2">@can('blog.tags.update')<a href="{{ route('admin.blog.tags.edit', $tag) }}" class="btn btn-sm btn-outline-primary">Düzenle</a>@endcan @can('blog.tags.delete')<form method="POST" action="{{ route('admin.blog.tags.destroy', $tag) }}" data-confirm="Etiket silinir; içerik kayıtları korunur. Devam edilsin mi?">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger">Sil</button></form>@endcan</div>
+<x-admin.table.actions :actions="[
+    ['icon' => 'edit', 'label' => 'Düzenle', 'url' => route('admin.blog.tags.edit', $tag), 'permission' => 'blog.tags.update'],
+    ['type' => 'form', 'icon' => 'trash', 'label' => 'Sil', 'url' => route('admin.blog.tags.destroy', $tag), 'permission' => 'blog.tags.delete', 'method' => 'DELETE', 'confirm' => 'Etiket silinir; içerik kayıtları korunur. Devam edilsin mi?'],
+]" />

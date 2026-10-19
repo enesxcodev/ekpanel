@@ -41,7 +41,11 @@ class SaveSettingDefinitionRequest extends FormRequest
             'options.*' => ['required', 'array:label,value'],
             'options.*.label' => ['required', 'string', 'max:150'],
             'options.*.value' => ['required', 'string', 'max:150', 'distinct:strict', 'regex:/^[a-zA-Z0-9_-]+$/'],
-            'attributes' => ['sometimes', 'array:placeholder,rows,step,layout,variant'],
+            'attributes' => ['sometimes', 'array:placeholder,rows,step,layout,variant,group,group_order,columns,width'],
+            'attributes.group' => ['nullable', 'string', 'max:150'],
+            'attributes.group_order' => ['nullable', 'integer', 'between:0,100000'],
+            'attributes.columns' => ['nullable', Rule::in([1, 2, 4])],
+            'attributes.width' => ['nullable', Rule::in([0, 3, 6, 12])],
             'attributes.placeholder' => ['nullable', 'string', 'max:255'],
             'attributes.rows' => ['nullable', 'integer', 'between:2,20'],
             'attributes.step' => ['nullable', 'numeric', 'gt:0', 'max:1000000'],
@@ -170,6 +174,6 @@ class SaveSettingDefinitionRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['section_id' => 'Bölüm', 'label' => 'Etiket', 'key' => 'Anahtar', 'input_type' => 'Alan türü', 'value_type' => 'Veri türü', 'options' => 'Seçenekler', 'validation.required' => 'Zorunluluk', 'default_value' => 'Varsayılan değer'];
+        return ['section_id' => 'Bölüm', 'label' => 'Etiket', 'key' => 'Anahtar', 'input_type' => 'Alan türü', 'value_type' => 'Veri türü', 'options' => 'Seçenekler', 'validation.required' => 'Zorunluluk', 'default_value' => 'Varsayılan değer', 'attributes.group' => 'Grup başlığı', 'attributes.group_order' => 'Grup sırası', 'attributes.columns' => 'Grubun sütun sayısı', 'attributes.width' => 'Alanın genişliği'];
     }
 }

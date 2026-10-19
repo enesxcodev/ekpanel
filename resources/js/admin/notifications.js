@@ -68,7 +68,7 @@ export function initializeNotifications() {
         button.disabled = true;
         try {
             const input = new FormData(form);
-            const result = await mutate(form.action, { action: input.get('action'), scope: 'all' });
+            const result = await mutate(form.getAttribute('action'), { action: input.get('action'), scope: 'all' });
             notify({ type: 'success', message: result.message });
             table?.ajax.reload();
             await refreshHeader();
@@ -131,7 +131,7 @@ export function initializeNotifications() {
         if (!ids.length || !event.submitter) return;
         bulk.querySelectorAll('button').forEach((button) => { button.disabled = true; });
         try {
-            const result = await mutate(bulk.action, { action: event.submitter.value, scope: 'selected', ids });
+            const result = await mutate(bulk.getAttribute('action'), { action: event.submitter.value, scope: 'selected', ids });
             notify({ type: 'success', message: result.message });
             clearSelection();
             table.ajax.reload();

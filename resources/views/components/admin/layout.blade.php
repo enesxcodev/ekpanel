@@ -48,6 +48,7 @@
                 </div>
             </div>
         </div>
+        <x-admin.confirm-modal />
         @stack('scripts')
     </body>
 </html>

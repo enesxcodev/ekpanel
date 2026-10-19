@@ -37,7 +37,10 @@
             </div>
             <div class="media-drop-area" data-media-drop>
                 <div class="media-loading d-none" data-media-loading role="status"><span class="spinner-border spinner-border-sm"></span> Dosyalar yükleniyor…</div>
-                <div class="media-grid" data-media-grid></div>
+                <div class="media-grid-container" data-media-grid>
+                    <div class="media-grid media-folder-grid" data-media-folders></div>
+                    <div class="media-grid media-file-grid" data-media-files></div>
+                </div>
                 <div class="table-responsive d-none" data-media-table>
                     <table class="table table-vcenter media-table mb-0">
                         <thead><tr>

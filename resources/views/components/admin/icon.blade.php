@@ -45,6 +45,14 @@
         @case('trash')
             <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7" />
             @break
+        @case('edit')
+            <path d="M7 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-1" />
+            <path d="M20.385 6.585a2.1 2.1 0 0 0-2.97-2.97L9 12v3h3z" />
+            @break
+        @case('eye')
+            <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0-4 0" />
+            <path d="M2 12s3.6-7 10-7s10 7 10 7s-3.6 7-10 7s-10-7-10-7" />
+            @break
         @case('list')
             <path d="M9 6h12M9 12h12M9 18h12M3 6h1m-1 6h1m-1 6h1" />
             @break
@@ -79,6 +87,16 @@
         @case('settings')
             <path d="M4 6h16M4 12h16M4 18h16" />
             <path d="M8 4v4M16 10v4M10 16v4" />
+            @break
+        @case('settings-cog')
+            <path d="M10 2h4l.5 3 2 1.2 2.8-1 2 3.4-2.3 2v2.8l2.3 2-2 3.4-2.8-1-2 1.2-.5 3h-4l-.5-3-2-1.2-2.8 1-2-3.4 2.3-2v-2.8l-2.3-2 2-3.4 2.8 1 2-1.2z" />
+            <circle cx="12" cy="12" r="3" />
+            @break
+        @case('code')
+            <path d="m7 8-4 4 4 4m10-8 4 4-4 4M14 4l-4 16" />
+            @break
+        @case('mail')
+            <path d="M3 5h18v14H3zM3 5l9 7 9-7" />
             @break
         @case('briefcase')
             <path d="M3 7h18v13H3z" />

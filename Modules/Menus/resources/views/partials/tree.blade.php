@@ -26,7 +26,7 @@
                 @can('menus.update')
                     <div class="d-flex gap-2">
                         <a href="{{ route('admin.menus.items.edit', [$menu, $node['item']]) }}" class="btn btn-sm btn-outline-primary">Düzenle</a>
-                        <form method="POST" action="{{ route('admin.menus.items.destroy', [$menu, $node['item']]) }}" data-confirm="Bu öğeyi silmek istediğinizden emin misiniz? Alt öğeler varsa önce taşıyın veya silin.">
+                        <form method="POST" action="{{ route('admin.menus.items.destroy', [$menu, $node['item']]) }}" data-confirm-modal data-confirm-title="Menü öğesini sil" data-confirm-message="Bu öğeyi silmek istediğinizden emin misiniz? Alt öğeler varsa önce taşıyın veya silin." data-confirm-button="Sil">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger">Sil</button>

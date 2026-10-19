@@ -7,6 +7,7 @@ use App\Models\Media\MediaFile;
 use App\Models\Settings\SettingDefinition;
 use App\Models\Settings\SettingSection;
 use App\Services\NotifyService;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -22,36 +23,39 @@ class SettingsService
 
     public function get(string $key, mixed $fallback = null): mixed
     {
-        $definition = SettingDefinition::query()->with('storedValue.media')->where('key', $key)->first();
-        if ($definition === null) {
+        $record = $this->snapshot()[$key] ?? null;
+        if ($record === null) {
             return $fallback;
         }
-        if ($definition->is_sensitive) {
-            return $definition->effectiveValue();
+        if ($record['is_sensitive']) {
+            return SettingDefinition::query()->with('storedValue')->where('key', $key)->first()?->effectiveValue();
         }
 
-        $cached = Cache::remember($this->cacheKey($key), 300, fn (): array => ['value' => $definition->effectiveValue()]);
-
-        return $cached['value'];
+        return $record['value'];
     }
 
     /** @return array<string, mixed> */
     public function all(): array
     {
-        return SettingDefinition::query()->where('is_sensitive', false)->with('storedValue.media')->get()
-            ->mapWithKeys(fn (SettingDefinition $definition): array => [$definition->key => $definition->effectiveValue()])->all();
+        $values = [];
+        foreach ($this->snapshot() as $key => $record) {
+            if (! $record['is_sensitive']) {
+                $values[$key] = $record['value'];
+            }
+        }
+
+        return $values;
     }
 
     public function mediaUrl(string $key, ?string $fallback = null): ?string
     {
-        $definition = SettingDefinition::query()->with('storedValue.media')->where('key', $key)->first();
-        if ($definition === null || ! $definition->input_type->isFile()) {
+        $record = $this->snapshot()[$key] ?? null;
+        if ($record === null || $record['is_sensitive'] || ! $record['is_file']) {
             return $fallback;
         }
-        $media = $definition->storedValue?->media;
-        $path = $definition->effectiveValue();
+        $path = $record['value'];
 
-        return $path ? Storage::disk($media?->disk ?? 'public')->url($path) : $fallback;
+        return $path ? Storage::disk($record['disk'])->url($path) : $fallback;
     }
 
     public function linkExistingLogoMedia(): int
@@ -162,21 +166,42 @@ class SettingsService
         }
     }
 
+    /** Invalidating one setting clears the shared non-sensitive snapshot. */
     public function forget(string $key): void
     {
-        Cache::forget($this->cacheKey($key));
+        $this->cache()->forget('settings.snapshot.v1');
     }
 
     public function forgetSection(SettingSection $section): void
     {
-        foreach ($section->definitions()->pluck('key') as $key) {
-            $this->forget($key);
-        }
+        $this->forget($section->key);
     }
 
-    private function cacheKey(string $key): string
+    private function cache(): Repository
     {
-        return 'settings.value.'.$key;
+        return Cache::memo(config('cache.settings_store', 'file'));
+    }
+
+    /** @return array<string, array{is_sensitive: bool, value?: mixed, is_file?: bool, disk?: string}> */
+    private function snapshot(): array
+    {
+        return $this->cache()->remember('settings.snapshot.v1', 300, function (): array {
+            $records = [];
+            $definitions = SettingDefinition::query()->where('is_sensitive', false)->with('storedValue.media')->get();
+            foreach ($definitions as $definition) {
+                $records[$definition->key] = [
+                    'is_sensitive' => false,
+                    'value' => $definition->effectiveValue(),
+                    'is_file' => $definition->input_type->isFile(),
+                    'disk' => $definition->storedValue?->media?->disk ?? 'public',
+                ];
+            }
+            foreach (SettingDefinition::query()->where('is_sensitive', true)->pluck('key') as $key) {
+                $records[$key] = ['is_sensitive' => true];
+            }
+
+            return $records;
+        });
     }
 
     private function hasChanged(SettingDefinition $definition, mixed $input, bool $removing): bool

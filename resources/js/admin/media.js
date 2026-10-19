@@ -218,12 +218,12 @@ class MediaBrowser {
     }
 
     renderFiles() {
-        const grid = this.get('[data-media-grid]'); const rows = this.get('[data-media-rows]');
-        grid.replaceChildren(); rows.replaceChildren();
+        const grid = this.get('[data-media-grid]'); const folderGrid = this.get('[data-media-folders]'); const fileGrid = this.get('[data-media-files]'); const rows = this.get('[data-media-rows]');
+        folderGrid.replaceChildren(); fileGrid.replaceChildren(); rows.replaceChildren();
         grid.classList.toggle('d-none', this.state.layout !== 'grid'); this.get('[data-media-table]').classList.toggle('d-none', this.state.layout !== 'list');
         const folders = (this.state.view === 'all' && this.state.page === 1 ? this.folders.filter(folder => folder.parent_id === this.state.folder && folder.name.toLocaleLowerCase('tr').includes(this.state.search.toLocaleLowerCase('tr'))) : []).sort((a, b) => a.name.localeCompare(b.name, 'tr'));
         for (const folder of folders) {
-            for (const [template, target] of [['folder', grid], ['folder-row', rows]]) {
+            for (const [template, target] of [['folder', folderGrid], ['folder-row', rows]]) {
                 const node = this.clone(template); node.dataset.id = folder.id; node.querySelector('[data-media-name]').textContent = folder.name;
                 const actions = [];
                 if (this.config.permissions.update) actions.push(['rename-folder', 'Yeniden adlandır'], ['move-folder', 'Taşı']);
@@ -232,7 +232,7 @@ class MediaBrowser {
             }
         }
         for (const file of this.files) {
-            for (const [template, target] of [['card', grid], ['row', rows]]) {
+            for (const [template, target] of [['card', fileGrid], ['row', rows]]) {
                 const node = this.clone(template); node.dataset.id = file.id;
                 node.querySelector('[data-media-check]').setAttribute('aria-label', file.name + ' dosyasını seç');
                 node.querySelector('[data-media-name]').textContent = file.name; node.querySelector('[data-media-name]').title = file.name;

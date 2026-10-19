@@ -9,7 +9,7 @@ readonly class FieldDefinition
 {
     /**
      * @param  list<array{label: string, value: string}>  $options
-     * @param  array{placeholder?: string, rows?: int, step?: int|float, layout?: string, variant?: string}  $attributes
+     * @param  array{placeholder?: string, rows?: int, step?: int|float, layout?: string, variant?: string, group?: string, group_order?: int, columns?: int, width?: int}  $attributes
      * @param  array{required?: bool, min?: int|float, max?: int|float, max_size?: int, extensions?: list<string>, min_width?: int, min_height?: int, max_width?: int, max_height?: int}  $validation
      */
     public function __construct(

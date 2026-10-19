@@ -51,7 +51,7 @@
                                     </div>
                                     @unless ($definition->is_system)
                                         <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.settings.definitions.edit', $definition) }}">Düzenle</a>
-                                        <form method="POST" action="{{ route('admin.settings.definitions.destroy', $definition) }}" data-confirm="Alan ve kayıtlı değeri silinsin mi?">
+                                        <form method="POST" action="{{ route('admin.settings.definitions.destroy', $definition) }}" data-confirm-modal data-confirm-title="Alanı sil" data-confirm-message="Alan ve kayıtlı değeri silinsin mi?" data-confirm-button="Sil">
                                             @csrf @method('DELETE')
                                             <button class="btn btn-sm btn-outline-danger" type="submit">Sil</button>
                                         </form>
@@ -62,7 +62,7 @@
                             @endforelse
                         </div>
                         @if ($section->definitions->isEmpty())
-                            <form method="POST" action="{{ route('admin.settings.sections.destroy', $section) }}" data-confirm="Boş bölüm silinsin mi?">
+                            <form method="POST" action="{{ route('admin.settings.sections.destroy', $section) }}" data-confirm-modal data-confirm-title="Bölümü sil" data-confirm-message="Boş bölüm silinsin mi?" data-confirm-button="Sil">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-outline-danger btn-sm" type="submit">Bölümü sil</button>
                             </form>

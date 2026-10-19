@@ -6,7 +6,7 @@ import { initializeTables } from './admin/table-import';
 import { initializeNotifications } from './admin/notifications';
 
 import { initializePermissionMatrix } from './admin/permission-matrix';
-import { initializeFormConfirmation } from './admin/form-confirmation';
+import { confirmWithModal, initializeFormConfirmation } from './admin/form-confirmation';
 import { initializeSettings } from './admin/settings';
 import { initializeFormTabs } from './admin/form-tabs';
 import { initializeSlugs } from './admin/slug';
@@ -22,7 +22,7 @@ window.$ = $;
 window.jQuery = $;
 $('.js-select2').select2({ width: '100%' });
 
-window.Panel = { notify };
+window.Panel = { notify, confirm: confirmWithModal };
 
 initializeCrudNotifications();
 initializeTables();
