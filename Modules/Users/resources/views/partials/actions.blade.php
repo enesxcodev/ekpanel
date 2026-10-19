@@ -1,4 +1,5 @@
 <div class="d-flex gap-2 justify-content-end">
+    <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#user-details-{{ $user->id }}">Görüntüle</button>
     @can('users.update')
         <a href="{{ route('admin.web-users.edit', $user) }}" class="btn btn-sm btn-outline-primary">Düzenle</a>
     @endcan
@@ -10,3 +11,4 @@
         </form>
     @endcan
 </div>
+@include('users::partials.details')

@@ -31,9 +31,9 @@ test('lists active and inactive web users while excluding deleted accounts and c
         ->assertOk()->assertJsonPath('recordsTotal', 2);
 
     $rows = collect($response->json('data'))->keyBy('id');
-    expect($rows->get($active->id)['name'])->toContain('&lt;script&gt;');
+    expect($rows->get($active->id)['full_name'])->toContain('&lt;script&gt;');
     expect($rows->get($active->id))->not->toHaveKeys(['password', 'remember_token']);
-    expect($rows->get($inactive->id)['is_active'])->toContain('Pasif');
+    expect($rows->get($inactive->id)['actions'])->toContain('Pasif');
     expect($rows->get($active->id)['actions'])->toContain(route('admin.web-users.edit', $active));
     expect($rows->get($active->id)['actions'])->toContain(route('admin.web-users.destroy', $active));
 });
@@ -136,4 +136,64 @@ test('blocks inactive admins and disabled modules', function () {
     Module::partialMock()->shouldReceive('find')->with('Users')->andReturn($module);
 
     $this->get(route('admin.web-users.index'))->assertNotFound();
+});
+
+test('renders the compact users table with only the requested four headings', function () {
+    $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
+
+    $response = $this->get(route('admin.web-users.index'))->assertOk();
+
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="utf-8" ?>'.$response->getContent());
+    $headings = (new DOMXPath($document))->query('//table[@id="web-users-table"]/thead/tr/th');
+    expect(array_map(fn (DOMNode $node): string => trim($node->textContent), iterator_to_array($headings)))
+        ->toBe(['ID', 'Ad Soyad', 'E-posta', 'İşlemler']);
+});
+
+test('opens user details in the matching modal with escaped data and no credentials', function () {
+    app(ModulePanelService::class)->syncPermissions();
+    $admin = Admin::factory()->create();
+    $admin->givePermissionTo('users.view');
+    $this->actingAs($admin, 'admin');
+    $user = User::factory()->create([
+        'name' => 'Ada', 'surname' => 'Yılmaz', 'username' => '<script>profile()</script>',
+        'last_login_ip' => '203.0.113.23', 'last_login_user_agent' => '<script>browser()</script>',
+        'last_login_at' => '2026-10-19 12:30:00',
+    ]);
+
+    $response = $this->getJson(route('admin.web-users.data', ['draw' => 1, 'start' => 0, 'length' => 10]))->assertOk();
+
+    $row = $response->json('data.0');
+    expect(array_keys($row))->toEqualCanonicalizing(['id', 'full_name', 'email', 'actions']);
+    expect($row['full_name'])->toBe('Ada Yılmaz');
+    expect($row['actions'])->toContain('Görüntüle', 'data-bs-target="#user-details-'.$user->id.'"', 'id="user-details-'.$user->id.'"',
+        'Kullanıcı detayları', $user->email, '203.0.113.23', '19.10.2026 12:30', '&lt;script&gt;profile()&lt;/script&gt;', '&lt;script&gt;browser()&lt;/script&gt;')
+        ->not->toContain('<script>', $user->password, $user->remember_token, 'Düzenle', '>Sil<');
+});
+
+test('searches the full name column by surname or both names', function (string $search) {
+    $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
+    $user = User::factory()->create(['name' => 'Ada', 'surname' => 'Lovelace']);
+    User::factory()->create(['name' => 'Grace', 'surname' => 'Hopper']);
+
+    $this->getJson(route('admin.web-users.data', [
+        'draw' => 1, 'start' => 0, 'length' => 10,
+        'columns' => [['data' => 'full_name', 'name' => 'full_name', 'searchable' => 'true', 'orderable' => 'true']],
+        'search' => ['value' => $search, 'regex' => 'false'],
+    ]))->assertOk()->assertJsonPath('recordsFiltered', 1)->assertJsonPath('data.0.id', $user->id);
+})->with(['Lovelace', 'Ada Lovelace']);
+
+test('sorts the full name column by name then surname', function () {
+    $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
+    User::factory()->create(['name' => 'Zoe', 'surname' => 'Smith']);
+    User::factory()->create(['name' => 'Ada', 'surname' => 'Zeta']);
+    User::factory()->create(['name' => 'Ada', 'surname' => 'Alpha']);
+
+    $response = $this->getJson(route('admin.web-users.data', [
+        'draw' => 1, 'start' => 0, 'length' => 10,
+        'columns' => [['data' => 'full_name', 'name' => 'full_name', 'searchable' => 'true', 'orderable' => 'true']],
+        'order' => [['column' => 0, 'dir' => 'asc']],
+    ]))->assertOk();
+
+    expect(array_column($response->json('data'), 'full_name'))->toBe(['Ada Alpha', 'Ada Zeta', 'Zoe Smith']);
 });
