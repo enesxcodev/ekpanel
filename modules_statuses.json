@@ -12,5 +12,6 @@
     "Documents": true,
     "Projects": true,
     "Galeriler": true,
-    "Users": true
+    "Users": true,
+    "Popup": true
 }
