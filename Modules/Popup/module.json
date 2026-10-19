@@ -1,0 +1,21 @@
+{
+    "name": "Popup",
+    "alias": "popup",
+    "version": "0.1.0",
+    "description": "Pop-up yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Popup\\Providers\\PopupServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "popup.menu",
+            "popup.view",
+            "popup.create",
+            "popup.update",
+            "popup.delete"
+        ]
+    }
+}

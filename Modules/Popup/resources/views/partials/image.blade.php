@@ -1,0 +1,1 @@
+<x-admin.media.thumbnail :url="$popup->image_url" :alt="$popup->imageMedia?->alt_text ?: $popup->title" />
