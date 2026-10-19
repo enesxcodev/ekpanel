@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['email', 'name', 'lastname', 'status', 'type', 'password'])]
@@ -15,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 class Admin extends Authenticatable
 {
     /** @use HasFactory<AdminFactory> */
-    use HasFactory, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     protected string $guard_name = 'admin';
 

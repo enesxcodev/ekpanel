@@ -40,6 +40,9 @@
                         <span class="nav-link-title">Dashboard</span>
                     </a>
                 </li>
+                @foreach ($moduleMenus as $menu)
+                    <x-admin.sidebar-menu :menu="$menu" />
+                @endforeach
                 @if (auth('admin')->user()?->can('users.menu') && auth('admin')->user()?->can('viewAny', \App\Models\Admin\Admin::class))
                     <li class="nav-item">
                         <a
@@ -110,6 +113,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.forms.*') && ! request()->routeIs('admin.forms.submissions.*') ? 'active' : '' }}" href="{{ route('admin.forms.index') }}"
                                            @if (request()->routeIs('admin.forms.*') && ! request()->routeIs('admin.forms.submissions.*')) aria-current="page" @endif>
+                                            <span class="nav-link-icon"><x-admin.icon name="file-pencil" /></span>
                                             <span class="nav-link-title">Form yönetimi</span>
                                         </a>
                                     </li>
@@ -118,6 +122,7 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ request()->routeIs('admin.forms.submissions.*') ? 'active' : '' }}" href="{{ route('admin.forms.submissions.index') }}"
                                            @if (request()->routeIs('admin.forms.submissions.*')) aria-current="page" @endif>
+                                            <span class="nav-link-icon"><x-admin.icon name="inbox" /></span>
                                             <span class="nav-link-title">Gelen başvurular</span>
                                         </a>
                                     </li>
@@ -126,9 +131,7 @@
                         </div>
                     </li>
                 @endif
-                @foreach ($moduleMenus as $menu)
-                    <x-admin.sidebar-menu :menu="$menu" />
-                @endforeach
+                
                 {{ $slot }}
             </ul>
         </div>

@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Pages\DataTables\PagesDataTable;
 use Modules\Pages\Http\Requests\SavePageRequest;
 use Modules\Pages\Models\Page;
@@ -43,9 +45,15 @@ class PageController extends Controller
         return view('pages::pages.create', compact('featureForm', 'featureFields', 'categoryTree') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function store(SavePageRequest $request, PageService $service): RedirectResponse
+    public function store(SavePageRequest $request, PageService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $page = $service->save($request->validated(), null, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sayfa eklendi',
+            'Bir sayfa eklendi.',
+            route('admin.pages.edit', ['page' => $page->id], absolute: false),
+        );
 
         return redirect()->route('admin.pages.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa başarıyla eklendi.']);
     }
@@ -61,17 +69,29 @@ class PageController extends Controller
         return view('pages::pages.edit', compact('page', 'featureForm', 'featureFields', 'categoryTree') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function update(SavePageRequest $request, Page $page, PageService $service): RedirectResponse
+    public function update(SavePageRequest $request, Page $page, PageService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), $page, $request->user('admin'));
+        $page = $service->save($request->validated(), $page, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sayfa güncellendi',
+            'Bir sayfa güncellendi.',
+            route('admin.pages.edit', ['page' => $page->id], absolute: false),
+        );
 
         return redirect()->route('admin.pages.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa başarıyla güncellendi.']);
     }
 
-    public function destroy(Page $page, PageService $service): RedirectResponse
+    public function destroy(Page $page, PageService $service, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('pages.delete');
         $service->delete($page);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sayfa silindi',
+            'Bir sayfa silindi.',
+            route('admin.pages.index', absolute: false),
+        );
 
         return redirect()->route('admin.pages.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa başarıyla silindi.']);
     }

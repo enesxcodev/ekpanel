@@ -1,7 +1,7 @@
 {
     "name": "Blog",
     "alias": "blog",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "description": "Blog, haber ve duyuru içeriklerinin yönetimi",
     "keywords": [],
     "priority": 0,

@@ -5,3 +5,5 @@
 - Public sayfa URL'si kategori ağacındaki slug'larla oluşur. `Page::url_path` erişimini veya kaydın `category` ilişkisini kullan; slug'ları tema içinde yeniden birleştirecek yeni yardımcı katman ekleme. Yalnız `published` durumundaki sayfalar public route tarafından sunulur.
 - Pages, bağımsız ve uzun biçimli bilgi sayfaları sağlar. Anasayfadaki hero, hizmet kartları, ekip üyeleri veya tek bir sabit site ayarı ihtiyacını otomatik olarak Pages'e eşleme; mevcut modül ve Settings kapsamlarını birlikte değerlendir.
 - Alan genişletmede [ortak modül kurallarına](../../../../.ai/rules/moduller.md#tema-için-yönetilebilir-alan-genişletme) başvur. Veriyi mevcut `Page` / `PageCategory` modelleri ve ilişkilerinden oku; tema için facade/helper veya örnek sayfa kaydı oluşturma.
+
+- Tema okumasında `PagesFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/pages-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

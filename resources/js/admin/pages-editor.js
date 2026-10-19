@@ -12,6 +12,7 @@ import 'hugerte/plugins/lists';
 import 'hugerte/plugins/table';
 import 'hugerte/plugins/code';
 import 'hugerte/plugins/wordcount';
+import { synchronizeEditorForm } from './editor-form';
 
 hugerte.init({
     selector: '[data-hugerte]',
@@ -22,4 +23,5 @@ hugerte.init({
     height: 500,
     skin_url: 'default',
     content_css: 'default',
+    setup: synchronizeEditorForm,
 });

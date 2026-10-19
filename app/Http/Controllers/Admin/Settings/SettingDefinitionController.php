@@ -7,9 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\SaveSettingDefinitionRequest;
 use App\Models\Settings\SettingDefinition;
 use App\Models\Settings\SettingSection;
+use App\Services\NotifyService;
 use App\Services\Settings\SettingConfigurationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class SettingDefinitionController extends Controller
 {
@@ -20,9 +22,15 @@ class SettingDefinitionController extends Controller
         return $this->form(new SettingDefinition);
     }
 
-    public function store(SaveSettingDefinitionRequest $request, SettingConfigurationService $configuration): RedirectResponse
+    public function store(SaveSettingDefinitionRequest $request, SettingConfigurationService $configuration, NotifyService $notifications): RedirectResponse
     {
         $definition = $configuration->saveDefinition($request->validated());
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Ayar alanı eklendi',
+            'Yeni bir ayar alanı eklendi.',
+            route('admin.settings.definitions.edit', ['definition' => $definition->id], absolute: false),
+        );
 
         return redirect()->route('admin.settings.configuration.index', ['section' => $definition->section_id])
             ->with('notification', ['type' => 'success', 'message' => 'Ayar alanı oluşturuldu.']);
@@ -36,19 +44,31 @@ class SettingDefinitionController extends Controller
         return $this->form($definition);
     }
 
-    public function update(SaveSettingDefinitionRequest $request, SettingDefinition $definition, SettingConfigurationService $configuration): RedirectResponse
+    public function update(SaveSettingDefinitionRequest $request, SettingDefinition $definition, SettingConfigurationService $configuration, NotifyService $notifications): RedirectResponse
     {
-        $configuration->saveDefinition($request->validated(), $definition);
+        $definition = $configuration->saveDefinition($request->validated(), $definition);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Ayar alanı güncellendi',
+            'Bir ayar alanı güncellendi.',
+            route('admin.settings.definitions.edit', ['definition' => $definition->id], absolute: false),
+        );
 
         return redirect()->route('admin.settings.configuration.index', ['section' => $definition->section_id])
             ->with('notification', ['type' => 'success', 'message' => 'Ayar alanı güncellendi.']);
     }
 
-    public function destroy(SettingDefinition $definition, SettingConfigurationService $configuration): RedirectResponse
+    public function destroy(SettingDefinition $definition, SettingConfigurationService $configuration, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('manage-setting-definitions');
         $sectionId = $definition->section_id;
         $configuration->deleteDefinition($definition);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Ayar alanı silindi',
+            'Bir ayar alanı silindi.',
+            route('admin.settings.configuration.index', ['section' => $sectionId], absolute: false),
+        );
 
         return redirect()->route('admin.settings.configuration.index', ['section' => $sectionId])
             ->with('notification', ['type' => 'success', 'message' => 'Ayar alanı silindi.']);

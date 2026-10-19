@@ -7,3 +7,5 @@
 - Öne çıkan görsel medya kütüphanesinden seçilir ve `ContentMediaService` üzerinden bağlanır. Tema uyarlaması görsel yolunu doğrudan tahmin etmemelidir.
 - Kategori ve içerik URL davranışı proje genelindeki mevcut route düzenine göre belirlenir; yeni site şablonu veya bağımsız içerik tipi varsayma.
 - Ek alanlar `features.json` ve ortak `ModuleFeatures`, `FeatureValues`, `FieldFiles` altyapısından yönetilir.
+
+- Tema okumasında `BlogFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/blog-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

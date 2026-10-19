@@ -8,7 +8,9 @@ use App\Models\Settings\SettingSection;
 use App\Policies\Admin\AdminPolicy;
 use App\Policies\Settings\SettingSectionPolicy;
 use App\Services\Admin\Modules\ModulePanelService;
+use App\Services\Admin\NotificationService;
 use App\Services\Fields\ModuleFeatures;
+use App\Services\Forms\FormContext;
 use App\Services\Settings\SettingsMailConfigurator;
 use App\Services\Settings\SettingsService;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -29,14 +31,19 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(ModuleFeatures::class);
+        $this->app->singleton(FormContext::class);
         $this->app->singleton(SettingsMailConfigurator::class);
     }
 
     /**
      * Bootstrap any application services.
      */
-    public function boot(ModulePanelService $modulePanel, SettingsService $settings): void
+    public function boot(ModulePanelService $modulePanel, SettingsService $settings, NotificationService $notifications): void
     {
+        ViewFacade::composer('components.admin.topbar', function (View $view) use ($notifications): void {
+            $admin = auth('admin')->user();
+            $view->with($admin && $admin->status ? $notifications->header($admin) : ['notificationItems' => collect(), 'unreadNotificationCount' => 0]);
+        });
         ViewFacade::composer('components.admin.sidebar', function (View $view) use ($modulePanel): void {
             $admin = auth('admin')->user();
             $view->with('moduleMenus', $admin ? $modulePanel->menus($admin) : []);

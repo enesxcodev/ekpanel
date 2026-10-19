@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Pages\DataTables\PageCategoriesDataTable;
 use Modules\Pages\Http\Requests\SavePageCategoryRequest;
 use Modules\Pages\Models\PageCategory;
@@ -42,9 +44,15 @@ class PageCategoryController extends Controller
         return view('pages::categories.create', compact('featureForm', 'featureFields', 'categoryOptions') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function store(SavePageCategoryRequest $request, PageCategoryService $service): RedirectResponse
+    public function store(SavePageCategoryRequest $request, PageCategoryService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $category = $service->save($request->validated(), null, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sayfa kategorisi eklendi',
+            'Bir sayfa kategorisi eklendi.',
+            route('admin.pages.categories.edit', ['category' => $category->id], absolute: false),
+        );
 
         return redirect()->route('admin.pages.categories.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa kategorisi başarıyla eklendi.']);
     }
@@ -59,17 +67,29 @@ class PageCategoryController extends Controller
         return view('pages::categories.edit', compact('category', 'featureForm', 'featureFields', 'categoryOptions') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function update(SavePageCategoryRequest $request, PageCategory $category, PageCategoryService $service): RedirectResponse
+    public function update(SavePageCategoryRequest $request, PageCategory $category, PageCategoryService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), $category, $request->user('admin'));
+        $category = $service->save($request->validated(), $category, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sayfa kategorisi güncellendi',
+            'Bir sayfa kategorisi güncellendi.',
+            route('admin.pages.categories.edit', ['category' => $category->id], absolute: false),
+        );
 
         return redirect()->route('admin.pages.categories.index')->with('notification', ['type' => 'success', 'message' => 'Sayfa kategorisi başarıyla güncellendi.']);
     }
 
-    public function destroy(PageCategory $category, PageCategoryService $service): RedirectResponse
+    public function destroy(PageCategory $category, PageCategoryService $service, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('pages.categories.delete');
         $deleted = $service->delete($category);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sayfa kategorisi silindi',
+            'Bir sayfa kategorisi silindi.',
+            route('admin.pages.categories.index', absolute: false),
+        );
 
         return redirect()->route('admin.pages.categories.index')->with('notification', [
             'type' => $deleted ? 'success' : 'error',

@@ -6,3 +6,5 @@
 - Model/servis erişimini kullan; yalnız tema için ek facade/helper oluşturma. Kurulu ve etkin olma kontrolünü koru.
 - Ortak alan genişletme için [modül kurallarını](../../../../.ai/rules/moduller.md) izle; features.json ve extra_fields altyapısını kopyalama.
 - [Modüle özgü skill](../../skills/projects-theme-integration/SKILL.md), [ortak tema skill’i](../../../../.claude/skills/theme-integration/SKILL.md) ve [geliştirme workflow’u](../workflows/modul-gelistirme.md) birlikte kullanılır.
+
+- Tema okumasında `ProjectsFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/projects-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

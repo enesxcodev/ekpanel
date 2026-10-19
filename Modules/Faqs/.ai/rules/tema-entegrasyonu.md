@@ -7,3 +7,5 @@
 - İçerik erişiminde mevcut `Faq` ve `FaqCategory` modellerini ve ilişkilerini kullan. Bu modül yönetim ekranı sağlar; ziyaretçi tarafı gösterim/route mevcut değilse varmış gibi davranma. İstenen tema gösterimi için sıralama veya görünürlük alanı kodda yoktur; tasarım bunları gerektiriyorsa kullanıcıya sor.
 
 Uygulama adımları için [SSS tema skill'ini](../../skills/faqs-theme-integration/SKILL.md), ortak alan ve modül sınırları için [modül kurallarını](../../../.ai/rules/moduller.md) izle.
+
+- Tema okumasında `FaqsFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/faqs-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

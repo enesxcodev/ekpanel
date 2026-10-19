@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Services\DataTables\ServicesDataTable;
 use Modules\Services\Http\Requests\StoreServiceRequest;
 use Modules\Services\Http\Requests\UpdateServiceRequest;
@@ -41,9 +43,15 @@ class ServiceController extends Controller
         return $this->form($features, $values);
     }
 
-    public function store(StoreServiceRequest $request, ServiceService $service): RedirectResponse
+    public function store(StoreServiceRequest $request, ServiceService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $service = $service->save($request->validated(), null, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Hizmet eklendi',
+            'Bir hizmet eklendi.',
+            route('admin.services.edit', ['service' => $service->id], absolute: false),
+        );
 
         return redirect()->route('admin.services.index')->with('notification', [
             'type' => 'success', 'message' => 'Hizmet başarıyla eklendi.',
@@ -57,17 +65,29 @@ class ServiceController extends Controller
         return $this->form($features, $values, $service);
     }
 
-    public function update(UpdateServiceRequest $request, Service $service, ServiceService $manager): RedirectResponse
+    public function update(UpdateServiceRequest $request, Service $service, ServiceService $manager, NotifyService $notifications): RedirectResponse
     {
-        $manager->save($request->validated(), $service, $request->user('admin'));
+        $service = $manager->save($request->validated(), $service, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Hizmet güncellendi',
+            'Bir hizmet güncellendi.',
+            route('admin.services.edit', ['service' => $service->id], absolute: false),
+        );
 
         return redirect()->route('admin.services.index')->with('notification', ['type' => 'success', 'message' => 'Hizmet başarıyla güncellendi.']);
     }
 
-    public function destroy(Service $service, ServiceService $manager): RedirectResponse
+    public function destroy(Service $service, ServiceService $manager, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('services.delete');
         $manager->delete($service);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Hizmet silindi',
+            'Bir hizmet silindi.',
+            route('admin.services.index', absolute: false),
+        );
 
         return redirect()->route('admin.services.index')->with('notification', ['type' => 'success', 'message' => 'Hizmet başarıyla silindi.']);
     }

@@ -11,6 +11,11 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{{ $title }} · {{ $companyName }}</title>
 
+        <script>
+            try {
+                document.documentElement.dataset.bsTheme = localStorage.getItem('ekagent-admin-theme') === 'dark' ? 'dark' : 'light';
+            } catch {}
+        </script>
         @vite(['resources/css/admin.css', 'resources/js/panel.js'])
         <x-admin.module-assets />
     </head>
@@ -22,6 +27,8 @@
             <div class="page-wrapper">
                 @isset($topbar)
                     {{ $topbar }}
+                @else
+                    <x-admin.topbar />
                 @endisset
 
                 <div class="page-header d-print-none">

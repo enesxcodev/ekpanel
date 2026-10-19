@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Galeriler\Http\Requests\BulkGalerilerItemsRequest;
 use Modules\Galeriler\Http\Requests\GalerilerIndexRequest;
 use Modules\Galeriler\Http\Requests\ReorderGalerilerItemsRequest;
@@ -50,9 +52,15 @@ class GalerilerItemController extends Controller
         return $this->form(null, $features, $values, $media);
     }
 
-    public function store(SaveGalerilerItemRequest $request, GalerilerItemService $service): RedirectResponse
+    public function store(SaveGalerilerItemRequest $request, GalerilerItemService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $item = $service->save($request->validated(), null, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Galeri kaydı eklendi',
+            'Bir galeri kaydı eklendi.',
+            route('admin.galeriler.edit', ['item' => $item->id], absolute: false),
+        );
 
         return redirect()->route('admin.galeriler.index')->with('notification', ['type' => 'success', 'message' => 'Galeri kayıtları eklendi.']);
     }
@@ -64,24 +72,43 @@ class GalerilerItemController extends Controller
         return $this->form($item, $features, $values, $media);
     }
 
-    public function update(SaveGalerilerItemRequest $request, GalerilerItem $item, GalerilerItemService $service): RedirectResponse
+    public function update(SaveGalerilerItemRequest $request, GalerilerItem $item, GalerilerItemService $service, NotifyService $notifications): RedirectResponse
     {
         $service->save($request->validated(), $item, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Galeri kaydı güncellendi',
+            'Bir galeri kaydı güncellendi.',
+            route('admin.galeriler.edit', ['item' => $item->id], absolute: false),
+        );
 
         return redirect()->route('admin.galeriler.index')->with('notification', ['type' => 'success', 'message' => 'Galeri kaydı güncellendi.']);
     }
 
-    public function destroy(GalerilerItem $item, GalerilerItemService $service): RedirectResponse
+    public function destroy(GalerilerItem $item, GalerilerItemService $service, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('galeriler.delete');
         $service->delete($item);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Galeri kaydı silindi',
+            'Bir galeri kaydı silindi.',
+            route('admin.galeriler.index', absolute: false),
+        );
 
         return redirect()->route('admin.galeriler.index')->with('notification', ['type' => 'success', 'message' => 'Galeri kaydı silindi.']);
     }
 
-    public function bulk(BulkGalerilerItemsRequest $request, GalerilerItemService $service): RedirectResponse
+    public function bulk(BulkGalerilerItemsRequest $request, GalerilerItemService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->bulk($request->validated());
+        $data = $request->validated();
+        $service->bulk($data);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            $data['action'] === 'delete' ? 'Galeri kayıtları silindi' : 'Galeri kayıtları güncellendi',
+            $data['action'] === 'delete' ? 'Toplu işlemde galeri kayıtları silindi.' : 'Toplu işlemde galeri kayıtları güncellendi.',
+            route('admin.galeriler.index', absolute: false),
+        );
 
         return redirect()->route('admin.galeriler.index')->with('notification', ['type' => 'success', 'message' => 'Toplu işlem tamamlandı.']);
     }

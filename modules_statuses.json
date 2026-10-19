@@ -13,5 +13,6 @@
     "Projects": true,
     "Galeriler": true,
     "Users": true,
+    "Products": true,
     "Popup": true
 }

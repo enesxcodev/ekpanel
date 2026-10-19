@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Sector\DataTables\SectorsDataTable;
 use Modules\Sector\Http\Requests\SaveSectorRequest;
 use Modules\Sector\Models\Sector;
@@ -41,9 +43,15 @@ class SectorController extends Controller
         return view('sector::create', compact('featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function store(SaveSectorRequest $request, SectorService $service): RedirectResponse
+    public function store(SaveSectorRequest $request, SectorService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $sector = $service->save($request->validated(), null, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sektör eklendi',
+            'Bir sektör eklendi.',
+            route('admin.sector.edit', ['sector' => $sector->id], absolute: false),
+        );
 
         return redirect()->route('admin.sector.index')->with('notification', ['type' => 'success', 'message' => 'Sektör başarıyla eklendi.']);
     }
@@ -58,17 +66,29 @@ class SectorController extends Controller
         return view('sector::edit', compact('sector', 'featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function update(SaveSectorRequest $request, Sector $sector, SectorService $service): RedirectResponse
+    public function update(SaveSectorRequest $request, Sector $sector, SectorService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), $sector, $request->user('admin'));
+        $sector = $service->save($request->validated(), $sector, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sektör güncellendi',
+            'Bir sektör güncellendi.',
+            route('admin.sector.edit', ['sector' => $sector->id], absolute: false),
+        );
 
         return redirect()->route('admin.sector.index')->with('notification', ['type' => 'success', 'message' => 'Sektör başarıyla güncellendi.']);
     }
 
-    public function destroy(Sector $sector, SectorService $service): RedirectResponse
+    public function destroy(Sector $sector, SectorService $service, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('sector.delete');
         $service->delete($sector);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Sektör silindi',
+            'Bir sektör silindi.',
+            route('admin.sector.index', absolute: false),
+        );
 
         return redirect()->route('admin.sector.index')->with('notification', ['type' => 'success', 'message' => 'Sektör başarıyla silindi.']);
     }

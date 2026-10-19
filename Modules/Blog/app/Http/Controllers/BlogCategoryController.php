@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Blog\DataTables\BlogCategoriesDataTable;
 use Modules\Blog\Http\Requests\SaveBlogCategoryRequest;
 use Modules\Blog\Models\BlogCategory;
@@ -16,7 +18,7 @@ use Modules\Blog\Services\BlogCategoryService;
 
 class BlogCategoryController extends Controller
 {
-    public function __construct(private MediaService $media) {}
+    public function __construct(private MediaService $media, private NotifyService $notifications) {}
 
     public function index(): View
     {
@@ -43,7 +45,13 @@ class BlogCategoryController extends Controller
 
     public function store(SaveBlogCategoryRequest $request, BlogCategoryService $service): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $category = $service->save($request->validated(), null, $request->user('admin'));
+        $this->notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Blog kategorisi eklendi',
+            'Yeni bir blog kategorisi eklendi.',
+            route('admin.blog.categories.edit', ['category' => $category->id], absolute: false),
+        );
 
         return redirect()->route('admin.blog.categories.index')->with('notification', ['type' => 'success', 'message' => 'Kategori eklendi.']);
     }
@@ -59,15 +67,29 @@ class BlogCategoryController extends Controller
 
     public function update(SaveBlogCategoryRequest $request, BlogCategory $category, BlogCategoryService $service): RedirectResponse
     {
-        $service->save($request->validated(), $category, $request->user('admin'));
+        $category = $service->save($request->validated(), $category, $request->user('admin'));
+        $this->notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Blog kategorisi güncellendi',
+            'Bir blog kategorisi güncellendi.',
+            route('admin.blog.categories.edit', ['category' => $category->id], absolute: false),
+        );
 
         return redirect()->route('admin.blog.categories.index')->with('notification', ['type' => 'success', 'message' => 'Kategori güncellendi.']);
     }
 
-    public function destroy(BlogCategory $category, BlogCategoryService $service): RedirectResponse
+    public function destroy(Request $request, BlogCategory $category, BlogCategoryService $service): RedirectResponse
     {
         $this->authorize('blog.categories.delete');
         $deleted = $service->delete($category);
+        if ($deleted) {
+            $this->notifications->sendToAdminsForActor(
+                $request->user('admin'),
+                'Blog kategorisi silindi',
+                'Bir blog kategorisi silindi.',
+                route('admin.blog.categories.index', absolute: false),
+            );
+        }
 
         return redirect()->route('admin.blog.categories.index')->with('notification', ['type' => $deleted ? 'success' : 'warning', 'message' => $deleted ? 'Kategori silindi.' : 'İçerik veya alt kategori bulunan kategori silinemez. Önce içeriği taşıyın veya alt kategorileri düzenleyin.']);
     }

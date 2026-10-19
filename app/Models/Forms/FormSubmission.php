@@ -10,11 +10,11 @@ class FormSubmission extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['form_name', 'name', 'email', 'phone', 'status', 'answers'];
+    protected $fillable = ['form_name', 'name', 'email', 'phone', 'status', 'answers', 'related_content'];
 
     protected function casts(): array
     {
-        return ['answers' => 'array'];
+        return ['answers' => 'array', 'related_content' => 'array'];
     }
 
     public function form(): BelongsTo

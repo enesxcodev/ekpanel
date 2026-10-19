@@ -1,7 +1,7 @@
 {
     "name": "Galeriler",
     "alias": "galeriler",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Fotoğraf ve Video Galerisi",
     "keywords": [],
     "priority": 0,
@@ -10,6 +10,10 @@
     ],
     "files": [],
     "panel": {
+        "assets": {
+            "routes": ["admin.galeriler.*"],
+            "js": ["resources/dist/panel.js"]
+        },
         "permissions": [
             "galeriler.menu",
             "galeriler.view",

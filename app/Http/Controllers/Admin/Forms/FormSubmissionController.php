@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Forms\FormSubmission;
 use App\Models\Forms\SiteForm;
 use App\Services\Forms\FormService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -50,18 +51,30 @@ class FormSubmissionController extends Controller
         return view('admin.forms.submissions.show', compact('submission'));
     }
 
-    public function update(Request $request, FormSubmission $submission): RedirectResponse
+    public function update(Request $request, FormSubmission $submission, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('forms.submissions.update');
         $submission->update($request->validate(['status' => ['required', Rule::in(['new', 'read', 'in_progress'])]]));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Form başvurusu güncellendi',
+            'Bir form başvurusunun durumu güncellendi.',
+            route('admin.forms.submissions.show', ['submission' => $submission->id], absolute: false),
+        );
 
         return back()->with('notification', ['type' => 'success', 'message' => 'Başvuru durumu güncellendi.']);
     }
 
-    public function destroy(FormSubmission $submission, FormService $service): RedirectResponse
+    public function destroy(FormSubmission $submission, FormService $service, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('forms.submissions.delete');
         $service->deleteSubmission($submission);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Form başvurusu silindi',
+            'Bir form başvurusu silindi.',
+            route('admin.forms.submissions.index', absolute: false),
+        );
 
         return redirect()->route('admin.forms.submissions.index')->with('notification', ['type' => 'success', 'message' => 'Başvuru silindi.']);
     }

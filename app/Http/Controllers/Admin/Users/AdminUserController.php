@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Users\StoreAdminRequest;
 use App\Http\Requests\Admin\Users\UpdateAdminRequest;
 use App\Models\Admin\Admin;
 use App\Services\Admin\Users\AdminUserService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -36,9 +37,15 @@ class AdminUserController extends Controller
         return view('admin.users.create', ['types' => AdminTypeEnum::cases()]);
     }
 
-    public function store(StoreAdminRequest $request, AdminUserService $adminUserService): RedirectResponse
+    public function store(StoreAdminRequest $request, AdminUserService $adminUserService, NotifyService $notifications): RedirectResponse
     {
-        $adminUserService->create($request->validated());
+        $admin = $adminUserService->create($request->validated());
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Yönetici eklendi',
+            'Yeni bir yönetici hesabı eklendi.',
+            route('admin.users.edit', ['admin' => $admin->id], absolute: false),
+        );
 
         return redirect()->route('admin.users.index')->with('notification', [
             'type' => 'success',
@@ -60,8 +67,15 @@ class AdminUserController extends Controller
         UpdateAdminRequest $request,
         Admin $admin,
         AdminUserService $adminUserService,
+        NotifyService $notifications,
     ): RedirectResponse {
-        $adminUserService->update($admin, $request->validated(), $request->user('admin'));
+        $admin = $adminUserService->update($admin, $request->validated(), $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Yönetici güncellendi',
+            'Bir yönetici hesabı güncellendi.',
+            route('admin.users.edit', ['admin' => $admin->id], absolute: false),
+        );
 
         return redirect()->route('admin.users.index')->with('notification', [
             'type' => 'success',

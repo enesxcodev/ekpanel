@@ -3,6 +3,7 @@
 namespace Modules\Menus\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -55,9 +56,15 @@ class MenusController extends Controller
         return redirect()->route('admin.menus.index', ['new' => 1]);
     }
 
-    public function store(SaveMenuRequest $request, MenuService $service): JsonResponse|RedirectResponse
+    public function store(SaveMenuRequest $request, MenuService $service, NotifyService $notifications): JsonResponse|RedirectResponse
     {
         $menu = $service->save($request->validated());
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Menü eklendi',
+            'Bir menü eklendi.',
+            route('admin.menus.index', ['menu' => $menu->id], absolute: false),
+        );
         if ($request->expectsJson()) {
             return response()->json(['menu' => $this->menuSummary($menu->loadCount('items')), 'message' => 'Menü başarıyla eklendi.'], 201);
         }
@@ -72,9 +79,15 @@ class MenusController extends Controller
         return redirect()->route('admin.menus.index', ['menu' => $menu->id]);
     }
 
-    public function update(SaveMenuRequest $request, Menu $menu, MenuService $service): JsonResponse|RedirectResponse
+    public function update(SaveMenuRequest $request, Menu $menu, MenuService $service, NotifyService $notifications): JsonResponse|RedirectResponse
     {
         $service->save($request->validated(), $menu);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Menü güncellendi',
+            'Bir menü güncellendi.',
+            route('admin.menus.index', ['menu' => $menu->id], absolute: false),
+        );
         if ($request->expectsJson()) {
             return response()->json(['menu' => $this->menuSummary($menu->loadCount('items')), 'message' => 'Menü başarıyla güncellendi.']);
         }
@@ -82,10 +95,16 @@ class MenusController extends Controller
         return redirect()->route('admin.menus.index')->with('notification', ['type' => 'success', 'message' => 'Menü başarıyla güncellendi.']);
     }
 
-    public function destroy(Request $request, Menu $menu): JsonResponse|RedirectResponse
+    public function destroy(Request $request, Menu $menu, NotifyService $notifications): JsonResponse|RedirectResponse
     {
         $this->authorize('menus.delete');
         $menu->delete();
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Menü silindi',
+            'Bir menü ve bağlı öğeleri silindi.',
+            route('admin.menus.index', absolute: false),
+        );
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Menü ve öğeleri başarıyla silindi.']);
         }

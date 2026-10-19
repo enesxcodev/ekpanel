@@ -52,7 +52,7 @@ test('slider records keep required images during edits and replace and delete th
     ])->assertSessionHasNoErrors()->assertRedirectToRoute('admin.slider.index');
     $slider = Slider::query()->sole();
     expect($slider->subtitle)->toBeNull();
-    expect($slider->extra_fields)->toBe(['background_image' => null, 'button_text' => 'İncele', 'short_description' => 'Kısa metin']);
+    expect($slider->extra_fields)->toBe(['eyebrow' => null, 'highlighted_title' => null, 'background_image' => null, 'button_text' => 'İncele', 'directions_button_text' => null, 'directions_url' => null, 'short_description' => 'Kısa metin']);
     $first = $slider->image;
     Storage::disk('public')->assertExists($first);
 
@@ -60,7 +60,7 @@ test('slider records keep required images during edits and replace and delete th
         ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.slider.index');
     expect($slider->fresh()->image)->toBe($first);
     expect($slider->fresh()->subtitle)->toBe('Alt başlık');
-    expect($slider->fresh()->extra_fields)->toBe(['background_image' => null, 'button_text' => null, 'short_description' => 'Kısa metin']);
+    expect($slider->fresh()->extra_fields)->toBe(['eyebrow' => null, 'highlighted_title' => null, 'background_image' => null, 'button_text' => null, 'directions_button_text' => null, 'directions_url' => null, 'short_description' => 'Kısa metin']);
     Storage::disk('public')->assertExists($first);
 
     $replacementMedia = sliderTestImage('replacement.png');

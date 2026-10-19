@@ -23,14 +23,14 @@ export function initializeSlugs() {
             return;
         }
 
-        let manuallyEdited = slug.value !== '';
+        let manuallyEdited = false;
         title.addEventListener('input', () => {
             if (!manuallyEdited) {
                 slug.value = toSlug(title.value);
             }
         });
         slug.addEventListener('input', () => {
-            manuallyEdited = true;
+            manuallyEdited = slug.value !== '';
         });
         if (slug.value === '' && title.value !== '') {
             slug.value = toSlug(title.value);

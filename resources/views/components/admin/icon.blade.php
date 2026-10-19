@@ -26,6 +26,16 @@
         @case('file')
             <path d="M6 3h8l4 4v14H6zM14 3v5h4M9 13h6m-6 4h6" />
             @break
+        @case('file-text')
+            <path d="M6 3h8l4 4v14H6zM14 3v5h4M9 13h6m-6 4h6" />
+            @break
+        @case('file-pencil')
+            <path d="M6 3h8l4 4v6M14 3v5h4M9 13h4m-4 4h3" />
+            <path d="m15 19 4-4 2 2-4 4-3 1z" />
+            @break
+        @case('inbox')
+            <path d="M4 4h16v15h-5l-2 2h-2l-2-2H4zM4 13h4l2 3h4l2-3h4" />
+            @break
         @case('clock')
             <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
             @break
@@ -77,6 +87,16 @@
         @case('category')
             <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" />
             <circle cx="17" cy="17" r="3" />
+            @break
+        @case('moon')
+            <path d="M12 3c-5 0-9 4-9 9s4 9 9 9 9-4 9-9a7 7 0 0 1-9-9z" />
+            @break
+        @case('sun')
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+            @break
+        @case('bell')
+            <path d="M10 5a2 2 0 0 1 4 0 6 6 0 0 1 4 6v3l2 3H4l2-3v-3a6 6 0 0 1 4-6M9 21h6" />
             @break
         @default
             <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z" />

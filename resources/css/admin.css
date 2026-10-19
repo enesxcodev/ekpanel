@@ -3,8 +3,33 @@
 @import './media.css';
 @import './admin-panel-refresh.css';
 @import './admin-forms.css';
+@import './admin-dark.css';
 @import './site-forms.css';
 @import './form-builder.css';
+
+[data-category-tree-select] {
+    min-width: 0;
+    max-width: 100%;
+}
+
+[data-category-tree-trigger] {
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+}
+
+[data-category-tree-label] {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+[data-category-tree-menu] {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
 
 .category-tree-list [data-category-tree-option] {
     cursor: pointer;
@@ -31,4 +56,20 @@
 .category-tree-option-path {
     color: var(--tblr-secondary);
     font-size: .75rem;
+}
+
+
+
+.admin-topbar { min-height: 3.5rem; background: var(--tblr-bg-surface); border-bottom: 1px solid var(--tblr-border-color); }
+.admin-topbar-user { max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-notifications { width: min(28rem, calc(100vw - 2rem)); }
+
+
+@media (max-width: 575.98px) {
+    .admin-topbar .nav-item:has(> .admin-notifications) { position: static; }
+    .admin-topbar .admin-notifications {
+        inset: 100% 1rem auto !important;
+        width: auto;
+        transform: none !important;
+    }
 }

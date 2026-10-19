@@ -11,6 +11,13 @@ beforeEach(function (): void {
     $this->withoutVite();
 });
 
+test('an empty FAQ answer is still rejected by server validation', function (): void {
+    $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
+        ->postJson(route('admin.faqs.store'), ['name' => 'Bir soru', 'content' => ''])
+        ->assertUnprocessable()->assertJsonValidationErrors('content');
+    $this->assertDatabaseCount('faqs', 0);
+});
+
 test('frequently asked questions can be created and updated in a category', function (): void {
     $admin = Admin::factory()->superAdmin()->create();
     $category = FaqCategory::factory()->create();

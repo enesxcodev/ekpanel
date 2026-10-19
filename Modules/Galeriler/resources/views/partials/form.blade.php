@@ -1,6 +1,6 @@
 @csrf
 @if ($item) @method('PUT') @endif
-<x-admin.form.select name="galeriler_category_id" label="Kategori" :options="$categoryOptions" :value="$item->galeriler_category_id ?? null" required />
+<x-admin.form.select name="galeriler_category_id" label="Kategori (isteğe bağlı)" :options="$categoryOptions" :value="$item->galeriler_category_id ?? null" placeholder="Kategorisiz" />
 <x-admin.form.select name="type" label="Tür" :options="[['value' => 'photo', 'label' => 'Fotoğraf'], ['value' => 'video', 'label' => 'Video']]" :value="$item->type ?? 'photo'" :placeholder="false" required data-galeriler-type />
 <div data-galeriler-photos @if(old('type', $item->type ?? 'photo') !== 'photo') hidden @endif>
     <x-admin.media.picker name="image_media_ids" label="Fotoğraflar" :config="$mediaConfig" kind="image" :multiple="true"

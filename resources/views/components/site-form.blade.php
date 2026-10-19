@@ -2,6 +2,7 @@
 @php($formErrors = $errors->getBag('form_'.$form->id))
 <form method="POST" action="{{ route('forms.submit',$form->key) }}" enctype="multipart/form-data" {{ $attributes->class(['ek-form', $form->css_class]) }} data-form="{{ $form->key }}">
     @csrf
+    @if($context !== null)<input type="hidden" name="form_context" value="{{ $context }}">@endif
     <input type="hidden" name="_form_id" value="{{ $form->id }}">
     @if(session('form_success.'.$form->id))<div class="ek-form__success" role="status">{{ session('form_success.'.$form->id) }}</div>@endif
     @if($formErrors->any())<div class="ek-form__errors" role="alert"><ul>@foreach($formErrors->all() as $message)<li>{{ $message }}</li>@endforeach</ul></div>@endif

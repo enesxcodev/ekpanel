@@ -1,0 +1,35 @@
+{
+    "name": "Products",
+    "alias": "products",
+    "version": "0.1.0",
+    "description": "Ürün yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Products\\Providers\\ProductsServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "products.menu",
+            "products.view",
+            "products.create",
+            "products.update",
+            "products.delete",
+            "products.categories.menu",
+            "products.categories.view",
+            "products.categories.create",
+            "products.categories.update",
+            "products.categories.delete"
+        ],
+        "assets": {
+            "routes": [
+                "admin.products.create",
+                "admin.products.edit"
+            ],
+            "js": [
+                "resources/dist/panel.js"
+            ]
+        }
+    }
+}

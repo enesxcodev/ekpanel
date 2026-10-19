@@ -1,7 +1,7 @@
 {
     "name": "Menus",
     "alias": "menus",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Yönetilebilir çok seviyeli ziyaretçi menüleri",
     "keywords": [],
     "priority": 0,

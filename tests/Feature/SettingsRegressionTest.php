@@ -31,6 +31,31 @@ test('settings renders configured inputs and saves typed values without losing d
     expect(app(SettingsService::class)->get($text->key))->toBe('Yeni başlık');
 });
 
+test('settings changes notify all admins with changed labels only when a regular admin saves them', function () {
+    $section = SettingSection::factory()->create(['label' => 'Genel']);
+    $title = SettingDefinition::factory()->for($section, 'section')->create(['label' => 'Site başlığı', 'default_value' => 'Eski başlık']);
+    $password = SettingDefinition::factory()->for($section, 'section')->password()->create(['label' => 'E-posta parolası']);
+    $admin = Admin::factory()->create();
+    $superAdmin = Admin::factory()->superAdmin()->create();
+    $service = app(SettingsService::class);
+    $payload = ['settings' => [$title->id => 'Yeni başlık', $password->id => 'gizli-yeni-değer']];
+
+    $service->updateSection($section, $payload, $admin);
+
+    expect($admin->notifications()->count())->toBe(1)->and($superAdmin->notifications()->count())->toBe(1);
+    $notification = $superAdmin->notifications()->firstOrFail();
+    expect($notification->data['title'])->toBe('Ayarlar güncellendi')
+        ->and($notification->data['content'])->toContain('Site başlığı', 'E-posta parolası')
+        ->and($notification->data['content'])->not->toContain('Yeni başlık', 'gizli-yeni-değer')
+        ->and($notification->data['link'])->toBe(parse_url(route('admin.settings.index', ['section' => $section->id]), PHP_URL_PATH).'?section='.$section->id);
+
+    $service->updateSection($section, $payload, $admin);
+    expect($admin->notifications()->count())->toBe(1)->and($superAdmin->notifications()->count())->toBe(1);
+
+    $service->updateSection($section, ['settings' => [$title->id => 'Süper admin değişikliği', $password->id => 'gizli-yeni-değer']], $superAdmin);
+    expect($admin->notifications()->count())->toBe(1)->and($superAdmin->notifications()->count())->toBe(1);
+});
+
 test('settings rejects invalid selections and unknown field ids without saving', function () {
     $section = SettingSection::factory()->create();
     $definition = SettingDefinition::factory()->for($section, 'section')->create(['label' => 'Renk', 'input_type' => 'select', 'options' => [['label' => 'Koyu', 'value' => 'dark']]]);

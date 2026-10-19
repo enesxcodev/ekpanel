@@ -1,0 +1,13 @@
+{
+    "schema_version": 1,
+    "forms": {
+        "product": {
+            "label": "Ek ürün alanları",
+            "fields": []
+        },
+        "category": {
+            "label": "Ek kategori alanları",
+            "fields": []
+        }
+    }
+}

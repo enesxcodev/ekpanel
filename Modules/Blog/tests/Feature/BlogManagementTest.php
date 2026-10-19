@@ -6,11 +6,79 @@ use Modules\Blog\Database\Seeders\BlogDatabaseSeeder;
 use Modules\Blog\Models\BlogCategory;
 use Modules\Blog\Models\BlogContent;
 use Modules\Blog\Models\BlogTag;
+use Spatie\Permission\Models\Permission;
 
 uses(LazilyRefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->withoutVite();
+});
+
+test('blog content category and tag actions notify all admins with links to the affected record', function (): void {
+    $permissionNames = [
+        'blog.create', 'blog.update', 'blog.delete',
+        'blog.categories.create', 'blog.categories.update', 'blog.categories.delete',
+        'blog.tags.create', 'blog.tags.update', 'blog.tags.delete',
+    ];
+    $actor = Admin::factory()->create();
+    $recipient = Admin::factory()->create();
+    $superAdmin = Admin::factory()->superAdmin()->create();
+    $actor->givePermissionTo(collect($permissionNames)->map(fn (string $name): Permission => Permission::findOrCreate($name, 'admin'))->all());
+    $this->actingAs($actor, 'admin');
+
+    $assertNotification = function (string $title, string $link) use ($recipient): void {
+        $notification = $recipient->notifications()->where('data->title', $title)->firstOrFail();
+        expect($notification->data['link'])->toBe($link);
+    };
+
+    $category = BlogCategory::factory()->create();
+    $this->post(route('admin.blog.store'), [
+        'blog_category_id' => $category->id,
+        'title' => 'Yeni yazı',
+        'slug' => 'yeni-yazi',
+        'content' => '<p>İçerik</p>',
+        'status' => 'draft',
+    ])->assertRedirectToRoute('admin.blog.index');
+    $blog = BlogContent::query()->sole();
+    $assertNotification('Blog yazısı eklendi', route('admin.blog.edit', ['blog' => $blog->id], absolute: false));
+
+    $this->put(route('admin.blog.update', $blog), [
+        'blog_category_id' => $category->id,
+        'title' => 'Güncel yazı',
+        'slug' => 'guncel-yazi',
+        'content' => '<p>Güncel içerik</p>',
+        'status' => 'draft',
+    ])->assertRedirectToRoute('admin.blog.index');
+    $assertNotification('Blog yazısı güncellendi', route('admin.blog.edit', ['blog' => $blog->id], absolute: false));
+
+    $this->delete(route('admin.blog.destroy', $blog))->assertRedirectToRoute('admin.blog.index');
+    $assertNotification('Blog yazısı silindi', route('admin.blog.index', absolute: false));
+
+    $this->post(route('admin.blog.categories.store'), ['name' => 'Yeni kategori', 'slug' => 'yeni-kategori', 'sort_order' => 0])
+        ->assertRedirectToRoute('admin.blog.categories.index');
+    $createdCategory = BlogCategory::query()->where('slug', 'yeni-kategori')->sole();
+    $assertNotification('Blog kategorisi eklendi', route('admin.blog.categories.edit', ['category' => $createdCategory->id], absolute: false));
+
+    $this->put(route('admin.blog.categories.update', $createdCategory), ['name' => 'Güncel kategori', 'slug' => 'guncel-kategori', 'sort_order' => 0])
+        ->assertRedirectToRoute('admin.blog.categories.index');
+    $assertNotification('Blog kategorisi güncellendi', route('admin.blog.categories.edit', ['category' => $createdCategory->id], absolute: false));
+
+    $this->delete(route('admin.blog.categories.destroy', $createdCategory))->assertRedirectToRoute('admin.blog.categories.index');
+    $assertNotification('Blog kategorisi silindi', route('admin.blog.categories.index', absolute: false));
+
+    $this->post(route('admin.blog.tags.store'), ['name' => 'Yeni etiket', 'slug' => 'yeni-etiket'])->assertRedirectToRoute('admin.blog.tags.index');
+    $tag = BlogTag::query()->where('slug', 'yeni-etiket')->sole();
+    $assertNotification('Blog etiketi eklendi', route('admin.blog.tags.edit', ['tag' => $tag->id], absolute: false));
+
+    $this->put(route('admin.blog.tags.update', $tag), ['name' => 'Güncel etiket', 'slug' => 'guncel-etiket'])->assertRedirectToRoute('admin.blog.tags.index');
+    $assertNotification('Blog etiketi güncellendi', route('admin.blog.tags.edit', ['tag' => $tag->id], absolute: false));
+
+    $this->delete(route('admin.blog.tags.destroy', $tag))->assertRedirectToRoute('admin.blog.tags.index');
+    $assertNotification('Blog etiketi silindi', route('admin.blog.tags.index', absolute: false));
+
+    expect($actor->notifications()->count())->toBe(9)
+        ->and($recipient->notifications()->count())->toBe(9)
+        ->and($superAdmin->notifications()->count())->toBe(9);
 });
 
 test('content can be created, updated and published from one category with multiple tags', function (): void {

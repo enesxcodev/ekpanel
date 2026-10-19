@@ -20,30 +20,35 @@ class GalerilerItemService
     public function __construct(private FieldFiles $files, private ModuleFeatures $features, private FeatureValues $values, private MediaService $media, private ContentMediaService $contentMedia, private MediaSelection $selection) {}
 
     /** @param array<string, mixed> $data */
-    public function save(array $data, ?GalerilerItem $item, Admin $actor): void
+    public function save(array $data, ?GalerilerItem $item, Admin $actor): GalerilerItem
     {
-        $this->files->transaction(function (FieldFiles $files) use ($data, $item, $actor): void {
-            $category = GalerilerCategory::query()->lockForUpdate()->findOrFail($data['galeriler_category_id']);
+        $savedItem = null;
+        $this->files->transaction(function (FieldFiles $files) use ($data, $item, $actor, &$savedItem): void {
+            $category = empty($data['galeriler_category_id']) ? null : GalerilerCategory::query()->lockForUpdate()->findOrFail($data['galeriler_category_id']);
+            $categoryId = $category?->id;
             $item = $item ? GalerilerItem::query()->lockForUpdate()->findOrFail($item->id) : null;
             $imageIds = $data['type'] === 'photo' ? $data['image_media_ids'] : [];
             $this->selection->images($imageIds, $actor, $item?->image_media_id ? [$item->image_media_id] : []);
-            $nextOrder = (int) $category->items()->max('sort_order') + 1;
+            $nextOrder = (int) GalerilerItem::query()->where('galeriler_category_id', $categoryId)->max('sort_order') + 1;
             foreach ($data['type'] === 'photo' ? $imageIds : [null] as $offset => $imageId) {
                 $record = $item ?? new GalerilerItem;
                 $record->fill([
-                    'galeriler_category_id' => $category->id, 'type' => $data['type'],
+                    'galeriler_category_id' => $categoryId, 'type' => $data['type'],
                     'title' => $data['title'] ?? null, 'description' => $data['description'] ?? null,
                     'video_url' => $data['type'] === 'video' ? $data['video_url'] : null,
                     ...$this->contentMedia->prepare($record, ['image_media_id' => $imageId], $this->contentMedia->definition(), $actor),
-                    'sort_order' => $item && $item->galeriler_category_id === $category->id ? $item->sort_order : $nextOrder + $offset,
+                    'sort_order' => $item && $item->galeriler_category_id === $categoryId ? $item->sort_order : $nextOrder + $offset,
                 ])->save();
                 $definitions = $this->features->form('Galeriler', 'item')['fields'];
                 $record->extra_fields = $this->values->prepare($definitions, $data, $record->extra_fields ?? [], 'galeriler/'.$record->id.'/features', $files, $actor);
                 $record->save();
                 $this->contentMedia->syncUsage($record, 'image', 'Galeri / '.($record->title ?? $record->id), 'admin.galeriler.edit');
                 $this->values->syncMediaUsages($definitions, $record, $this->media, 'Galeri / '.$record->id, 'admin.galeriler.edit');
+                $savedItem = $record;
             }
         });
+
+        return $savedItem ?? throw new \LogicException('Galeri kaydı oluşturulamadı.');
     }
 
     public function delete(GalerilerItem $item): void

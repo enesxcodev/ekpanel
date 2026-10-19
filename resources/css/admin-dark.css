@@ -3,8 +3,7 @@
  * Remove this file from the admin layout's @vite list and remove data-bs-theme="dark"
  * to restore the default light appearance.
  */
-:root,
-[data-bs-theme="dark"] {
+html[data-bs-theme="dark"] {
     color-scheme: dark;
     --tblr-body-bg: #111827;
     --tblr-body-color: #d1d5db;
@@ -16,56 +15,42 @@
     --tblr-muted: #9ca3af;
 }
 
-body {
+html[data-bs-theme="dark"] body {
     background-color: var(--tblr-body-bg);
     color: var(--tblr-body-color);
 }
 
-.admin-sidebar-brand {
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-}
-
-.admin-sidebar-brand-logo {
-    display: block;
-    width: auto;
-    max-width: 100%;
-    height: 2.75rem;
-    object-fit: contain;
-}
-
-.page-wrapper,
-.page-body {
+html[data-bs-theme="dark"] .page-wrapper,
+html[data-bs-theme="dark"] .page-body {
     background-color: var(--tblr-body-bg);
 }
 
-.page-header,
-.navbar-expand-md:not(.navbar-vertical) {
+html[data-bs-theme="dark"] .page-header,
+html[data-bs-theme="dark"] .navbar-expand-md:not(.navbar-vertical) {
     background-color: var(--tblr-bg-surface);
     border-color: var(--tblr-border-color);
 }
 
-.card,
-.dropdown-menu,
-.modal-content,
-.offcanvas,
-.list-group-item,
-.accordion-item {
+html[data-bs-theme="dark"] .card,
+html[data-bs-theme="dark"] .dropdown-menu,
+html[data-bs-theme="dark"] .modal-content,
+html[data-bs-theme="dark"] .offcanvas,
+html[data-bs-theme="dark"] .list-group-item,
+html[data-bs-theme="dark"] .accordion-item {
     color: var(--tblr-body-color);
     background-color: var(--tblr-bg-surface);
     border-color: var(--tblr-border-color);
 }
 
-.card-header,
-.card-footer,
-.table thead th,
-.table tfoot th {
+html[data-bs-theme="dark"] .card-header,
+html[data-bs-theme="dark"] .card-footer,
+html[data-bs-theme="dark"] .table thead th,
+html[data-bs-theme="dark"] .table tfoot th {
     background-color: var(--tblr-bg-surface-secondary);
     border-color: var(--tblr-border-color);
 }
 
-.table {
+html[data-bs-theme="dark"] .table {
     --tblr-table-color: var(--tblr-body-color);
     --tblr-table-bg: transparent;
     --tblr-table-border-color: var(--tblr-border-color);
@@ -73,25 +58,25 @@ body {
     --tblr-table-hover-bg: rgb(148 163 184 / 8%);
 }
 
-.form-control,
-.form-select,
-.form-check-input,
-.input-group-text,
-.select2-container--default .select2-selection--single,
-.select2-container--default .select2-selection--multiple {
+html[data-bs-theme="dark"] .form-control,
+html[data-bs-theme="dark"] .form-select,
+html[data-bs-theme="dark"] .form-check-input,
+html[data-bs-theme="dark"] .input-group-text,
+html[data-bs-theme="dark"] .select2-container--default .select2-selection--single,
+html[data-bs-theme="dark"] .select2-container--default .select2-selection--multiple {
     color: var(--tblr-body-color);
     background-color: #111827;
     border-color: var(--tblr-border-color);
 }
 
-.form-label,
-.form-check-label {
+html[data-bs-theme="dark"] .form-label,
+html[data-bs-theme="dark"] .form-check-label {
     color: #f3f4f6;
     font-weight: 600;
 }
 
-.form-control:not(textarea):not([type="file"]),
-.form-select {
+html[data-bs-theme="dark"] .form-control:not(textarea):not([type="file"]),
+html[data-bs-theme="dark"] .form-select {
     min-height: 2.75rem;
     padding-block: .625rem;
     color: #f9fafb;
@@ -100,63 +85,63 @@ body {
     line-height: 1.4;
 }
 
-.form-control[type="file"] {
+html[data-bs-theme="dark"] .form-control[type="file"] {
     min-height: 2.75rem;
 }
 
-.form-control:not(textarea):not([type="file"])::placeholder,
-.form-control:where(textarea)::placeholder,
-.form-select:invalid,
-.select2-container--default .select2-selection__placeholder {
+html[data-bs-theme="dark"] .form-control:not(textarea):not([type="file"])::placeholder,
+html[data-bs-theme="dark"] .form-control:where(textarea)::placeholder,
+html[data-bs-theme="dark"] .form-select:invalid,
+html[data-bs-theme="dark"] .select2-container--default .select2-selection__placeholder {
     color: #9ca3af;
     opacity: 1;
 }
 
-.form-hint,
-.form-text {
+html[data-bs-theme="dark"] .form-hint,
+html[data-bs-theme="dark"] .form-text {
     color: #9ca3af;
     font-size: .8125rem;
     line-height: 1.5;
 }
 
-.form-control:disabled,
-.form-control[readonly],
-.form-select:disabled {
+html[data-bs-theme="dark"] .form-control:disabled,
+html[data-bs-theme="dark"] .form-control[readonly],
+html[data-bs-theme="dark"] .form-select:disabled {
     color: #9ca3af;
     background-color: #18212f;
 }
 
-.form-control::placeholder,
-.select2-container--default .select2-selection__placeholder {
+html[data-bs-theme="dark"] .form-control::placeholder,
+html[data-bs-theme="dark"] .select2-container--default .select2-selection__placeholder {
     color: #9ca3af;
 }
 
-.form-control:focus,
-.form-select:focus,
-.form-check-input:focus {
+html[data-bs-theme="dark"] .form-control:focus,
+html[data-bs-theme="dark"] .form-select:focus,
+html[data-bs-theme="dark"] .form-check-input:focus {
     background-color: #111827;
 }
 
-.dropdown-item,
-.list-group-item-action {
+html[data-bs-theme="dark"] .dropdown-item,
+html[data-bs-theme="dark"] .list-group-item-action {
     color: var(--tblr-body-color);
 }
 
-.dropdown-item:hover,
-.dropdown-item:focus,
-.list-group-item-action:hover,
-.list-group-item-action:focus {
+html[data-bs-theme="dark"] .dropdown-item:hover,
+html[data-bs-theme="dark"] .dropdown-item:focus,
+html[data-bs-theme="dark"] .list-group-item-action:hover,
+html[data-bs-theme="dark"] .list-group-item-action:focus {
     color: #f9fafb;
     background-color: #374151;
 }
 
-.select2-container--default .select2-results__option,
-.select2-container--default .select2-results__option[aria-selected="true"] {
+html[data-bs-theme="dark"] .select2-container--default .select2-results__option,
+html[data-bs-theme="dark"] .select2-container--default .select2-results__option[aria-selected="true"] {
     color: var(--tblr-body-color);
     background-color: var(--tblr-bg-surface);
 }
 
-.select2-container--default .select2-results__option--highlighted[aria-selected] {
+html[data-bs-theme="dark"] .select2-container--default .select2-results__option--highlighted[aria-selected] {
     color: #fff;
     background-color: var(--tblr-primary);
 }

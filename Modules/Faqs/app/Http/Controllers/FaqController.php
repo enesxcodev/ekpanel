@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Faqs\DataTables\FaqsDataTable;
 use Modules\Faqs\Http\Requests\SaveFaqRequest;
 use Modules\Faqs\Models\Faq;
@@ -43,9 +45,15 @@ class FaqController extends Controller
         return view('faqs::create', compact('featureForm', 'featureFields', 'categoryOptions') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function store(SaveFaqRequest $request, FaqService $service): RedirectResponse
+    public function store(SaveFaqRequest $request, FaqService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $faq = $service->save($request->validated(), null, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Soru eklendi',
+            'Bir soru eklendi.',
+            route('admin.faqs.edit', ['faq' => $faq->id], absolute: false),
+        );
 
         return redirect()->route('admin.faqs.index')->with('notification', ['type' => 'success', 'message' => 'Soru başarıyla eklendi.']);
     }
@@ -60,17 +68,29 @@ class FaqController extends Controller
         return view('faqs::edit', compact('faq', 'featureForm', 'featureFields', 'categoryOptions') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
-    public function update(SaveFaqRequest $request, Faq $faq, FaqService $service): RedirectResponse
+    public function update(SaveFaqRequest $request, Faq $faq, FaqService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), $faq, $request->user('admin'));
+        $faq = $service->save($request->validated(), $faq, $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Soru güncellendi',
+            'Bir soru güncellendi.',
+            route('admin.faqs.edit', ['faq' => $faq->id], absolute: false),
+        );
 
         return redirect()->route('admin.faqs.index')->with('notification', ['type' => 'success', 'message' => 'Soru başarıyla güncellendi.']);
     }
 
-    public function destroy(Faq $faq, FaqService $service): RedirectResponse
+    public function destroy(Faq $faq, FaqService $service, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('faqs.delete');
         $service->delete($faq);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Soru silindi',
+            'Bir soru silindi.',
+            route('admin.faqs.index', absolute: false),
+        );
 
         return redirect()->route('admin.faqs.index')->with('notification', ['type' => 'success', 'message' => 'Soru başarıyla silindi.']);
     }

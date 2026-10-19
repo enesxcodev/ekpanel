@@ -13,9 +13,9 @@ beforeEach(function () {
     $this->withoutVite();
 });
 
-test('testimonials default to unpublished and allow optional fields to be empty', function () {
+test('testimonials create form selects published while omitted fields use persistence defaults', function () {
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
-    $this->get(route('admin.testimonials.create'))->assertOk()->assertSee('Yayında değil')->assertSee('name="sort_order"', false);
+    $this->get(route('admin.testimonials.create'))->assertOk()->assertSee('value="1" selected', false)->assertSee('name="sort_order"', false);
 
     $this->post(route('admin.testimonials.store'), ['customer_name' => 'Ayşe', 'content' => 'Çok memnun kaldık.'])->assertSessionHasNoErrors()->assertRedirectToRoute('admin.testimonials.index');
 

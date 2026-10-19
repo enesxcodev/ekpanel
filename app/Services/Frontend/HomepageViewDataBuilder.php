@@ -3,34 +3,26 @@
 namespace App\Services\Frontend;
 
 use App\Services\Settings\SettingsService;
-use Illuminate\Support\Facades\Schema;
-use Modules\Menus\Services\NavigationService;
-use Modules\Services\Models\Service;
-use Modules\Slider\Models\Slider;
-use Nwidart\Modules\Facades\Module;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Menus\Services\MenusFrontendService;
+use Modules\Services\Services\ServicesFrontendService;
+use Modules\Slider\Services\SliderFrontendService;
 
 class HomepageViewDataBuilder
 {
-    public function __construct(private SettingsService $settings, private NavigationService $navigation) {}
+    public function __construct(private SettingsService $settings, private ModuleFrontendServiceResolver $modules) {}
 
     /** @return array<string, mixed> */
     public function build(): array
     {
         $whatsAppNumber = preg_replace('/\D+/', '', (string) $this->settings->get('contact.whatsapp', ''));
-        $navigationItems = Module::isEnabled('Menus') && Schema::hasTable('menus')
-            ? $this->navigation->tree((string) config('menus.main_menu', 'main'))
-            : [];
-        $banner = Module::isEnabled('Slider') && Schema::hasTable('sliders')
-            ? Slider::query()->with('imageMedia')->where('is_active', true)->first()
-            : null;
-        $services = Module::isEnabled('Services') && Schema::hasTable('services')
-            ? Service::query()->with('category')->where('is_active', true)->orderBy('sort_order')->orderBy('id')->get()
-            : collect();
-        $featuredServices = $services->filter(fn (Service $service): bool => $service->category === null
+        $navigationItems = $this->modules->resolve(MenusFrontendService::class)?->getTree((string) config('menus.main_menu', 'main')) ?? [];
+        $banner = $this->modules->resolve(SliderFrontendService::class)?->getFirst();
+        $services = $this->modules->resolve(ServicesFrontendService::class)?->getAll() ?? collect();
+        $featuredServices = $services->filter(fn (Model $service): bool => $service->category === null
             ? true
-            : $service->category->is_active && ($service->category->extra_fields['homepage_display'] ?? 'cards') === 'cards')->values();
-        $otherServices = $services->filter(fn (Service $service): bool => $service->category !== null
-            && $service->category->is_active
+            : ($service->category->extra_fields['homepage_display'] ?? 'cards') === 'cards')->values();
+        $otherServices = $services->filter(fn (Model $service): bool => $service->category !== null
             && ($service->category->extra_fields['homepage_display'] ?? 'cards') === 'compact')->values();
         $address = trim((string) $this->settings->get('contact.address', ''));
         $savedDirectionsUrl = trim((string) ($banner?->extra_fields['directions_url'] ?? ''));
@@ -46,7 +38,7 @@ class HomepageViewDataBuilder
             'description' => $this->settings->get('home_highlights.item_'.$number.'_description', ['Profesyonel cihazlarla doğru tespit.', 'Güvenilir ve titiz hizmet.', 'Randevu ve bilgi için her zaman ulaşabilirsiniz.'][$number - 1]),
         ])->all();
 
-        return [
+        $data = [
             'navigationItems' => $navigationItems,
             'whatsAppUrl' => $whatsAppNumber === '' ? null : 'https://wa.me/'.$whatsAppNumber,
             'banner' => $banner,
@@ -85,6 +77,34 @@ class HomepageViewDataBuilder
                 'description' => $this->settings->get('cta.description', 'Bakım, onarım veya arıza tespiti için hemen bizimle iletişime geçin.'),
                 'button_text' => $this->settings->get('cta.button_text', 'WhatsApp ile İletişim'),
             ],
+        ];
+
+        $companyName = $data['companyName'];
+        $whatsAppUrl = $data['whatsAppUrl'];
+        $garageImage = $banner?->image_url ?? asset('images/themes/general/route66-sanayi.jpg');
+        $aboutImage = $data['aboutCopy']['image_url'] ?? $garageImage;
+        $heroTitle = $banner?->title ?: 'Aracınız için';
+        $heroHighlight = $banner?->extra_fields['highlighted_title'] ?? 'güvenilir servis';
+        $heroSubtitle = $banner?->subtitle ?: 'Bakım, arıza tespiti ve onarım hizmetleri tek noktada.';
+        $heroButtonText = $banner?->extra_fields['button_text'] ?? 'WhatsApp ile İletişim';
+        $heroEyebrow = $banner?->extra_fields['eyebrow'] ?? 'GÜVENİLİR SERVİS, UZMAN ÇÖZÜM';
+        $heroDirectionsText = $banner?->extra_fields['directions_button_text'] ?? 'Yol Tarifi Al';
+
+        $contact = array_intersect_key($data, array_flip(['workingHours', 'address', 'directionsUrl', 'whatsAppUrl'])) + compact('heroDirectionsText');
+        $header = array_intersect_key($data, array_flip(['navigationItems', 'brandLogoUrl', 'companyName', 'whatsAppUrl']));
+        $footer = array_intersect_key($data, array_flip(['navigationItems', 'footerLogoUrl', 'companyName', 'instagramUrl']));
+
+        return [
+            'layout' => array_intersect_key($data, array_flip(['siteTitle', 'siteDescription', 'siteKeywords', 'whatsAppUrl'])) + [
+                'header' => $header,
+                'footer' => $footer,
+                'headCode' => (string) $this->settings->get('scripts.head', ''),
+                'bodyCode' => (string) $this->settings->get('scripts.body', ''),
+            ],
+            'hero' => compact('garageImage', 'companyName', 'heroTitle', 'heroHighlight', 'heroSubtitle', 'heroButtonText', 'heroEyebrow', 'heroDirectionsText', 'whatsAppUrl', 'directionsUrl', 'highlights'),
+            'services' => array_intersect_key($data, array_flip(['servicesCopy', 'featuredServices', 'otherServices'])),
+            'about' => ['aboutCopy' => $data['aboutCopy']] + compact('aboutImage', 'companyName', 'whatsAppUrl', 'contact'),
+            'cta' => ['ctaCopy' => $data['ctaCopy'], 'whatsAppUrl' => $whatsAppUrl],
         ];
     }
 

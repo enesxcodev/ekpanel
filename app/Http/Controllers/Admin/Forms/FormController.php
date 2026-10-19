@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Forms\SaveFormRequest;
 use App\Models\Forms\SiteForm;
 use App\Services\Forms\FormSchema;
 use App\Services\Forms\FormService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -41,9 +42,15 @@ class FormController extends Controller
         return view('admin.forms.editor', ['form' => null, 'editorFields' => []]);
     }
 
-    public function store(SaveFormRequest $request, FormService $service): RedirectResponse
+    public function store(SaveFormRequest $request, FormService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated());
+        $form = $service->save($request->validated());
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Form eklendi',
+            'Yeni bir form oluşturuldu.',
+            route('admin.forms.edit', ['form' => $form->id], absolute: false),
+        );
 
         return redirect()->route('admin.forms.index')->with('notification', ['type' => 'success', 'message' => 'Form oluşturuldu.']);
     }
@@ -55,14 +62,20 @@ class FormController extends Controller
         return view('admin.forms.editor', ['form' => $form, 'editorFields' => $schema->editorFields($form)]);
     }
 
-    public function update(SaveFormRequest $request, SiteForm $form, FormService $service): RedirectResponse
+    public function update(SaveFormRequest $request, SiteForm $form, FormService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), $form);
+        $form = $service->save($request->validated(), $form);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Form güncellendi',
+            'Bir form güncellendi.',
+            route('admin.forms.edit', ['form' => $form->id], absolute: false),
+        );
 
         return redirect()->route('admin.forms.index')->with('notification', ['type' => 'success', 'message' => 'Form güncellendi.']);
     }
 
-    public function destroy(SiteForm $form): RedirectResponse
+    public function destroy(SiteForm $form, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('forms.delete');
         DB::transaction(function () use ($form): void {
@@ -72,6 +85,12 @@ class FormController extends Controller
             }
             $form->delete();
         });
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Form silindi',
+            'Bir form silindi.',
+            route('admin.forms.index', absolute: false),
+        );
 
         return redirect()->route('admin.forms.index')->with('notification', ['type' => 'success', 'message' => 'Form silindi.']);
     }

@@ -1,5 +1,8 @@
 <x-admin.layout :title="$submission->form_name.' başvurusu'">
     <div class="card"><div class="card-header"><h2 class="card-title">{{ $submission->created_at->format('d.m.Y H:i') }}</h2></div><div class="card-body">
+        @if($submission->related_content)
+            <p>İlgili ürün: <strong>{{ $submission->related_content['title'] }}</strong> ({{ $submission->related_content['slug'] }}, #{{ $submission->related_content['id'] }})</p>
+        @endif
         <dl class="row">@foreach($submission->answers as $key=>$answer)
             <dt class="col-md-3 mb-3">{{ $answer['label'] }}</dt><dd class="col-md-9 mb-3">
                 @if($answer['type']==='file' && is_array($answer['value']))<a href="{{ route('admin.forms.submissions.download',[$submission,$key]) }}">{{ $answer['value']['name'] }}</a>

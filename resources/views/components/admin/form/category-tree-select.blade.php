@@ -29,7 +29,7 @@
     $selectedCategory = $findSelected($tree);
     $selectedLabel = $selectedCategory['path'] ?? ($allowEmpty ? $emptyLabel : 'Kategori seçin');
 @endphp
-<div class="mb-3" data-category-tree-select>
+<div class="" data-category-tree-select>
     <label class="form-label" for="{{ $id }}">{{ $label }}</label>
     <input type="hidden" name="{{ $name }}" value="{{ $selected }}" data-category-tree-value @if ($filterTarget) data-table-filter="category_id" data-table-target="{{ $filterTarget }}" @endif>
     <div class="dropdown w-100" data-category-tree-dropdown>

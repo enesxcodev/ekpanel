@@ -6,3 +6,5 @@
 - Güncel alanları koddan doğrula. Alan genişletmede [ortak modül kurallarını](../../../../.ai/rules/moduller.md#tema-için-yönetilebilir-alan-genişletme), uygulamada [Services skill’ini](../../skills/services-theme-integration/SKILL.md) izle.
 
 - Hizmet ekleme, düzenleme ve silme ayrı izinlerle yönetilir. `content` HugeRTE ile düzenlenir ve ortak HTML temizleyicisinden geçirilir. Slug eklenmiş olması public detay route oluşturmaz.
+
+- Tema okumasında `ServicesFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/services-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

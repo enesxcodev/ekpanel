@@ -1,7 +1,7 @@
 {
     "name": "Documents",
     "alias": "documents",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Belgeler, sertifikalar, indirmeler ve ürün katalogları yönetimi",
     "keywords": [],
     "priority": 0,

@@ -11,6 +11,15 @@
 .ek-form .ek-form__help { display:block; margin-top:.35rem; opacity:.7; }
 .ek-form .ek-form__error, .ek-form .ek-form__errors { color:#c0392b; }
 .ek-form .ek-form__success { padding:1rem; margin-bottom:1rem; border:1px solid #198754; border-radius:.35rem; }
+.hero-contact-form .ek-form__fields { grid-template-columns:minmax(0,1fr); gap:.9rem; }
+.hero-contact-form .ek-form__label { color:#e2e8f0; font-size:.875rem; }
+.hero-contact-form .ek-form__input { border-color:rgba(255,255,255,.14); border-radius:.65rem; padding:.75rem .85rem; background:#090d0f; color:#f3f5f6; }
+.hero-contact-form .ek-form__input::placeholder { color:#94a3b8; }
+.hero-contact-form .ek-form__input:focus { outline-color:#f04450; }
+.hero-contact-form .ek-form__submit { width:100%; border-radius:.65rem; padding:.85rem 1rem; margin-top:1rem; background:linear-gradient(90deg,#e43b47,#ba2632); font-weight:700; }
+.hero-contact-form .ek-form__success { color:#dcfce7; }
+.hero-contact-form .ek-form__errors, .hero-contact-form .ek-form__error { color:#fca5a5; }
+.hero-contact-form .ek-form__help { color:#94a3b8; }
 .ek-form-page { margin:0; padding:3rem 1.25rem; background:#f5f7fb; font-family:system-ui,sans-serif; color:#182433; }
 .ek-form-page main { max-width:48rem; margin:auto; background:white; padding:2rem; border-radius:.75rem; border:1px solid #e2e7ef; }
 @media(max-width:600px) { .ek-form .ek-form__field { grid-column:1/-1; } .ek-form-page { padding:1rem; } }

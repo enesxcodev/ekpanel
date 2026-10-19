@@ -7,3 +7,5 @@
 - Ortak alan genişletme için [modül kurallarını](../../../../.ai/rules/moduller.md) izle; features.json ve extra_fields altyapısını kopyalama.
 - [Modüle özgü skill](../../skills/galeriler-theme-integration/SKILL.md), [ortak tema skill’i](../../../../.claude/skills/theme-integration/SKILL.md) ve [geliştirme workflow’u](../workflows/modul-gelistirme.md) birlikte kullanılır.
 İçerik modülünün kimliği Galeriler, namespace’i Modules\Galeriler ve izin/route öneki galeriler’dir. Mevcut Gallery / Media Library ortak dosya kütüphanesidir; App\Services\Media, admin.media.* ve ortak picker kimliklerini değiştirme. Geçmiş gallery_* içerik tabloları veri korunarak galeriler_* adına taşınmıştır; eski oluşturma migration’ını düzenleme.
+
+- Tema okumasında `GalerilerFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/galeriler-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

@@ -6,6 +6,7 @@ use App\Models\Admin\Admin;
 use App\Models\Media\MediaFile;
 use App\Models\Settings\SettingDefinition;
 use App\Models\Settings\SettingSection;
+use App\Services\NotifyService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ use Throwable;
 
 class SettingsService
 {
-    public function __construct(private SettingRuleBuilder $ruleBuilder) {}
+    public function __construct(private SettingRuleBuilder $ruleBuilder, private NotifyService $notifications) {}
 
     public function get(string $key, mixed $fallback = null): mixed
     {
@@ -84,9 +85,10 @@ class SettingsService
     {
         $newFiles = [];
         $oldFiles = [];
+        $changedSettings = [];
 
         try {
-            DB::transaction(function () use ($section, $payload, $actor, &$newFiles, &$oldFiles): void {
+            DB::transaction(function () use ($section, $payload, $actor, &$newFiles, &$oldFiles, &$changedSettings): void {
                 SettingSection::query()->whereKey($section->id)->lockForUpdate()->firstOrFail();
                 $definitions = $section->definitions()->with('storedValue.media')->get();
                 $labels = $definitions->mapWithKeys(fn (SettingDefinition $definition): array => ['settings.'.$definition->id => $definition->label])->all();
@@ -102,6 +104,9 @@ class SettingsService
                     }
                     if ($removing && $input !== null && $input !== '') {
                         throw ValidationException::withMessages(['settings.'.$definition->id => 'Yeni değer girme ve mevcut değeri kaldırma işlemlerinden birini seçin.']);
+                    }
+                    if ($this->hasChanged($definition, $input, $removing)) {
+                        $changedSettings[] = $definition->label;
                     }
                     if ($definition->usesMediaLibrary()) {
                         if (! $removing && (int) $input !== $definition->storedValue?->media_id) {
@@ -145,6 +150,16 @@ class SettingsService
             Storage::disk('public')->delete($path);
         }
         $this->forgetSection($section);
+
+        if ($changedSettings !== []) {
+            $this->notifications->sendForActor(
+                $actor,
+                Admin::query()->get(),
+                'Ayarlar güncellendi',
+                $section->label.' bölümünde şu ayarlar değiştirildi: '.implode(', ', array_unique($changedSettings)),
+                route('admin.settings.index', ['section' => $section->id], absolute: false),
+            );
+        }
     }
 
     public function forget(string $key): void
@@ -162,5 +177,22 @@ class SettingsService
     private function cacheKey(string $key): string
     {
         return 'settings.value.'.$key;
+    }
+
+    private function hasChanged(SettingDefinition $definition, mixed $input, bool $removing): bool
+    {
+        if ($definition->usesMediaLibrary()) {
+            return $removing
+                ? $definition->effectiveValue() !== null
+                : (int) $input !== $definition->storedValue?->media_id;
+        }
+
+        if ($definition->input_type->isFile()) {
+            return $removing
+                ? $definition->effectiveValue() !== null
+                : $input instanceof UploadedFile;
+        }
+
+        return $definition->effectiveValue() !== $definition->value_type->normalize($removing ? null : $input);
     }
 }

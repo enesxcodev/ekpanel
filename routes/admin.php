@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Auth\AdminAuthController;
 use App\Http\Controllers\Admin\Forms\FormController;
 use App\Http\Controllers\Admin\Forms\FormSubmissionController;
 use App\Http\Controllers\Admin\Modules\ModuleController;
+use App\Http\Controllers\Admin\Notifications\NotificationController;
 use App\Http\Controllers\Admin\Roles\AdminRoleController;
 use App\Http\Controllers\Admin\Settings\SettingConfigurationController;
 use App\Http\Controllers\Admin\Settings\SettingController;
@@ -22,6 +23,15 @@ Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')-
     });
 
     Route::middleware(['auth:admin', EnsureAdminIsActive::class])->group(function (): void {
+        Route::prefix('notifications')->name('notifications.')->group(function (): void {
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::get('/data', [NotificationController::class, 'data'])->name('data');
+            Route::get('/header', [NotificationController::class, 'header'])->name('header');
+            Route::patch('/', [NotificationController::class, 'update'])->name('update');
+            Route::get('/{notification}', [NotificationController::class, 'show'])->whereUuid('notification')->name('show');
+            Route::post('/{notification}/open', [NotificationController::class, 'open'])->whereUuid('notification')->name('open');
+            Route::patch('/{notification}/read', [NotificationController::class, 'read'])->whereUuid('notification')->name('read');
+        });
         Route::prefix('forms')->name('forms.')->group(function (): void {
             Route::get('submissions', [FormSubmissionController::class, 'index'])->name('submissions.index');
             Route::get('submissions/data', [FormSubmissionController::class, 'data'])->name('submissions.data');

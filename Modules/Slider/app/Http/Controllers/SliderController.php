@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Modules\Slider\DataTables\SlidersDataTable;
 use Modules\Slider\Http\Requests\SaveSliderRequest;
 use Modules\Slider\Models\Slider;
@@ -39,9 +41,15 @@ class SliderController extends Controller
         return view('slider::create', ['featureForm' => $featureForm, 'featureFields' => $featureFields, 'mediaConfig' => $media->configuration(auth('admin')->user())]);
     }
 
-    public function store(SaveSliderRequest $request, SliderService $service): RedirectResponse
+    public function store(SaveSliderRequest $request, SliderService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), $request->user('admin'));
+        $slider = $service->save($request->validated(), $request->user('admin'));
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Slider eklendi',
+            'Bir slider eklendi.',
+            route('admin.slider.edit', ['slider' => $slider->id], absolute: false),
+        );
 
         return redirect()->route('admin.slider.index')->with('notification', ['type' => 'success', 'message' => 'Slider başarıyla eklendi.']);
     }
@@ -56,17 +64,29 @@ class SliderController extends Controller
         return view('slider::edit', ['slider' => $slider, 'featureForm' => $featureForm, 'featureFields' => $featureFields, 'mediaConfig' => $media->configuration(auth('admin')->user())]);
     }
 
-    public function update(SaveSliderRequest $request, Slider $slider, SliderService $service): RedirectResponse
+    public function update(SaveSliderRequest $request, Slider $slider, SliderService $service, NotifyService $notifications): RedirectResponse
     {
-        $service->save($request->validated(), $request->user('admin'), $slider);
+        $slider = $service->save($request->validated(), $request->user('admin'), $slider);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Slider güncellendi',
+            'Bir slider güncellendi.',
+            route('admin.slider.edit', ['slider' => $slider->id], absolute: false),
+        );
 
         return redirect()->route('admin.slider.index')->with('notification', ['type' => 'success', 'message' => 'Slider başarıyla güncellendi.']);
     }
 
-    public function destroy(Slider $slider, SliderService $service): RedirectResponse
+    public function destroy(Slider $slider, SliderService $service, Request $request, NotifyService $notifications): RedirectResponse
     {
         $this->authorize('slider.delete');
         $service->delete($slider);
+        $notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Slider silindi',
+            'Bir slider silindi.',
+            route('admin.slider.index', absolute: false),
+        );
 
         return redirect()->route('admin.slider.index')->with('notification', ['type' => 'success', 'message' => 'Slider başarıyla silindi.']);
     }

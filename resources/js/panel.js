@@ -3,6 +3,7 @@ import $ from 'jquery';
 import select2 from 'select2';
 import { initializeCrudNotifications, notify } from './admin/crud-notification';
 import { initializeTables } from './admin/table-import';
+import { initializeNotifications } from './admin/notifications';
 
 import { initializePermissionMatrix } from './admin/permission-matrix';
 import { initializeFormConfirmation } from './admin/form-confirmation';
@@ -25,6 +26,7 @@ window.Panel = { notify };
 
 initializeCrudNotifications();
 initializeTables();
+initializeNotifications();
 initializePermissionMatrix();
 initializeFormConfirmation();
 initializeSettings();
@@ -39,3 +41,6 @@ initializeDatepickers();
 initializeFormBuilder();
 initializeModuleAssets(window.Panel);
 initializeModuleInstallations();
+
+import { initializeTheme } from './admin/theme';
+initializeTheme();

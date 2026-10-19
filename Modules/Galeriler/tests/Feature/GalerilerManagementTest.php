@@ -23,6 +23,32 @@ function galerilerTestImage(string $name): MediaFile
     return MediaFile::factory()->create(['path' => $path, 'name' => $name, 'kind' => 'image', 'mime_type' => 'image/png', 'extension' => 'png', 'size' => Storage::disk('public')->size($path)]);
 }
 
+test('galeriler saves and lists uncategorized photos and videos and can assign or clear a category', function () {
+    Storage::fake('public');
+    $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
+    $image = galerilerTestImage('uncategorized.png');
+
+    $this->post(route('admin.galeriler.store'), ['type' => 'photo', 'image_media_ids' => [$image->id]])
+        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.galeriler.index');
+    $this->post(route('admin.galeriler.store'), ['galeriler_category_id' => '', 'type' => 'video', 'video_url' => 'https://vimeo.com/123456789'])
+        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.galeriler.index');
+
+    expect(GalerilerItem::query()->whereNull('galeriler_category_id')->count())->toBe(2);
+    $this->get(route('admin.galeriler.index'))->assertOk()->assertSee('Kategorisiz');
+    $photo = GalerilerItem::query()->where('type', 'photo')->sole();
+    $category = GalerilerCategory::factory()->create();
+    $payload = ['type' => 'photo', 'image_media_ids' => [$image->id]];
+    $this->put(route('admin.galeriler.update', $photo), $payload + ['galeriler_category_id' => $category->id])
+        ->assertSessionHasNoErrors();
+    expect($photo->fresh()->galeriler_category_id)->toBe($category->id);
+    $this->put(route('admin.galeriler.update', $photo), $payload + ['galeriler_category_id' => null])
+        ->assertSessionHasNoErrors();
+    expect($photo->fresh()->galeriler_category_id)->toBeNull();
+
+    $this->postJson(route('admin.galeriler.store'), ['type' => 'video', 'video_url' => 'https://vimeo.com/123456789', 'galeriler_category_id' => 999999])
+        ->assertUnprocessable()->assertJsonValidationErrors('galeriler_category_id');
+});
+
 test('galeriler categories form a tree and reject cycles or deletion with children', function () {
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
     $this->post(route('admin.galeriler.categories.store'), ['name' => 'Ofis', 'icon' => 'photo', 'short_description' => 'Ofis görselleri'])

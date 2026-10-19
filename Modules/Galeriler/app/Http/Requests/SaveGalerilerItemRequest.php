@@ -25,7 +25,7 @@ class SaveGalerilerItemRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values, MediaSelection $selection): array
     {
         return [
-            'galeriler_category_id' => ['required', 'integer', 'exists:galeriler_categories,id'],
+            'galeriler_category_id' => ['nullable', 'integer', 'exists:galeriler_categories,id'],
             'type' => ['required', Rule::in(['photo', 'video'])],
             'title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:10000'],

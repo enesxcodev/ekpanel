@@ -18,7 +18,7 @@ use Throwable;
 
 class FormService
 {
-    public function __construct(private FormSchema $schema, private FieldRuleBuilder $fieldRules) {}
+    public function __construct(private FormSchema $schema, private FieldRuleBuilder $fieldRules, private FormContext $contexts) {}
 
     /** @param array<string, mixed> $data */
     public function save(array $data, ?SiteForm $form = null): SiteForm
@@ -57,6 +57,7 @@ class FormService
             $submission = DB::transaction(function () use ($form, $request, &$newFiles): FormSubmission {
                 $form = SiteForm::query()->lockForUpdate()->findOrFail($form->id);
                 abort_unless($form->is_active, 404);
+                $context = $this->contexts->resolve($request->input('form_context'), $form);
                 $form->load('fields');
                 abort_if($form->fields->isEmpty(), 404);
                 $definition = $this->schema->validation($form);
@@ -84,7 +85,7 @@ class FormService
                     }
                 }
 
-                return $form->submissions()->create(['form_name' => $form->name, ...$summary, 'status' => 'new', 'answers' => $answers]);
+                return $form->submissions()->create(['form_name' => $form->name, 'related_content' => $context, ...$summary, 'status' => 'new', 'answers' => $answers]);
             });
         } catch (Throwable $exception) {
             Storage::disk('local')->delete($newFiles);

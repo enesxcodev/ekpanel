@@ -9,3 +9,5 @@
 - Features alanları document ve category form anahtarlarıyla ayrılır. Ortak alan altyapısını kopyalamadan [modül kurallarını](../../../../.ai/rules/moduller.md) izle.
 
 Uygulama adımları için [Belgeler tema skill'ini](../../skills/documents-theme-integration/SKILL.md) ve [ortak tema skill'ini](../../../../.claude/skills/theme-integration/SKILL.md) oku.
+
+- Tema okumasında `DocumentsFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/documents-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

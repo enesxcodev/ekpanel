@@ -7,6 +7,7 @@ use App\Models\Admin\Admin;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
+use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +21,7 @@ use Modules\Blog\Services\BlogService;
 
 class BlogContentController extends Controller
 {
-    public function __construct(private MediaService $media) {}
+    public function __construct(private MediaService $media, private NotifyService $notifications) {}
 
     public function index(): View
     {
@@ -47,7 +48,13 @@ class BlogContentController extends Controller
 
     public function store(SaveBlogContentRequest $request, BlogService $service): RedirectResponse
     {
-        $service->save($request->validated(), null, $request->user('admin'));
+        $blog = $service->save($request->validated(), null, $request->user('admin'));
+        $this->notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Blog yazısı eklendi',
+            'Yeni bir blog yazısı eklendi.',
+            route('admin.blog.edit', ['blog' => $blog->id], absolute: false),
+        );
 
         return redirect()->route('admin.blog.index')->with('notification', ['type' => 'success', 'message' => 'İçerik başarıyla eklendi.']);
     }
@@ -64,15 +71,27 @@ class BlogContentController extends Controller
 
     public function update(SaveBlogContentRequest $request, BlogContent $blog, BlogService $service): RedirectResponse
     {
-        $service->save($request->validated(), $blog, $request->user('admin'));
+        $blog = $service->save($request->validated(), $blog, $request->user('admin'));
+        $this->notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Blog yazısı güncellendi',
+            'Bir blog yazısı güncellendi.',
+            route('admin.blog.edit', ['blog' => $blog->id], absolute: false),
+        );
 
         return redirect()->route('admin.blog.index')->with('notification', ['type' => 'success', 'message' => 'İçerik güncellendi.']);
     }
 
-    public function destroy(BlogContent $blog, BlogService $service): RedirectResponse
+    public function destroy(Request $request, BlogContent $blog, BlogService $service): RedirectResponse
     {
         $this->authorize('blog.delete');
         $service->delete($blog);
+        $this->notifications->sendToAdminsForActor(
+            $request->user('admin'),
+            'Blog yazısı silindi',
+            'Bir blog yazısı silindi.',
+            route('admin.blog.index', absolute: false),
+        );
 
         return redirect()->route('admin.blog.index')->with('notification', ['type' => 'success', 'message' => 'İçerik silindi.']);
     }

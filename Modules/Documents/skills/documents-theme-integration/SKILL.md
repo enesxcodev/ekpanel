@@ -12,4 +12,13 @@ description: Belgeler, sertifikalar, indirmeler ve ürün kataloğu dosyaların�
 - Ziyaretçi listelerinde status published filtresini kullan. Kategorisiz ve dosyasız kayıtları geçerli kabul et; dosyası olmayan kayıtta indirme bağlantısı üretme.
 - Başlangıç kategorileri düzenlenebilir; sabit ID veya kategori adına göre iş kuralı kurma. Kategori seçimi, sıralama veya içerik sahipliği belirsizse kullanıcıya sor.
 - DocumentService kaydı ortak HtmlSanitizer ve FieldFiles ile yapar. Ek alanlar document/category anahtarlarıyla ModuleFeatures, FeatureValues ve admin.features.fields üzerinden bağlıdır; paralel altyapı kurma.
-- Mevcut model ilişkilerini kullan. Ziyaretçi route'u, özel dosya erişim katmanı veya tema sorgu servisi varmış gibi davranma; sadece tema için facade/helper ekleme.
+- Tema okumalarında `DocumentsFrontendService` kullan. Servis kayıt sağlar; ziyaretçi detay/indirme route'u veya özel dosya erişim katmanı üretmez.
+
+## Frontend okuma servisi
+
+- Sınıf: `Modules\Documents\Services\DocumentsFrontendService`; dosya: `app/Services/DocumentsFrontendService.php`.
+- `getAll(?int $categoryId = null)` bir `Collection<int, Document>`, `getFirst(?int $categoryId = null)` bir `Document` veya `null`, `find(int $id)` yalnız görünür kaydı veya `null` döndürür. `getAll` kendiliğinden limit uygulamaz; sayfalama API'si değildir.
+- Yalnız `status=published` kayıtları döner. Tanımlı bir iş sırası yoktur; ilk/son/en yeni gibi bir öncelik garantisi verilmez. Modül kayıtlı/etkin değilse veya gerekli modül tabloları yoksa koleksiyon metotları boş koleksiyon, tek kayıt metotları `null` döndürür.
+- İlişkiler önceden yüklenir: `category`, `fileMedia`. Görsel/dosya URL'si için mevcut model erişimcisini kullan; servis yeni route veya HTML üretmez.
+- Kategori parametresi verilmezse kategorisiz olanlar dahil tüm görünür kayıtlar döner; parametre verilirse yalnız ilgili kategori filtrelenir. Bulunmayan kategori boş sonuç verir; sabit kategori ID'si veya adı varsayma.
+- Tek öğe tasarımında `getFirst`, tekrar eden listede `getAll`, bilinen kayıt kimliğinde `find` seç; metodu yalnız kayıt sayısına göre seçip arayüzü otomatik değiştirme. Görünürlük ve modül kontrollerini çağıran tarafta tekrarlama.
