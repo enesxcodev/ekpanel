@@ -1,0 +1,10 @@
+# Users tema ve servis entegrasyonu
+
+- “Giriş yap”, “hesabım”, “profil”, “e-posta doğrulama” ve “şifremi unuttum” alanları Users adayıdır. Bölümün anlamını değerlendir; personel tanıtım kartları Team, yönetici oturumları mevcut admin altyapısı kapsamındadır. Eşleşme belirsizse kullanıcıya sor.
+- Users web guard ve e-posta ile giriş kullanır. Kullanıcı adı isteğe bağlı profil bilgisidir, giriş anahtarı değildir. Kullanıcı hesabında rol/yetki sistemi yoktur. Admin panel izinleri ayrı admin guard içindir.
+- Model: `Modules\Users\Models\User`; mevcut `users` tablosunu genişletir. Ad `name`, soyad `surname`, e-posta `email`, isteğe bağlı `username` ve `profile_image`, aktiflik `is_active`, doğrulama `email_verified_at` alanlarıdır. Resim public disk üzerindeki yoldur; URL üretiminde Storage kullan.
+- Şifre modelde hashlenir; password ve remember_token serileştirmede gizlidir. Bu alanları, sıfırlama tokenlarını ve giriş geçmişini herkese açık içerik olarak gösterme. Hesaplar soft delete edilir; geçmiş `user_logins` tablosunda korunur.
+- Frontend hesabına erişim için [modül skill'indeki](../../skills/users-theme-integration/SKILL.md) `UsersFrontendService` sözleşmesini kullan. Genel kullanıcı listesi/getAll API'si yoktur. Bu servis bir JavaScript istemcisi değil, sunucu tarafı PHP servisidir.
+- Modül kapalı/eksikse veya migration uygulanmamışsa current null verir; korunan işlemler erişimi reddeder. Pasif/silinmiş hesaplar oturum ve remember-token sağlayıcısından alınamaz. E-posta doğrulanmadan giriş mümkündür; doğrulama gerektiren yeni özelliklerde ilgili kontrolü ayrıca tanımla.
+- Panel menüsü Kullanıcılar, route grubu `admin.web-users.*`, yol `admin/web-users` biçimindedir (admin prefix yapılandırılabilir). Listeleme, düzenleme ve soft delete vardır; panelden ekleme ve frontend giriş ekranı yoktur. Yöneticiler ekranıyla karıştırma.
+- Özelleştirilebilir alan sözleşmesi için [ortak modül kurallarına](../../../../.ai/rules/moduller.md) bak. Mevcut `features.json` boş forms içerir; kayıt/ek alan veya başka bir profil API'si varmış gibi davranma.

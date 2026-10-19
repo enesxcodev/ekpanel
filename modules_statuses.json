@@ -11,5 +11,6 @@
     "Testimonials": true,
     "Documents": true,
     "Projects": true,
-    "Galeriler": true
+    "Galeriler": true,
+    "Users": true
 }

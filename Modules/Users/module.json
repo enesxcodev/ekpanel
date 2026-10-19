@@ -1,0 +1,13 @@
+{
+    "name": "Users",
+    "alias": "users",
+    "version": "0.1.0",
+    "description": "Web kullanıcıları ve kimlik doğrulama altyapısı",
+    "keywords": [],
+    "priority": 0,
+    "providers": ["Modules\\Users\\Providers\\UsersServiceProvider"],
+    "files": [],
+    "panel": {
+        "permissions": ["users.menu", "users.view", "users.update", "users.delete"]
+    }
+}

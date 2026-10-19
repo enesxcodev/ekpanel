@@ -1,0 +1,8 @@
+{
+    "name": "ekagent/users",
+    "description": "EkAgent web kullanıcıları ve kimlik doğrulama altyapısı",
+    "type": "library",
+    "license": "proprietary",
+    "require": {"php": "^8.4", "laravel/framework": "^13.0", "nwidart/laravel-modules": "^13.0"},
+    "autoload": {"psr-4": {"Modules\\Users\\": "app/", "Modules\\Users\\Database\\Factories\\": "database/factories/", "Modules\\Users\\Database\\Seeders\\": "database/seeders/"}}
+}
