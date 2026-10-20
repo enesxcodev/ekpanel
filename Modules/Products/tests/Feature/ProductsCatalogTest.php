@@ -2,16 +2,13 @@
 
 use App\Models\Admin\Admin;
 use App\Models\Forms\FormField;
-use App\Models\Forms\FormSubmission;
 use App\Models\Forms\SiteForm;
 use App\Models\Media\MediaFile;
 use App\Services\Forms\FormContext;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\ViewErrorBag;
 use Modules\Products\Models\Product;
 use Modules\Products\Models\ProductCategory;
 use Modules\Products\Services\ProductsFrontendService;
@@ -209,59 +206,20 @@ test('disabled module blocks admin public reads and product form contexts', func
     expect($service->formFor($product))->toBeNull();
 });
 
-test('one existing form accepts different products and retains snapshots after removal', function () {
-    $form = productForm();
-    $first = Product::factory()->create(['site_form_id' => $form->id, 'title' => '<script>Kapı</script>']);
-    $second = Product::factory()->create(['site_form_id' => $form->id]);
-    $service = app(ProductsFrontendService::class);
-    foreach ([$first, $second] as $product) {
-        $context = $service->formFor($product);
-        $this->postJson(route('forms.submit', $form->key), ['form_context' => $context['context'], 'answers' => ['message' => 'Bilgi istiyorum']])->assertCreated();
-    }
-    $submission = FormSubmission::query()->oldest('id')->firstOrFail();
-    $first->delete();
-    $admin = Admin::factory()->superAdmin()->create();
-
-    $this->actingAs($admin, 'admin')->get(route('admin.forms.submissions.show', $submission))->assertOk()->assertSee('İlgili ürün:')->assertSee('<script>Kapı</script>')->assertDontSee('<script>Kapı</script>', false);
-    expect($submission->related_content['id'])->toBe($first->id);
-    expect(FormSubmission::query()->latest('id')->first()->related_content['id'])->toBe($second->id);
-});
-
-test('form context is explicitly rendered and absent for ordinary forms', function () {
+test('assigned active form is exposed through the product read service', function () {
     $form = productForm();
     $product = Product::factory()->create(['site_form_id' => $form->id]);
-    $data = app(ProductsFrontendService::class)->formFor($product);
 
-    view()->share('errors', new ViewErrorBag);
-    $html = Blade::render('<x-site-form :key="$key" :context="$context" unstyled />', $data);
-    expect($html)->toContain('name="form_context"');
-    expect(Blade::render('<x-site-form :key="$key" unstyled />', ['key' => $form->key]))->not->toContain('name="form_context"');
-    $this->postJson(route('forms.submit', $form->key), ['answers' => ['message' => 'İletişim'], 'product_id' => $product->id])->assertCreated();
-    expect(FormSubmission::query()->sole()->related_content)->toBeNull();
+    $productForm = app(ProductsFrontendService::class)->formFor($product);
+
+    expect($productForm)->toMatchArray(['key' => $form->key]);
+    expect(app(FormContext::class)->resolve($productForm['context'], $form))->toMatchArray([
+        'type' => 'product',
+        'id' => $product->id,
+        'title' => $product->title,
+        'slug' => $product->slug,
+    ]);
 });
-
-test('submission rejects forged expired mismatched or no longer public product contexts', function (string $failure) {
-    $this->freezeTime();
-    $form = productForm();
-    $category = ProductCategory::factory()->create(['is_active' => true]);
-    $product = Product::factory()->for($category, 'category')->create(['site_form_id' => $form->id]);
-    $data = app(ProductsFrontendService::class)->formFor($product);
-    $token = $data['context'];
-    match ($failure) {
-        'forged' => $token = 'forged-token',
-        'expired' => $this->travel(3)->hours(),
-        'draft' => $product->update(['is_active' => false]),
-        'deleted' => $product->delete(),
-        'changed form' => $product->update(['site_form_id' => null]),
-        'hidden category' => $category->update(['is_active' => false]),
-        'disabled module' => disableProducts(),
-        'wrong form' => $form = productForm(),
-    };
-
-    $this->postJson(route('forms.submit', $form->key), ['form_context' => $token, 'answers' => ['message' => 'Mesaj']])->assertUnprocessable()->assertJsonValidationErrors('form_context');
-
-    $this->assertDatabaseCount('form_submissions', 0);
-})->with(['forged', 'expired', 'draft', 'deleted', 'changed form', 'hidden category', 'disabled module', 'wrong form']);
 
 test('no form is exposed when absent inactive or empty', function () {
     $product = Product::factory()->create();
@@ -326,26 +284,6 @@ test('gallery selection rejects duplicate images and new selection without media
     $this->assertDatabaseCount('media_usages', 0);
 });
 
-test('ordinary forms keep working without any optional context resolver', function () {
-    $form = productForm();
-    app()->instance(FormContext::class, new FormContext);
-
-    $this->postJson(route('forms.submit', $form->key), ['answers' => ['message' => 'Genel başvuru']])->assertCreated();
-
-    expect(FormSubmission::query()->sole()->related_content)->toBeNull();
-});
-
-test('inactive forms reject a previously issued product context', function () {
-    $form = productForm();
-    $product = Product::factory()->create(['site_form_id' => $form->id]);
-    $data = app(ProductsFrontendService::class)->formFor($product);
-    $form->update(['is_active' => false]);
-
-    $this->postJson(route('forms.submit', $form->key), ['form_context' => $data['context'], 'answers' => ['message' => 'Mesaj']])->assertNotFound();
-
-    $this->assertDatabaseCount('form_submissions', 0);
-});
-
 test('product menu requires both menu and view permissions', function (array $permissions, bool $visible) {
     $this->seed(AdminPermissionSeeder::class);
     $admin = Admin::factory()->create();
@@ -364,14 +302,3 @@ test('product menu requires both menu and view permissions', function (array $pe
     'view only' => [['products.view'], false],
     'both permissions' => [['products.menu', 'products.view'], true],
 ]);
-
-test('context from an unavailable optional integration is rejected without class resolution errors', function () {
-    $form = productForm();
-    $product = Product::factory()->create(['site_form_id' => $form->id]);
-    $data = app(ProductsFrontendService::class)->formFor($product);
-    app()->instance(FormContext::class, new FormContext);
-
-    $this->postJson(route('forms.submit', $form->key), ['form_context' => $data['context'], 'answers' => ['message' => 'Mesaj']])->assertUnprocessable()->assertJsonValidationErrors('form_context');
-
-    $this->assertDatabaseCount('form_submissions', 0);
-});

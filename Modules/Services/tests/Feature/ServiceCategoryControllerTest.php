@@ -151,7 +151,8 @@ test('role editor displays category permissions under a readable module label', 
         ->assertSee('value="services.categories.menu"', false)
         ->assertSee('value="services.categories.delete"', false);
 
-    expect($role->fresh()->permissions)->toBeEmpty();
+    expect($role->fresh()->permissions->pluck('name')->all())->toContain('admins.menu');
+    expect($role->fresh()->permissions->pluck('name')->all())->not->toContain('services.categories.menu');
 });
 
 test('disabled services module hides its group and blocks cached routes for super admins', function () {

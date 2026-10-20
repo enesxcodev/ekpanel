@@ -12,7 +12,7 @@ test('service category create and edit forms render shared category fields and p
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
 
     $this->get(route('admin.services.categories.create'))->assertOk()
-        ->assertSeeInOrder(['name="name"', 'name="extra_fields[short_description]"', 'name="extra_fields[badge_text]"'], false);
+        ->assertSeeInOrder(['name="name"', 'name="extra_fields[short_description]"', 'name="extra_fields[badge_text]"', 'name="extra_fields[homepage_display]"'], false);
     $this->get(route('admin.services.categories.edit', $category))->assertOk()
         ->assertSee('Üretimden önce satılan hizmetler')->assertSee('Öne çıkan');
 });
@@ -25,13 +25,13 @@ test('service category creation stores feature values and updates without erasin
     ])->assertRedirectToRoute('admin.services.categories.index')->assertSessionHasNoErrors();
     $category = ServiceCategory::query()->sole();
     expect($category->name)->toBe('Danışmanlık');
-    expect($category->extra_fields)->toBe(['short_description' => 'Şirketlere özel danışmanlık', 'badge_text' => 'Popüler']);
+    expect($category->extra_fields)->toBe(['short_description' => 'Şirketlere özel danışmanlık', 'badge_text' => 'Popüler', 'homepage_display' => 'cards']);
 
     $this->put(route('admin.services.categories.update', $category), [
         'name' => 'Kurumsal danışmanlık', 'extra_fields' => ['badge_text' => null],
     ])->assertRedirectToRoute('admin.services.categories.index')->assertSessionHasNoErrors();
     expect($category->fresh()->name)->toBe('Kurumsal danışmanlık');
-    expect($category->fresh()->extra_fields)->toBe(['short_description' => 'Şirketlere özel danışmanlık', 'badge_text' => null]);
+    expect($category->fresh()->extra_fields)->toBe(['short_description' => 'Şirketlere özel danışmanlık', 'badge_text' => null, 'homepage_display' => 'cards']);
 });
 
 test('service category rejects unknown extra fields and keeps the submitted record unchanged', function () {
