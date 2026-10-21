@@ -242,3 +242,45 @@ test('worker failure before claiming the queued record releases its active insta
     expect($service->find($id)['results'][0]['error'])->toContain('Worker could not start');
     Queue::assertPushed(InstallQueuedModule::class, 1);
 });
+
+test('enable requests queue once without running processes and expose activation progress', function () {
+    $admin = Admin::factory()->superAdmin()->create();
+    prepareDistribution();
+    putDistributionModule(enabled: false);
+    Queue::fake();
+    Process::preventStrayProcesses();
+    $this->withoutVite();
+
+    $this->actingAs($admin, 'admin')->post(route('admin.modules.enable', 'Sample'))
+        ->assertRedirectToRoute('admin.modules.index')->assertSessionHas('notification.type', 'success');
+    $this->post(route('admin.modules.enable', 'Sample'))->assertSessionHas('notification.type', 'error');
+    $status = app(ModuleInstallations::class)->latest();
+    $this->get(route('admin.modules.index'))->assertOk()->assertSee('Modül etkinleştirme');
+    $this->getJson(route('admin.modules.installations.show', $status['id']))->assertOk()
+        ->assertJsonPath('action', 'enable')->assertJsonPath('status', 'queued')->assertJsonPath('percentage', 0);
+
+    $this->assertDatabaseCount('module_installations', 1);
+    Queue::assertPushed(InstallQueuedModule::class, 1);
+    Process::assertNothingRan();
+});
+
+test('queued activation reports real stages and preserves disabled state on failure', function (bool $fails) {
+    prepareDistribution();
+    putDistributionModule(enabled: false);
+    Queue::fake();
+    Process::preventStrayProcesses();
+    Process::fake(fn ($process) => Process::result(exitCode: $fails && in_array('migrate', $process->command, true) ? 1 : 0));
+    $service = app(ModuleInstallations::class);
+    $id = $service->enqueueEnable('Sample', 7);
+    $service->claim($id, 0);
+
+    $this->artisan('module:install-queued', ['installation' => $id, 'index' => 0])->assertExitCode($fails ? 1 : 0);
+    expect($service->find($id)['results'][0]['completed'])->toBe($fails ? 6 : 11);
+    $service->finish($id, 0, $fails ? 'Migration başarısız' : null);
+
+    expect($service->find($id)['status'])->toBe($fails ? 'failed' : 'succeeded');
+    expect($service->find($id)['percentage'])->toBe($fails ? 50 : 100);
+    expect(json_decode(Storage::disk('module-distribution')->get('statuses.json'), true)['Sample'])->toBe(! $fails);
+    Process::assertRan(fn ($process): bool => in_array('migrate', $process->command, true));
+    Queue::assertPushed(InstallQueuedModule::class, 1);
+})->with([false, true]);

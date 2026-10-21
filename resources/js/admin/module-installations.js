@@ -1,6 +1,6 @@
 const statusLabels = {
     queued: 'Sırada',
-    running: 'Kuruluyor',
+    running: 'İşleniyor',
     succeeded: 'Tamamlandı',
     failed: 'Başarısız',
     skipped: 'Atlandı',

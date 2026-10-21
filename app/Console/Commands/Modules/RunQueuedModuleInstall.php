@@ -22,8 +22,12 @@ class RunQueuedModuleInstall extends Command
         $index = (int) $this->argument('index');
         try {
             $item = $installations->entry($id, $index);
-            $manager->install($item['entry'], (int) $item['actor'],
-                fn (int $completed, string $stage) => $installations->progress($id, $index, $completed, $stage));
+            $progress = fn (int $completed, string $stage) => $installations->progress($id, $index, $completed, $stage);
+            if (($item['entry']['action'] ?? 'install') === 'enable') {
+                $manager->enable($item['entry']['name'], (int) $item['actor'], $progress);
+            } else {
+                $manager->install($item['entry'], (int) $item['actor'], $progress);
+            }
 
             return self::SUCCESS;
         } catch (Throwable $exception) {

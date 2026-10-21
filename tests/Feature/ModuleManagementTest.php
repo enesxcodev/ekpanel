@@ -3,6 +3,7 @@
 use App\Jobs\InstallQueuedModule;
 use App\Models\Admin\Admin;
 use App\Services\Admin\Modules\ModuleManager;
+use App\Services\Admin\Modules\ModuleInstallations;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Process;
@@ -85,6 +86,7 @@ test('module disable and enable persist state and record operations', function (
     prepareDistribution();
     putDistributionModule();
     Process::fake();
+    Queue::fake();
     $this->actingAs($admin, 'admin');
 
     $this->post(route('admin.modules.disable', 'Sample'))->assertRedirectToRoute('admin.modules.index')
@@ -93,8 +95,16 @@ test('module disable and enable persist state and record operations', function (
     $this->post(route('admin.modules.enable', 'Sample'))->assertRedirectToRoute('admin.modules.index')
         ->assertSessionHas('notification.type', 'success');
 
+    expect(Module::findOrFail('Sample')->isEnabled())->toBeFalse();
+    $installations = app(ModuleInstallations::class);
+    $id = $installations->latest()['id'];
+    $installations->claim($id, 0);
+    $this->artisan('module:install-queued', ['installation' => $id, 'index' => 0])->assertSuccessful();
+    $installations->finish($id, 0);
+
     expect(Module::findOrFail('Sample')->isEnabled())->toBeTrue();
     expect(app(ModuleManager::class)->history())->toHaveCount(2);
+    Queue::assertPushed(InstallQueuedModule::class, 1);
     Process::assertRan(fn ($process): bool => in_array('migrate', $process->command, true) && in_array('--realpath', $process->command, true));
 });
 

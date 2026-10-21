@@ -1,0 +1,338 @@
+{
+  "schema_version": 1,
+  "baseline_scope": "full_catalog",
+  "catalog_path": "D:\\localhost\\ekAgentModules\\catalog.json",
+  "catalog_sha256": "8537e58d3ce0e2ae03cb5e6db7922a3ba046064e835500bad0ddeeaf5e005c29",
+  "baseline_candidate": "store",
+  "baseline_result": "Store remains justified by the Products rules explicitly excluding commerce. No other new module candidate met the evidence threshold in the full rules/skills sweep. Appointment/booking is an unpromoted observation pending customer-demand evidence; see README.md.",
+  "modules": [
+    {
+      "id": "menus",
+      "name": "Menus",
+      "version": "0.1.1",
+      "description": "Yönetilebilir çok seviyeli ziyaretçi menüleri",
+      "catalog_entry_sha256": "9d546dfe5a9ddff599c0fba041e98d24ba82e48f1a53ad7e9c88885fd3587c7b",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "09e60efd24139f92dd4b870d5ea239f38c4c5fcdae5cfdb72ab3558da70f6147"
+        },
+        {
+          "path": "skills/menus-development/SKILL.md",
+          "sha256": "04f0499a5ee121eb17f96b9460ec76df5a4755da2c957bb5ec07c49da2c2849e"
+        },
+        {
+          "path": "skills/menus-theme-integration/SKILL.md",
+          "sha256": "4c7a8ccf6daf3c891ae8e477cadc90cb7234fcae8a06b389b3c000abbee514d1"
+        }
+      ],
+      "assessment": "Managed visitor navigation and dynamic content targets; does not cover commerce.",
+      "candidates": null
+    },
+    {
+      "id": "blog",
+      "name": "Blog",
+      "version": "0.1.2",
+      "description": "Blog, haber ve duyuru içeriklerinin yönetimi",
+      "catalog_entry_sha256": "e786726e4297900b7b00c4eea41c9d97db3995d47535eedca1fbe8e7061fff15",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "5d2b8776f662c4cd770862f7cead2de03c2ea0aa4769c3ad03c5ed43d09292fa"
+        },
+        {
+          "path": "skills/blog-theme-integration/SKILL.md",
+          "sha256": "a505bd7e8439921af90334bbe0b69d724ab77983fd6e714c5e1960146a70337f"
+        }
+      ],
+      "assessment": "Blog/news/announcement content; not a commerce gap.",
+      "candidates": null
+    },
+    {
+      "id": "brand",
+      "name": "Brand",
+      "version": "0.1.1",
+      "description": "Çalışılan markaların yönetimi",
+      "catalog_entry_sha256": "76fdd40dd7732d7f09a17e4c00517ad587b63251a2c5cee556c35e364662cef9",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "401f2815790f8bbeee1dcedb2587781398be645b8cd141e4c061b19f3ec25e6d"
+        },
+        {
+          "path": "skills/brand-theme-integration/SKILL.md",
+          "sha256": "08cdb5e4cf5a030d6d9cff0ebc24d2dfa5c6418817032fc5a836fd2a0e016727"
+        }
+      ],
+      "assessment": "Business partner brands; explicitly distinct from product brands, customers, and projects.",
+      "candidates": null
+    },
+    {
+      "id": "documents",
+      "name": "Documents",
+      "version": "0.1.1",
+      "description": "Belgeler, sertifikalar, indirmeler ve ürün katalogları yönetimi",
+      "catalog_entry_sha256": "e9300e44c57139b1e6df6d976f7a7bbfa3cb9d233a24df0dc06eb7e99cf455bf",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "af3872ad93de56556dcb5a0c86cc634bdc4eb176f7167aabb5cd318db5b27793"
+        },
+        {
+          "path": "skills/documents-theme-integration/SKILL.md",
+          "sha256": "ff0196e6a186f312bb154aeb6ce2eb98f43ac4efc0a9e95e0175305b248dde52"
+        }
+      ],
+      "assessment": "Downloadable documents, brochures, certificates, and catalog files; product catalogue files are not shoppable products.",
+      "candidates": null
+    },
+    {
+      "id": "faqs",
+      "name": "Faqs",
+      "version": "0.1.1",
+      "description": "Sıkça sorulan sorular ve kategoriler yönetimi",
+      "catalog_entry_sha256": "377f9c395e2e61e31977744ef5d8d25db6821a6bcc63d074d7e8247ae03fe6c4",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "1d79619f297341bae7babf2402a3050cdd2561dd5b96c68cebf54101271166b0"
+        },
+        {
+          "path": "skills/faqs-theme-integration/SKILL.md",
+          "sha256": "fc90f457501f25edc1a44fababba044008212e7c2fbd2a3b34deb0c8d4ba9db4"
+        }
+      ],
+      "assessment": "Question/answer knowledge content.",
+      "candidates": null
+    },
+    {
+      "id": "galeriler",
+      "name": "Galeriler",
+      "version": "0.1.1",
+      "description": "Fotoğraf ve Video Galerisi",
+      "catalog_entry_sha256": "bbd81fe410b362a535536145e3e3b00ad0e11a1a7f726a618277f4f0f26e6f89",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "ed71ac2bd5a1fbd53d36f41179d52e6ef3864678e32e91ed50450fffd87fb655"
+        },
+        {
+          "path": "skills/galeriler-theme-integration/SKILL.md",
+          "sha256": "a1e7f9a9ab3b336090089333f467075c2fa3cfe0d3e083125bad62c8a8a14a7d"
+        }
+      ],
+      "assessment": "Photo/video gallery content.",
+      "candidates": null
+    },
+    {
+      "id": "pages",
+      "name": "Pages",
+      "version": "0.1.1",
+      "description": "Sayfa ve sayfa kategorisi yönetimi",
+      "catalog_entry_sha256": "c6f94d28c7ceebcf71bab2586a302335519327f89b281dfdd54d89c5bd9c9b63",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "dc6648cb93022e51d13be847c64d9ab017f7a7547589b24d6bab81cd1e90c63d"
+        },
+        {
+          "path": "skills/pages-theme-integration/SKILL.md",
+          "sha256": "bd184d25a1482643e1d3130b85a8f76fb564d3c3d13276a5418d7c9f8701e4ba"
+        }
+      ],
+      "assessment": "Long-form site pages with metadata and categories.",
+      "candidates": null
+    },
+    {
+      "id": "projects",
+      "name": "Projects",
+      "version": "0.1.1",
+      "description": "Projeler",
+      "catalog_entry_sha256": "a2379f14ad776a4064c38da7489b41f2dacb3d5bcc6861b4208be70fdf705022",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "69ce72a574fa9e92f432af524b14bdbca814bffe41fff6efcb3109a27977864f"
+        },
+        {
+          "path": "skills/projects-theme-integration/SKILL.md",
+          "sha256": "00a21d77bf2f48aaf44ab6d4b4ef5c0013edb0711d377276f1082eff5e8a6e79"
+        }
+      ],
+      "assessment": "Project portfolio and completed work.",
+      "candidates": null
+    },
+    {
+      "id": "sector",
+      "name": "Sector",
+      "version": "0.1.1",
+      "description": "Sektör yönetimi",
+      "catalog_entry_sha256": "821957b998ca14eef4302876488a87677eef2ce0051e1067ca7d4c9a0eb903b2",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "da07b4eed630a6ba2329771514bbebdc2ae23493e9ccc29cf4182e537f3b7799"
+        },
+        {
+          "path": "skills/sector-theme-integration/SKILL.md",
+          "sha256": "1e887780c15f84d6ec4ede872295129354b68cc70d84cb02fd66718255454e6b"
+        }
+      ],
+      "assessment": "Business sectors served; distinct from services and brands.",
+      "candidates": null
+    },
+    {
+      "id": "services",
+      "name": "Services",
+      "version": "0.1.1",
+      "description": "Hizmet yönetimi",
+      "catalog_entry_sha256": "7bd98bdd7c58257683108b3694d1ef413cd66a863828a512af32be3594f8686f",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "7eb01061896c2624ce7dc6e7e9b39f885551b871fcd98ff1e69af76e630ded57"
+        },
+        {
+          "path": "skills/services-theme-integration/SKILL.md",
+          "sha256": "48c91b244cfd79452d29811785bfe48916cf738597fa200d24fe0cf174e21b41"
+        }
+      ],
+      "assessment": "Service catalogue; not scheduling or booking.",
+      "candidates": null
+    },
+    {
+      "id": "slider",
+      "name": "Slider",
+      "version": "0.1.1",
+      "description": "Slider yönetimi",
+      "catalog_entry_sha256": "7251537c79d7c637a524b0f9e71a6f85f15d3cf0b72b49435e8342f929b25e7b",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "bc9ec0a65f59a820e086dbd3a668d3b356143feddcbaa58a8aec7dd949f3ca26"
+        },
+        {
+          "path": "skills/slider-theme-integration/SKILL.md",
+          "sha256": "23e50baa24b83b824c9ab6c55401c77c21fdd3e851443931564bbd01f1b999e3"
+        }
+      ],
+      "assessment": "Hero/banner slides; not commerce.",
+      "candidates": null
+    },
+    {
+      "id": "team",
+      "name": "Team",
+      "version": "0.1.1",
+      "description": "Ekip üyeleri yönetimi",
+      "catalog_entry_sha256": "32e30f04491812767fd4db2664426a2aec118cc7e5b8970f75bb777223075e70",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "91424a60c7c343c4ef029fd1e04cd52945921143f2bc63f769572a0415bafbee"
+        },
+        {
+          "path": "skills/team-theme-integration/SKILL.md",
+          "sha256": "e5d929441faadb8f5d9f044afda6348b621c951a7ce625f9d4cb2c9091c336d2"
+        }
+      ],
+      "assessment": "Team member profiles.",
+      "candidates": null
+    },
+    {
+      "id": "testimonials",
+      "name": "Testimonials",
+      "version": "0.1.1",
+      "description": "Müşteri yorumları ve başarı hikâyeleri yönetimi",
+      "catalog_entry_sha256": "4b0bfc060e485174af1a1eb82f5de13b5bb0b0f9f46040b61420c99f6476d627",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "26b8addbe4e2cf4cb4879d63fddd4ca41acf7dc86af384dbea4f3bd68817b34e"
+        },
+        {
+          "path": "skills/testimonials-theme-integration/SKILL.md",
+          "sha256": "f45b81e6e53842b2f6a11345c24a081551b2d6380ba13001d9be53909b09cd51"
+        }
+      ],
+      "assessment": "Customer reviews with publication approval.",
+      "candidates": null
+    },
+    {
+      "id": "popup",
+      "name": "Popup",
+      "version": "0.1.0",
+      "description": "Pop-up yönetimi",
+      "catalog_entry_sha256": "6204f757ec7bbd6aa060966ab2dedc33e6d25849ae1f1845c4e2c8c37aaca4e7",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "13d9d3cd3d72d6f747d9ac32499fda5f3998a043ec6fe18dbde026d963290b2d"
+        },
+        {
+          "path": "skills/popup-theme-integration/SKILL.md",
+          "sha256": "3e8b4a1aeb65c3e6f4db829d05717a8a0dd34db4c449a7c45586dc8926f428f8"
+        }
+      ],
+      "assessment": "Scheduled announcements and eligibility service; missing frontend rendering is an integration task inside existing module, not a missing module.",
+      "candidates": null
+    },
+    {
+      "id": "products",
+      "name": "Products",
+      "version": "0.1.0",
+      "description": "Ürün yönetimi",
+      "catalog_entry_sha256": "ab43c142342b8e7d40bd1ba65e4c4ed05274c4070c695069fe857df2cdf9d46e",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "fbf170e3f83c1501be27c6ee1b98210fd5934a523ec4bc0dc7c1d343bd873edb"
+        },
+        {
+          "path": "skills/products-theme-integration/SKILL.md",
+          "sha256": "fa38e75b2abd0af49db540838a0d04237f9c149b8c0c9c8e88efa2a4a67962ea"
+        }
+      ],
+      "assessment": "Corporate product catalogue only. Rule and skill explicitly exclude price, inventory, variants, cart, orders, and payment; validates the Store candidate.",
+      "candidates": "store"
+    },
+    {
+      "id": "users",
+      "name": "Users",
+      "version": "0.1.0",
+      "description": "Web kullanıcıları ve kimlik doğrulama altyapısı",
+      "catalog_entry_sha256": "64df0286ab3774a733c4794a2d4bdde9580d85cb67e1ef8ba7801322a520f1c5",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "f1d0fe6d6dbfe559231158458ef18ca8d7428eeac5015c9b90979ec4466e0a39"
+        },
+        {
+          "path": "skills/users-theme-integration/SKILL.md",
+          "sha256": "20a3aaa73b0af837edbb5d59921ab2250a6dd01a5ee189fa47bb0557edc2dd2d"
+        }
+      ],
+      "assessment": "Web login, verification, password reset, and admin user management; no separate account module is justified. Store should decide optional account integration or guest checkout.",
+      "candidates": null
+    }
+  ],
+  "last_checked_at": "2026-10-21T18:50:05+03:00",
+  "last_discovery_completion_at": "2026-10-21T18:50:05+03:00",
+  "last_discovery_task_id": "TASK-20261021-1848-full-baseline",
+  "baseline_completed_at": "2026-10-21T18:50:05+03:00"
+}

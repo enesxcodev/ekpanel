@@ -14,5 +14,6 @@
     "Galeriler": true,
     "Users": true,
     "Products": true,
-    "Popup": true
+    "Popup": true,
+    "Store": false
 }

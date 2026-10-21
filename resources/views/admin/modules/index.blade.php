@@ -5,12 +5,12 @@
     </div>
     @if ($installation ?? null)
         @php
-            $installationStatuses = ['queued' => 'Sırada', 'running' => 'Kuruluyor', 'succeeded' => 'Tamamlandı', 'failed' => 'Başarısız', 'skipped' => 'Atlandı'];
+            $installationStatuses = ['queued' => 'Sırada', 'running' => 'İşleniyor', 'succeeded' => 'Tamamlandı', 'failed' => 'Başarısız', 'skipped' => 'Atlandı'];
             $installationPercentage = max(0, min($installation['status'] === 'succeeded' ? 100 : 99, (int) $installation['percentage']));
         @endphp
         <div class="card mb-4" data-module-installation data-status="{{ $installation['status'] }}" data-status-url="{{ route('admin.modules.installations.show', $installation['id']) }}">
             <div class="card-header d-flex justify-content-between">
-                <h2 class="card-title">Modül kurulumu</h2>
+                <h2 class="card-title">{{ ($installation['action'] ?? 'install') === 'enable' ? 'Modül etkinleştirme' : 'Modül kurulumu' }}</h2>
                 <span class="badge bg-secondary-lt" data-installation-status>{{ $installationStatuses[$installation['status']] ?? $installation['status'] }}</span>
             </div>
             <div class="card-body">
@@ -18,10 +18,10 @@
                     <span data-installation-stage>{{ $installation['stage'] }}</span>
                     <strong data-installation-percentage>%{{ $installationPercentage }}</strong>
                 </div>
-                <div class="progress" role="progressbar" aria-label="Kurulum ilerlemesi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $installationPercentage }}" data-installation-progress>
+                <div class="progress" role="progressbar" aria-label="Modül işlemi ilerlemesi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $installationPercentage }}" data-installation-progress>
                     <div class="progress-bar" style="width: {{ $installationPercentage }}%" data-installation-bar></div>
                 </div>
-                <p class="text-secondary mt-2 mb-0" data-installation-wait @if ($installation['status'] !== 'queued') hidden @endif>Kurulum sırada; kuyruk çalışanının işi alması bekleniyor.</p>
+                <p class="text-secondary mt-2 mb-0" data-installation-wait @if ($installation['status'] !== 'queued') hidden @endif>İşlem sırada; kuyruk çalışanının işi alması bekleniyor.</p>
                 <p class="text-danger mt-2 mb-0" data-installation-error @if (empty($installation['error'])) hidden @endif>{{ $installation['error'] ?? '' }}</p>
                 <p class="text-warning mt-2 mb-0" data-installation-network hidden role="status"></p>
                 <button type="button" class="btn btn-sm mt-2" data-installation-retry hidden>Şimdi yeniden kontrol et</button>

@@ -230,12 +230,13 @@ class ModuleManager
         });
     }
 
-    public function enable(string $name, int $actor): void
+    public function enable(string $name, int $actor, ?Closure $progress = null): void
     {
-        $this->run('enable', $name, $actor, function () use ($name): void {
+        $this->run('enable', $name, $actor, function () use ($name, $progress): void {
+            $progress?->__invoke(0, 'Etkinleştirme uyumluluğu kontrol ediliyor');
             $module = Module::findOrFail($name);
             $this->assertLocal($module);
-            $this->activate($module, false);
+            $this->activate($module, false, $progress);
         });
     }
 

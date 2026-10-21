@@ -75,12 +75,11 @@ class ModuleController extends Controller
         }, 'Kurulum sıraya alındı. Aşamaları bu ekrandan izleyebilirsiniz.');
     }
 
-    public function enable(Request $request, string $module, ModuleManager $manager): RedirectResponse
+    public function enable(Request $request, string $module, ModuleInstallations $installations): RedirectResponse
     {
-        return $this->respond(function () use ($manager, $module, $request): void {
-            app(ModuleInstallations::class)->assertIdle();
-            $manager->enable($module, $request->user('admin')->id);
-        }, 'Modül etkinleştirildi.');
+        return $this->respond(function () use ($installations, $module, $request): void {
+            $installations->enqueueEnable($module, $request->user('admin')->id);
+        }, 'Etkinleştirme sıraya alındı. İlerlemeyi bu ekrandan izleyebilirsiniz.');
     }
 
     public function disable(Request $request, string $module, ModuleManager $manager): RedirectResponse

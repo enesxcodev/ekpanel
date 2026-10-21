@@ -1,0 +1,240 @@
+{
+  "main": {
+    "id": "3967615812ed69b0",
+    "type": "split",
+    "children": [
+      {
+        "id": "6098dc9478af5c5a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d83f5d1e3f9c2453",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "teklif-goturulecekler.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "teklif-goturulecekler"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "ccc78f5657107c48",
+    "type": "split",
+    "children": [
+      {
+        "id": "e0daa51ac6e664b5",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b9875c58c2277daa",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Dosya Gezgini"
+            }
+          },
+          {
+            "id": "51daf1fbdda95add",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Ara"
+            }
+          },
+          {
+            "id": "8313aed9e7960518",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Yer İmleri"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 355.5
+  },
+  "right": {
+    "id": "2c96f7413d3afb0b",
+    "type": "split",
+    "children": [
+      {
+        "id": "2efe46ad60c88e7c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f60121e0c0ddeceb",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "is-plani.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Geri Bağlantılar"
+            }
+          },
+          {
+            "id": "40023004ab113e6e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "is-plani.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Giden bağlantılar"
+            }
+          },
+          {
+            "id": "fd8a444e9b483091",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiketler"
+            }
+          },
+          {
+            "id": "f3c53d01ca1cfcea",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Tüm özellikler"
+            }
+          },
+          {
+            "id": "fcd6e78466ce95a4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "is-plani.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Anahat"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Hızlı geçişi aç": false,
+      "graph:Grafik görünümünü aç": false,
+      "canvas:Yeni tuval oluşturun": false,
+      "daily-notes:Bugünün Notunu Aç": false,
+      "templates:Şablon ekle": false,
+      "command-palette:Komut paletini aç": false,
+      "bases:Yeni taban oluştur": false
+    }
+  },
+  "active": "d83f5d1e3f9c2453",
+  "lastOpenFiles": [
+    "file:D:/localhost/ekagent/Modules/Plans/Store.md",
+    "file:D:/localhost/ekagent/Modules/Plans/README.md",
+    "file:D:/localhost/ekagent/Modules/Plans/Görev Günlüğü.md",
+    "file:D:/localhost/ekagent/Modules/Plans/İş Akışı.md",
+    "file:C:/Users/root/Desktop/codex-model-selection-guide.md",
+    "2026-10-21/ilk-10-isletme-on-eleme.md",
+    "2026-10-21/gunluk-rapor.md",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/analiz-ve-brif.md",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/arastirma-kanitlar.md",
+    "2026-10-21/merter-cinar-yapi-tesisat-gungoren/arastirma-ve-nihai-puan.md",
+    "2026-10-21/su-yolu-tesisat-kucukcekmece/arastirma-ve-nihai-puan.md",
+    "2026-10-21/takip.md",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/ticari-teklif.md",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/teklif-taslagi.md",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/maliyet.md",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/gorseller-manifesti.md",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/durum-ve-kararlar.md",
+    "2026-10-21/isista-beauty-kuafor-kartal/teklif-taslagi.md",
+    "2026-10-21/isista-beauty-kuafor-kartal/arastirma-ve-nihai-puan.md",
+    "2026-10-21/kavaca-premium-arac-kaplama-umraniye/arastirma-ve-nihai-puan.md",
+    "2026-10-21/kavaca-premium-arac-kaplama-umraniye/durum-ve-kararlar.md",
+    "2026-10-21/kavaca-premium-arac-kaplama-umraniye/maliyet.md",
+    "2026-10-21/arts-beauty-studio-sisli/teklif-taslagi.md",
+    "2026-10-21/arts-beauty-studio-sisli/tasarim-karari.md",
+    "2026-10-21/arts-beauty-studio-sisli/maliyet.md",
+    "2026-10-21/arts-beauty-studio-sisli/durum-ve-kararlar.md",
+    "2026-10-21/arts-beauty-studio-sisli",
+    "2026-10-21/isista-beauty-kuafor-kartal",
+    "2026-10-21/merter-cinar-yapi-tesisat-gungoren",
+    "2026-10-21/krom-istanbul-jant-boyama-atasehir",
+    "2026-10-21/kavaca-premium-arac-kaplama-umraniye",
+    "2026-10-21/su-yolu-tesisat-kucukcekmece",
+    "check-business-duplicate.ps1",
+    "business-index.jsonl",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller/F1-tabela-cephe.jpg",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller/F7-arka-camurluk-boyasi.jpg",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller/F6-on-tampon-boyahane.jpg",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller/F5-kapi-gocuk-duzeltme.jpg",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller/F4-arac-yan-panel-onarim.jpg",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller/F3-boyahane-maskeleme.jpg",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller/F2-arac-kaporta-astar.jpg",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/tasarim.html",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/tasarim.png",
+    "2026-10-21/suvaroglu-oto-kaporta-boya-sultanbeyli/referans-gorseller",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/referans-gorseller/F6-liftte-hafif-ticari.jpg",
+    "2026-10-21/umut-oto-ozel-servis-basaran-usta-eyupsultan/referans-gorseller/F5-arac-on-gorunum.jpg"
+  ]
+}

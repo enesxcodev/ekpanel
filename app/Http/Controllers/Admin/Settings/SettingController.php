@@ -12,6 +12,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Nwidart\Modules\Facades\Module;
 
 class SettingController extends Controller
 {
@@ -20,6 +21,7 @@ class SettingController extends Controller
         $this->authorize('settings.view');
         $admin = auth('admin')->user();
         $sections = SettingSection::query()->orderBy('sort_order')->orderBy('id')->get()
+            ->reject(fn (SettingSection $section): bool => $section->key === 'store' && ! Module::isEnabled('Store'))
             ->filter(fn (SettingSection $section): bool => $admin->can('view', $section))->values();
         $sections->load('definitions.storedValue.media');
         $fields = [];
@@ -61,6 +63,7 @@ class SettingController extends Controller
 
     public function update(UpdateSettingsRequest $request, SettingSection $section, SettingsService $settings): RedirectResponse
     {
+        abort_if($section->key === 'store' && ! Module::isEnabled('Store'), 404);
         try {
             $settings->updateSection($section, $request->validated(), $request->user('admin'));
         } finally {

@@ -1,0 +1,18 @@
+{
+    "name": "Store",
+    "alias": "store",
+    "version": "0.1.0",
+    "description": "Satılabilir ürün, stok ve yerel sipariş yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Store\\Providers\\StoreServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "install": {
+            "seeders": ["Modules\\Store\\Database\\Seeders\\StoreSettingsSeeder"]
+        },
+        "permissions": ["store.menu", "store.view", "store.create", "store.update", "store.delete", "store.categories.menu", "store.categories.view", "store.categories.create", "store.categories.update", "store.categories.delete", "store.stock.view", "store.stock.update", "store.orders.menu", "store.orders.view", "store.orders.update"]
+    }
+}

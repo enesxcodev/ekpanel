@@ -7,6 +7,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
+use Nwidart\Modules\Facades\Module;
 use RuntimeException;
 use stdClass;
 
@@ -17,6 +18,16 @@ class ModuleInstallations
     private function records(): Builder
     {
         return DB::table('module_installations');
+    }
+
+    public function enqueueEnable(string $name, int $actor): string
+    {
+        $module = Module::findOrFail($name);
+
+        return $this->enqueue([[
+            'id' => strtolower($module->getName()), 'name' => $module->getName(),
+            'action' => 'enable', 'requires' => ['modules' => []],
+        ]], $actor);
     }
 
     /** @param list<array<string, mixed>> $entries */
@@ -174,13 +185,15 @@ class ModuleInstallations
             return $this->find($record->id);
         }
         $results = json_decode($record->results, true, 64, JSON_THROW_ON_ERROR);
+        $entries = json_decode($record->entries, true, 64, JSON_THROW_ON_ERROR);
+        $action = $entries[0]['action'] ?? 'install';
         $percentage = (int) floor(array_sum(array_column($results, 'completed')) / (count($results) * self::STEPS) * 100);
         $current = $results[$record->current_index] ?? null;
 
         return [
-            'id' => $record->id, 'status' => $record->status,
+            'id' => $record->id, 'status' => $record->status, 'action' => $action,
             'percentage' => $record->status === 'succeeded' ? 100 : min(99, $percentage),
-            'stage' => $current['stage'] ?? ($record->status === 'succeeded' ? 'Tüm modüller kuruldu' : 'Kurulum tamamlandı; hataları inceleyin'),
+            'stage' => $current['stage'] ?? ($record->status === 'succeeded' ? ($action === 'enable' ? 'Modül etkinleştirildi' : 'Tüm modüller kuruldu') : 'İşlem tamamlandı; hataları inceleyin'),
             'error' => $record->error, 'results' => $results, 'updated_at' => $record->updated_at,
         ];
     }
