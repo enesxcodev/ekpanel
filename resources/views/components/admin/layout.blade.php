@@ -14,6 +14,9 @@
         <script>
             try {
                 document.documentElement.dataset.bsTheme = localStorage.getItem('ekagent-admin-theme') === 'dark' ? 'dark' : 'light';
+                if (localStorage.getItem('tabler-sidebar') === 'folded-hover') {
+                    document.documentElement.dataset.bsSidebar = 'folded-hover';
+                }
             } catch {}
         </script>
         @vite(['resources/css/admin.css', 'resources/js/panel.js'])
@@ -36,7 +39,13 @@
                         <div class="row g-2 align-items-center">
                             <div class="col">
                                 <x-admin.page-title :title="$title" />
+                                @isset($description)
+                                    <div class="text-secondary mt-1">{{ $description }}</div>
+                                @endisset
                             </div>
+                            @isset($pageActions)
+                                <div class="col-auto">{{ $pageActions }}</div>
+                            @endisset
                         </div>
                     </div>
                 </div>

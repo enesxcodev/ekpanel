@@ -1,7 +1,7 @@
 {
     "name": "Pages",
     "alias": "pages",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Sayfa ve sayfa kategorisi yönetimi",
     "keywords": [],
     "priority": 0,
@@ -21,6 +21,7 @@
             "pages.categories.create",
             "pages.categories.update",
             "pages.categories.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

@@ -16,5 +16,10 @@
     "Products": true,
     "Popup": true,
     "Store": true,
-    "Konum": true
+    "Konum": true,
+    "Branches": true,
+    "Appointments": true,
+    "Careers": true,
+    "Events": true,
+    "LogViewer": true
 }

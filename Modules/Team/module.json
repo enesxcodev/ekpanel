@@ -1,7 +1,7 @@
 {
     "name": "Team",
     "alias": "team",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Ekip üyeleri yönetimi",
     "keywords": [],
     "priority": 0,
@@ -16,6 +16,7 @@
             "team.create",
             "team.update",
             "team.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

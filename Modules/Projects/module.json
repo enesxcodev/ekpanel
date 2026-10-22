@@ -1,7 +1,7 @@
 {
     "name": "Projects",
     "alias": "projects",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Projeler",
     "keywords": [],
     "priority": 0,
@@ -21,6 +21,7 @@
             "projects.categories.create",
             "projects.categories.update",
             "projects.categories.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

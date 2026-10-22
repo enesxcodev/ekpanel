@@ -21,3 +21,13 @@ Her gerçek kayda seri kimliği, ayrı ön/nihai puan ve bant, `tasarim-karari.m
 | ARTS BEAUTY STUDIO / güzellik-tırnak | `2026-10-21/arts-beauty-studio-sisli` | 70 / 75 | Tasarım kararı ve taslak var; gönderilmedi | `teklif-taslagi.md` |
 
 Bunlar gönderilmemiş teklif taslaklarıdır; tasarım kararı, araştırma/nihai puan ve maliyet kayıtlarıyla birlikte dosya kontrolünden geçti ve seri hedefi olan üç tamamlanmış paket olarak sayıldı. Her birinin kanıt sınırları, görsel stratejisi ve maliyet ölçüm durumu firma klasöründedir. Müşteri gönderimi 0; ticari fiyat ve şartlar kullanıcı tarafından belirlenecek.
+
+## Yeni seri — PILOT-20261022-01
+
+| Firma kimliği | Firma / sektör / konum | Place ID / telefon / adres | Gün ve firma klasörü | Site sonucu | Ön / nihai puan | Durum | Taslak | Gönderim |
+|---|---|---|---|---|---:|---|---|---|
+| STAR-BMW-SERVISI-IKITELLI-20261022 | ÖZEL STAR BMW SERVİSİ / özel oto servisi / Başakşehir | `0x14caa3f8cabb66f3:0x6b3540c1fe65df83` / +905352971396 / Dolapdere Sanayi Sitesi 22. Ada | `2026-10-22/ozel-star-bmw-servisi-basaksehir` | Maps alanı boş; araştırmada resmi alan adı doğrulanmadı; yokluğu kesin değil | 66 / 75 yüksek | Tasarım kararı, prompt, teklif taslağı ve maliyet kaydı tamamlandı; paket 1/3 | `teklif-taslagi.md` | Gönderilmedi |
+
+Paket doğrulama tarihi 2026-10-22. Fotoğraf ve yorum sayıları ön eleme veya puana dahil edilmedi. Müşteri mesajı gönderilmedi; fiyat/şart kullanıcı belirleyecek. Kaynak ve bilinmeyenler firma klasöründedir.
+
+| GENTURK-SEPETLI-VINC-KAGITHANE-20261022 | Gençtürk sepetli vinç kiralama / vinç ve iş makinesi kiralama / Kağıthane | `0xa290b8dd19b66ebf:0xa99cb38cd85b8e55` / +905386379068 / Talatpaşa Ertan Sk. No:5 | `2026-10-22/gencturk-sepetli-vinc-kagithane` | Maps alanı boş; resmi alan adı kapsam dahilinde doğrulanamadı; benzer domain eşleşmedi | 70 / 75 yüksek | Tasarım kararı, prompt, teklif taslağı ve maliyet kaydı tamamlandı; paket 2/3 | `teklif-taslagi.md` | Gönderilmedi |

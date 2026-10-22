@@ -1,0 +1,21 @@
+<?php
+
+namespace $NAMESPACE$;
+
+use App\Models\Admin\Admin;
+use App\Services\Admin\Dashboard\DashboardWidget;
+use $MODEL$;
+
+class $CLASS$ implements DashboardWidget
+{
+    public function definition(): array
+    {
+        return ['id' => $ID$, 'title' => $TITLE$, 'icon' => 'list',
+            'permissions' => [$PERMISSION$], 'default' => $DEFAULT$, 'order' => 100, 'type' => 'stat'];
+    }
+
+    public function data(Admin $admin): array
+    {
+        return ['value' => $MODEL_NAME$::query()->count(), 'url' => route($ROUTE$, absolute: false)];
+    }
+}

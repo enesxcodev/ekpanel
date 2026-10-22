@@ -1,7 +1,7 @@
 {
     "name": "Documents",
     "alias": "documents",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Belgeler, sertifikalar, indirmeler ve ürün katalogları yönetimi",
     "keywords": [],
     "priority": 0,
@@ -21,6 +21,7 @@
             "documents.categories.create",
             "documents.categories.update",
             "documents.categories.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

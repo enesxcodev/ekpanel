@@ -9,6 +9,7 @@
     ],
     "files": [],
     "panel": {
+        "widgets": "config/widgets.php",
         "permissions": ["$LOWER_NAME$.menu", "$LOWER_NAME$.view"]
     }
 }

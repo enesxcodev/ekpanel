@@ -1,0 +1,22 @@
+{
+    "name": "Events",
+    "alias": "events",
+    "version": "0.1.1",
+    "description": "Etkinlik, kayıt ve katılım yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Events\\Providers\\EventsServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "events.menu",
+            "events.view",
+            "events.create",
+            "events.update",
+            "events.delete"
+        ],
+        "widgets": "config/widgets.php"
+    }
+}

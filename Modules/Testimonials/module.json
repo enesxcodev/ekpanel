@@ -1,7 +1,7 @@
 {
     "name": "Testimonials",
     "alias": "testimonials",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Müşteri yorumları ve başarı hikâyeleri yönetimi",
     "keywords": [],
     "priority": 0,
@@ -16,6 +16,7 @@
             "testimonials.create",
             "testimonials.update",
             "testimonials.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

@@ -1,7 +1,7 @@
 {
     "name": "Popup",
     "alias": "popup",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Pop-up yönetimi",
     "keywords": [],
     "priority": 0,
@@ -16,6 +16,7 @@
             "popup.create",
             "popup.update",
             "popup.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

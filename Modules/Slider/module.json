@@ -1,7 +1,7 @@
 {
     "name": "Slider",
     "alias": "slider",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Slider yönetimi",
     "keywords": [],
     "priority": 0,
@@ -16,6 +16,7 @@
             "slider.create",
             "slider.update",
             "slider.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

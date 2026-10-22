@@ -1,7 +1,7 @@
 {
     "name": "Konum",
     "alias": "konum",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Türkiye il, ilçe, ara bölge, mahalle ve cadde/sokak referans verileri",
     "providers": [
         "Modules\\Konum\\Providers\\KonumServiceProvider"
@@ -17,6 +17,7 @@
             "seeders": [
                 "Modules\\Konum\\Database\\Seeders\\KonumInstallSeeder"
             ]
-        }
+        },
+        "widgets": "config/widgets.php"
     }
 }

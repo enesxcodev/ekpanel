@@ -1,0 +1,32 @@
+{
+    "name": "ekagent/events",
+    "description": "Etkinlik ve katılımcı kaydı yönetimi",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^13.0",
+        "nwidart/laravel-modules": "^13.0",
+        "spatie/laravel-permission": "^8.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Events\\": "app/",
+            "Modules\\Events\\Database\\Factories\\": "database/factories/",
+            "Modules\\Events\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Events\\Tests\\": "tests/"
+        }
+    }
+}

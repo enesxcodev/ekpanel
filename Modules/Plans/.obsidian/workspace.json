@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Görev Günlüğü.md",
+                "file": "Gün Sonu Raporu.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Görev Günlüğü"
+              "title": "Gün Sonu Raporu"
             }
           }
         ]
@@ -188,18 +188,22 @@
       "bases:Yeni taban oluştur": false
     }
   },
-  "active": "166e39a9aa9869e6",
+  "active": "c1e426a7bac1a241",
   "lastOpenFiles": [
+    "LogViewer/LogViewer - Tamamlandı.md",
+    "LogViewer/prototype.html",
+    "LogViewer/LogViewer - Yeni.md",
+    "LogViewer",
+    "Görev Günlüğü.md",
+    "Gün Sonu Raporu.md",
+    "İş Akışı.md",
+    "Onay Gerektiren İşler.md",
     "Branches/Branches - Yeni.md",
     "Branches",
-    "Gün Sonu Raporu.md",
-    "Onay Gerektiren İşler.md",
-    "İş Akışı.md",
     "Store/Store - Tamamlandı.md",
     "file:C:/Users/root/.codex/automations/eksik-mod-l-ke-fi/memory.md",
     "Store/Store-Ürün-Formu.png",
     "Store/Store - Yeni.md",
-    "Görev Günlüğü.md",
     "Store",
     "Store - Yeni.md",
     "Store.md",

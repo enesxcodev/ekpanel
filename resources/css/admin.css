@@ -6,6 +6,7 @@
 @import './admin-dark.css';
 @import './site-forms.css';
 @import './form-builder.css';
+@import './dashboard-widgets.css';
 
 [data-category-tree-select] {
     min-width: 0;
@@ -61,15 +62,80 @@
 
 
 .admin-topbar { min-height: 3.5rem; background: var(--tblr-bg-surface); border-bottom: 1px solid var(--tblr-border-color); }
+.admin-topbar-search { flex: 1 1 auto; min-width: 0; background: none; }
+.admin-topbar-search .input-icon { border: 2px dashed #075d1a; background: none; box-shadow: inset 0 0 1rem rgb(0 255 91 / 10%), 0 0 .45rem rgb(0 151 43 / 22%); }
+.admin-topbar-search .form-control { min-height: 2.35rem; border: 0; background: none; color: #63f58d; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .8125rem; letter-spacing: .055em; text-shadow: 0 0 .45rem rgb(99 245 141 / 45%); }
+.admin-topbar-search .input-icon:focus-within,
+.admin-topbar-search .input-icon:focus-within .form-control { border-radius: 0; }
+.admin-topbar-search .input-icon:focus-within { border-color: transparent; box-shadow: none; }
+.admin-topbar-search .form-control:focus { background: #000; box-shadow: none; }
+.admin-topbar-search .form-control::placeholder { color: #319653; opacity: 1; }
+.admin-topbar-search .input-icon-addon { color: #3fe474; }
+.admin-topbar-search-results { display: block; inset: calc(100% + .25rem) 0 auto; max-height: min(24rem, calc(100vh - 5rem)); overflow-y: auto; }
+.admin-topbar-search-result { display: flex; align-items: center; gap: .5rem; }
+.admin-topbar-search-result[data-depth] { padding-inline-start: calc(1rem + (var(--admin-search-depth) * 1rem)); }
+.admin-topbar-search-result .nav-link-icon { display: inline-flex; flex: 0 0 1.5rem; justify-content: center; }
+.admin-topbar-search-group { display: flex; align-items: center; gap: .5rem; padding: .6rem 1rem .35rem; color: var(--tblr-body-color); font-size: .75rem; font-weight: 700; text-transform: uppercase; }
+.admin-topbar-search-group .nav-link-icon { display: inline-flex; flex: 0 0 1.5rem; justify-content: center; }
+.admin-topbar-search-empty { padding: .75rem 1rem; color: var(--tblr-secondary); }
 .admin-topbar-user { max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-notifications { width: min(28rem, calc(100vw - 2rem)); }
+.admin-sidebar-brand { display: inline-flex; min-width: 0; overflow: hidden; }
+.admin-sidebar-brand-logo { width: 9rem; height: auto; object-fit: contain; }
+.admin-sidebar-toggle { color: inherit; flex-shrink: 0; }
 
+@media (min-width: 768px) {
+    .page > .navbar-vertical.navbar-expand-md {
+        overflow-x: clip;
+        transition: width .2s ease-out;
+    }
+
+    .page > .navbar-vertical ~ .page-wrapper {
+        transition: margin-inline-start .2s ease-out;
+    }
+
+    .page > .navbar-vertical .navbar-brand {
+        min-height: 7rem;
+    }
+
+    .page > .navbar-vertical .nav-link-title {
+        white-space: nowrap;
+        transition: none;
+    }
+
+    .page > .navbar-vertical .nav-link-icon {
+        display: inline-flex !important;
+        flex-shrink: 0;
+    }
+
+    .page > .navbar-vertical .admin-sidebar-brand-logo {
+        width: 9rem;
+        height: 5.5rem;
+        object-fit: contain;
+        transition: none;
+    }
+
+    html[data-bs-sidebar="folded-hover"] .navbar-vertical:not(:hover):not(:has(:focus-visible)) .navbar-collapse .collapse {
+        display: none !important;
+    }
+
+    html[data-bs-sidebar="folded-hover"] .page > .navbar-vertical:not(:hover):not(:has(:focus-visible)) .admin-sidebar-brand-logo {
+        width: 2rem;
+        height: 2rem;
+        object-position: center;
+    }
+}
 
 @media (max-width: 575.98px) {
+    .admin-topbar-search { min-width: 7rem; }
     .admin-topbar .nav-item:has(> .admin-notifications) { position: static; }
     .admin-topbar .admin-notifications {
         inset: 100% 1rem auto !important;
         width: auto;
         transform: none !important;
     }
+}
+
+@media (max-width: 767.98px) {
+    .admin-sidebar-toggle { display: none; }
 }

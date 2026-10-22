@@ -1,17 +1,32 @@
 {
     "name": "Blog",
     "alias": "blog",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "Blog, haber ve duyuru içeriklerinin yönetimi",
     "keywords": [],
     "priority": 0,
-    "providers": ["Modules\\Blog\\Providers\\BlogServiceProvider"],
+    "providers": [
+        "Modules\\Blog\\Providers\\BlogServiceProvider"
+    ],
     "files": [],
     "panel": {
         "permissions": [
-            "blog.menu", "blog.view", "blog.create", "blog.update", "blog.delete",
-            "blog.categories.menu", "blog.categories.view", "blog.categories.create", "blog.categories.update", "blog.categories.delete",
-            "blog.tags.menu", "blog.tags.view", "blog.tags.create", "blog.tags.update", "blog.tags.delete"
-        ]
+            "blog.menu",
+            "blog.view",
+            "blog.create",
+            "blog.update",
+            "blog.delete",
+            "blog.categories.menu",
+            "blog.categories.view",
+            "blog.categories.create",
+            "blog.categories.update",
+            "blog.categories.delete",
+            "blog.tags.menu",
+            "blog.tags.view",
+            "blog.tags.create",
+            "blog.tags.update",
+            "blog.tags.delete"
+        ],
+        "widgets": "config/widgets.php"
     }
 }

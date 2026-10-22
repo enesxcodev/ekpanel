@@ -1,0 +1,46 @@
+{
+    "name": "Branches",
+    "alias": "branches",
+    "version": "0.1.1",
+    "description": "Şube ve bayi konumlarının yönetimi",
+    "keywords": [
+        "branches",
+        "locations"
+    ],
+    "priority": 0,
+    "providers": [
+        "Modules\\Branches\\Providers\\BranchesServiceProvider"
+    ],
+    "files": [],
+    "requires": {
+        "konum": "^0.1.0"
+    },
+    "panel": {
+        "permissions": [
+            "branches.menu",
+            "branches.view",
+            "branches.create",
+            "branches.update",
+            "branches.delete",
+            "branches.categories.menu",
+            "branches.categories.view",
+            "branches.categories.create",
+            "branches.categories.update",
+            "branches.categories.delete"
+        ],
+        "install": {
+            "seeders": [
+                "Modules\\Branches\\Database\\Seeders\\BranchCategorySeeder"
+            ]
+        },
+        "assets": {
+            "routes": [
+                "admin.branches.*"
+            ],
+            "js": [
+                "resources/dist/panel.js"
+            ]
+        },
+        "widgets": "config/widgets.php"
+    }
+}

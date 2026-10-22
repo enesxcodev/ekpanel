@@ -1,7 +1,7 @@
 {
     "name": "Store",
     "alias": "store",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Satılabilir ürün, stok ve yerel sipariş yönetimi",
     "keywords": [],
     "priority": 0,
@@ -10,11 +10,39 @@
     ],
     "files": [],
     "panel": {
-        "assets": {"routes": ["admin.store.*"], "js": ["resources/dist/panel.js"]},
+        "assets": {
+            "routes": [
+                "admin.store.*"
+            ],
+            "js": [
+                "resources/dist/panel.js"
+            ]
+        },
         "install": {
             "ensure_on_enable": true,
-            "seeders": ["Modules\\Store\\Database\\Seeders\\StoreSettingsSeeder"]
+            "seeders": [
+                "Modules\\Store\\Database\\Seeders\\StoreSettingsSeeder"
+            ]
         },
-        "permissions": ["store.menu", "store.view", "store.create", "store.update", "store.delete", "store.categories.menu", "store.categories.view", "store.categories.create", "store.categories.update", "store.categories.delete", "store.stock.menu", "store.stock.view", "store.stock.update", "store.orders.menu", "store.orders.view", "store.orders.update", "store.orders.payment"]
+        "permissions": [
+            "store.menu",
+            "store.view",
+            "store.create",
+            "store.update",
+            "store.delete",
+            "store.categories.menu",
+            "store.categories.view",
+            "store.categories.create",
+            "store.categories.update",
+            "store.categories.delete",
+            "store.stock.menu",
+            "store.stock.view",
+            "store.stock.update",
+            "store.orders.menu",
+            "store.orders.view",
+            "store.orders.update",
+            "store.orders.payment"
+        ],
+        "widgets": "config/widgets.php"
     }
 }

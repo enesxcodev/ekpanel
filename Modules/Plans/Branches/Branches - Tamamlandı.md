@@ -1,13 +1,13 @@
 # Branches — Şubeler / Bayiler birleşik modül planı
 
-- Durum: Yeni; kullanıcı incelemesi bekleyen plan, 22 Ekim 2026.
+- Durum: Yerel uygulama, dar test/build ve kaynak staging tamamlandı; GitHub release/push yapılmadı, 22 Ekim 2026.
 - Görev: `TASK-20261022-0832-branches-plan`.
 - Teknik aday adı: `Branches`; panel adı önerisi: **Şubeler / Bayiler**.
-- Yetki sınırı: Yalnız planlama istendi. Bu belge uygulama, ImageGen, test/build, staging, paketleme, katalog değişikliği veya yayın yetkisi vermez. Kullanıcı planı incelemeden sonraki görsel ve kod aşamalarına geçilmez.
+- Yetki sınırı: Kullanıcı 22 Ekim 2026'da bu planı uygulamamı istedi. Yerel kod, ilgili test/build ve kaynak staging yapıldı. Bu istek Git push, release paketi, GitHub Release, katalog değişikliği veya yayın yetkisi vermedi.
 
 ## Kesinleşen karar ve gerekçe
 
-**Şube ve Bayi iki ayrı modül olmayacak.** Tek modül, tek kayıt modeli, ortak liste ve ortak ekle/düzenle formu kullanılacak. Ayrım gerekiyorsa aynı kayıtta tür/kategori alanıyla yapılacak. Bu alanın sabit Şube/Bayi seçimi mi yoksa yönetilebilir kategori mi olacağı henüz açık ürün kararıdır; iki paralel kayıt modeli oluşturulmayacak.
+**Şube ve Bayi iki ayrı modül olmayacak.** Tek modül, tek kayıt modeli, ortak liste ve ortak ekle/düzenle formu kullanılacak. Ayrım kategoriyle yapılacak; kurulum seeder'ı iki başlangıç kategorisini “Şube” ve “Bayi” olarak idempotent biçimde oluşturacak. İlk sürümde kategori yönetimi ayrı CRUD ekranı değildir; seed edilen iki kategori kullanılır. Panel adı “Şubeler / Bayiler”, teknik ad `Branches` olarak uygulandı.
 
 Kullanıcı, bu modülün Türkiye Konum modülüne bağlı çalışmasını istedi. Branches kullanımı için Konum kurulu, uyumlu ve etkin olmalı; adres verisi importu kullanılabilir durumda bulunmalıdır. Konum coğrafi referansın sahibidir; işletmenin şube/bayi kaydının sahibi Branches olur. Konum'da şube CRUD'u veya yeni il/ilçe/mahalle tanımlama akışı kurulmaz.
 
@@ -20,17 +20,17 @@ CMS'nin küçük işletme siteleri hedefi içinde çok konumlu işletmelerin tek
 | Alan | Davranış / sahiplik |
 | --- | --- |
 | Ad | Zorunlu şube veya bayi adı; aynı adlı farklı adreslere izin önerilir. |
-| Tür/kategori | Tek kayıtta Şube/Bayi ayrımı; sabit seçenek veya yönetilebilir kategori kararı bekliyor. |
-| Konum bağlantısı | Kaynak ID'leriyle il, ilçe, kaynak ara bölgesi, mahalle, isteğe bağlı cadde/sokak. İl ve ilçe zorunlu önerilir; alt seviyelerin zorunluluğu kaynak kapsamına göre kullanıcıyla netleşir. |
+| Kategori | Her kayıt tek kategoriye bağlanır; install seeder'ı Şube ve Bayi başlangıç kategorilerini idempotent oluşturur. Yönetilebilir ek kategori kapsamı ayrıca netleştirilir. |
+| Konum bağlantısı | Kaynak ID'leriyle il, ilçe, kaynak ara bölgesi, mahalle, cadde/sokak; tüm seviyeler isteğe bağlıdır. Seçilen her seviye yine kendi üst zinciriyle tutarlı olmalıdır. |
 | Adres detayı | Bina, kapı, kat ve tarif gibi Branches'a ait serbest metin; kaynak yer adlarını tekrar yazdırmaz. |
 | Telefon | İsteğe bağlı tek iletişim telefonu; uygun bağlantı gösterimi. |
 | E-posta, web sitesi | İsteğe bağlı, biçimi doğrulanmış iletişim alanları. |
-| Çalışma saatleri | İlk sürüm için isteğe bağlı kısa metin önerisi; haftalık yapılandırılmış takvim ancak kullanıcı isterse. |
+| Çalışma saatleri | İsteğe bağlı kısa metin. Tabler içinde kullanılabilir saat picker bileşeni varsa kullanılır; yoksa yeni picker bağımlılığı eklemeden kısa metin alanı kullanılır. Haftalık yapılandırılmış takvim kapsam dışıdır. |
 | Harita bağlantısı / koordinat | İsteğe bağlı HTTPS URL ve/veya elle girilen enlem-boylam çifti; geçerli aralıklar doğrulanır. Harita sağlayıcı API'si yok. |
 | Aktiflik ve sıra | Pasif kayıt ziyaretçiye gösterilmez; sıralama sıra, ardından kararlı ID ile yapılır. |
 | Ek alanlar | Ortak `features.json` / `extra_fields` sözleşmesi; ilk sürümde ek tanım gerekmiyorsa boş forms nesnesi. |
 
-Kapsam varsayımı: Ziyaretçi bir şube/bayi listesi veya tema içindeki aynı veriyle beslenen iletişim bölümü görecek; isteğe bağlı tür, il ve ilçe filtresi kullanılabilecek. Ayrı detay sayfası, slug/SEO alanları, fotoğraf/galeri, mesafeye göre en yakın konum, çalışma saatinden anlık açık/kapalı hesabı, bölge ataması, bayi başvurusu, CRM ve stok işlemleri bu ilk öneriye dahil değildir. Kullanıcı bunlardan birini isterse plan kapsamı yeniden belirlenir.
+Kapsam kararı: Yönetim tablosunun top bar'ında kategori ve durum filtresi bulunur. Tema kullanımı modülün public okuma servisiyle yapılır; Branches'a özel public liste route'u veya detay sayfası eklenmedi. Servis kategori slug'ıyla filtrelemeyi destekler. Ayrı slug/SEO alanları, fotoğraf/galeri, mesafeye göre en yakın konum, çalışma saatinden anlık açık/kapalı hesabı, bölge ataması, bayi başvurusu, CRM ve stok işlemleri bu ilk sürüme dahil değildir.
 
 ## Konum sözleşmesi ve veri tutarlılığı
 
@@ -44,7 +44,7 @@ Kaynak hiyerarşisi `cities → towns → districts → neighbourhoods → stree
 
 Önerilen veri kararı: Coğrafi ID'ler ve canlı kaynak adları asıl gerçektir; il/ilçe tabloları veya adları Branches'a kopyalanmaz. Adres detayı ve iletişim Branches'ın kendi verisidir. Tarihsel teslimat/sipariş kanıtı olmadığı için ilk sürümde adres snapshot'ı tutulması önerilmez. Kaynak adının değişmesi canlı gösterime yansır; kaynak ilişki değişimi otomatik olarak yeni adrese dönüştürülmez.
 
-Silinmiş, pasif veya tutarsız kaynak/üst zincir tespitinde kayıt korunur, yönetici listesinde düzeltme uyarısı ve kayıt kimliği gösterilir; geçersiz adres ziyaretçiye sunulmaz. Bu durum kaydın kullanıcının belirlediği aktiflik değerini sessizce değiştirmez; geçerlilik ayrı hesaplanır. Yönetici formu mevcut bozuk ID'yi gizlice başka seçenekle değiştirmez. Konum yeniden kullanılabilir olduğunda kayıt yeniden doğrulanabilir. Bu yayın davranışı kullanıcı incelemesine sunulan öneridir.
+Seçilen kaynak ID'lerinin her biri üst zinciriyle tutarlı olmalıdır. Kullanıcı geçersiz kaynak kayıtları nedeniyle public listeden dışlama/uyarı iş akışı istemedi; bu özel akış için ek geliştirme yapılmayacak. Kaynak seçimleri ve geçerli üst ilişki doğrulaması yine normal form ve sunucu doğrulamasının parçasıdır.
 
 Üst seçim değiştiğinde bütün alt seçimler temizlenir; geç gelen AJAX cevabı eski üst seçime ait seçenekleri geri getiremez. İstemcideki seçeneklere güvenilmez: kayıtta her ID'nin aktifliği, tutarlılığı ve aynı üst zincire ait olduğu sunucuda tekrar doğrulanır. İl/ilçe dışındaki boş seviyeler için hayali kaynak kayıt üretilmez. Cadde seçilmişse gereken bütün üst ID'ler bulunmalıdır.
 
@@ -52,19 +52,19 @@ Konum'un kaynak dökümü 11 Mayıs 2024 tarihlidir; güncel resmî kapsama gara
 
 ## Admin akışı
 
-1. Yetkili yönetici ortak sidebar'dan Şubeler / Bayiler listesine gelir. Liste ad, tür, il/ilçe, telefon, aktiflik, kaynak geçerliliği ve sıra sütunlarını; arama, tür ve durum filtrelerini sunar. Yajra backend, Tabler ve `<x-admin.data-table>` ile mevcut ortak başlatıcı kullanılır.
-2. Listedeki ekle düğmesi ayrı ekleme sayfasını açar. Form önerisi üç alan grubu/sekme: **Genel** (ad, tür, aktiflik/sıra), **Adres** (hiyerarşik seçim ve detay), **İletişim** (telefon, e-posta/site, saatler, harita).
-3. İl seçilir, ilçe seçenekleri yüklenir; kaynakta gereken alt seviyeler sırayla açılır. Bağımlılık/import hazır değilse seçim yerine neden ve süper adminin yapacağı işlem gösterilir; kayıt işlemi engellenir.
+1. Yetkili yönetici ortak sidebar'dan Şubeler / Bayiler listesine gelir. Liste ad, kategori, il/ilçe, telefon, aktiflik ve sıra sütunlarını; arama, table top bar'da kategori filtresi ve durum filtresini sunar. Yajra backend, Tabler ve `<x-admin.data-table>` ile mevcut ortak başlatıcı kullanılır.
+2. Listedeki ekle düğmesi ayrı ekleme sayfasını açar. Form önerisi üç alan grubu/sekme: **Genel** (ad, kategori, aktiflik/sıra), **Adres** (isteğe bağlı hiyerarşik seçim ve detay), **İletişim** (telefon, e-posta/site, saatler, harita).
+3. Konum alanları isteğe bağlıdır. Seviye seçildiğinde alt seçenekler üst seçime göre yüklenir; bağımlılık/import hazır değilse adres seçimi kullanılamaz ve yöneticiye nedeni gösterilir. Adres seçilmeden de kayıt oluşturulabilir.
 4. Kaydetme başarılı olunca listeye dönülür. Hatalarda eski değerler korunur, hata bulunan sekme açılır. Düzenleme ayrı sayfadır; silme ortak onay akışını kullanır. Satır işlemleri erişilebilir etiketli ikonlarla gösterilir.
 5. Başarılı CRUD işlemlerinden sonra ortak `NotifyService` ve CRUD bildirimi kullanılır. Aktör/süper admin davranışı ortak servise bırakılır; hassas adres/iletişim ayrıntıları bildirim içine dökülmez.
 
 Konum seçenek araması Branches admin akışına ait yetkili endpoint üzerinden sunulur. Konum modülü mevcutta herkese açık HTTP adres API'si sağlamaz; böyle bir API varmış gibi davranılmaz. Endpoint yalnız izin verilen entity/üst alanlarını kabul eder; mevcut uygulama hız sınırları ve admin yetkisi uygulanır. Branches yöneticisine adres seçebilmesi için Konum yönetim ekranı izni otomatik verilmez.
 
-## Ziyaretçi akışı ve okuma servisi önerisi
+## Ziyaretçi akışı ve okuma servisi
 
-Önerilen `Modules/Branches/app/Services/BranchesFrontendService.php` tema tüketimine aktif ve geçerli kayıtların sınırlı/sayfalı listesini sağlar. Tür/il/ilçe filtreleri, kabul edilen değerler, sayfa sınırı, dönüş biçimi ve boş sonuç sözleşmesi uygulama öncesi kesinleştirilir; bugün bu servis veya metotlar mevcut değildir. Tema Blade'i sorgu, modül keşfi ve zincir doğrulaması yapmaz.
+`Modules/Branches/app/Services/BranchesFrontendService.php` tema tüketimine sıralı, aktif kayıtların sınırlı listesini sağlar. `getAll()` varsayılan 50, üst sınır 100 kayıt döndürür ve isteğe bağlı kategori slug'ıyla filtreler; `getFirst()` ve `find()` tek kayıt okuması sunar. Konum hazır değilse servis boş sonuç döndürür. Tema Blade'i sorgu, modül keşfi veya kaynak doğrulama yapmaz.
 
-Şubeler kartında ad, varsa tür, okunabilir adres, telefon ve saatler görünür; boş alanlar için boş buton oluşmaz. Harita URL'si varsa dış bağlantı sunulur; koordinat tek başına sağlayıcı entegrasyonu sayılmaz. Harita iframe'i veya dış script otomatik yüklenmez. Filtre sonucu yoksa kısa boş durum gösterilir. Kullanıcı aktif kayıt görürken pasif veya geçersiz kayıt ID'siyle veri alamamalıdır.
+Şubeler kartında ad, kategori, varsa okunabilir adres, telefon ve saatler gösterilebilir; boş alanlar için boş buton oluşmaz. Harita URL'si varsa dış bağlantı sunulur; koordinat tek başına sağlayıcı entegrasyonu sayılmaz. Harita iframe'i veya dış script otomatik yüklenmez. Modül özel public kaynak-geçerlilik filtresi eklemez; bulunmayan ilişki adı gösterilmez.
 
 Branches veya Konum kapalı/eksikse isteğe bağlı tema bölümü boş sonuçla gizlenir; çekirdek sayfa sınıf çözümleme hatası vermez. Branches'a ait doğrudan liste route'u varsa modül erişim politikası uygulanır. Çekirdek controller'a kurulu olmayan modül sınıfı zorunlu constructor bağımlılığı eklenmez; bağımlılık denetimi sınıf çözümlemeden önce yapılır.
 
@@ -78,7 +78,7 @@ Branches veya Konum kapalı/eksikse isteğe bağlı tema bölümü boş sonuçla
 - İzinler önerisi: `branches.menu`, `branches.view`, `branches.create`, `branches.update`, `branches.delete`. Menü için menu+view gerekir; her işlem route/controller seviyesinde denetlenir. Admin auth/aktif hesap ve `module.enabled:Branches` yanında Konum önkoşulu da denetlenir; süper admin bağımlılık etkinliğini aşamaz. Müşteri rollerine izinler otomatik atanmaz.
 - Etkin Branches varken Konum kapatılması; kurulu Branches varken Konum kaldırılması mevcut bağımlı modül kurallarıyla engellenmelidir. Elle dosya kaybı gibi yollar için çalışma zamanı koruması ayrıca gerekir. Branches'ın kapatılması kendi menü/route/verisini erişime kapatır.
 - Kaldırma veri silmez/migration rollback yapmaz; kod ortak geri alınabilir yedek akışına girer. Coğrafi silinmenin Branches kayıtlarını cascade ile yok etmesine izin verilmez. Kaynak ID koruma/soft-delete ve olası fiziksel silme davranışına uygun DB kısıtı uygulama keşfinde seçilir.
-- Normal etkinleştirme örnek müşteri kaydı üretmez. Gerekli sistem tanımları varsa yalnız açık install seeder'ında idempotent hazırlanır. Sabit tür enum'unda kategori seeder'ı gerekmez. Yeniden etkinleştirme kullanıcı değerlerini veya sıra/aktiflik seçimini sıfırlamaz.
+- Normal etkinleştirme örnek şube/bayi kaydı üretmez. Yalnız `BranchCategorySeeder` açık install seeder'ı olarak çalışır ve Şube/Bayi kategori referanslarını tekrar çalıştırılabilir biçimde hazırlar. Yeniden etkinleştirme kullanıcı kayıtlarını veya sıra/aktiflik seçimini sıfırlamaz.
 
 ## Tutarlılık, hatalar ve eşzamanlılık
 
@@ -101,20 +101,29 @@ Tekrarlı kurulum/seed denemesi tanım çoğaltmaz. Formun çift gönderimi ve e
 
 Dar test hedefleri: CRUD yetkileri ve menu/view ayrımı; başarı bildirimi/aktör davranışı; Konum önkoşulu ve bozuk zincir reddi; üst seviye değişiminde alt ID temizliği; pasif/geçersiz kaynak ve kayıtların public listeden dışlanması; geçerli filtre/sıralama ve boş sonuç; gerçek panel/komut giriş yoluyla bağımlılık kurulum-kapatma-kaldırma sınırları ve başarısız kurulumun kapalı kalması. Ortak kurucunun bütün ZIP güvenlik testlerini Branches içinde kopyalama; değişen bağımlılık davranışına ait mevcut testleri çalıştır. Kaynak ilişkilerini yapay biçimde hazırlayıp yaşam döngüsündeki eksik seeder adımını gizleme; HTTP/süreç sınırlarını fake ile yalıt. Stil/copy için yeni test yazılmaz.
 
-## Kullanıcı kararı bekleyenler
+## Kullanıcı kararları ve uygulama varsayımları
 
-1. Panel adı “Şubeler / Bayiler” ve teknik ad Branches uygun mu? Tek modül kararı kesindir.
-2. Ayrım sabit Şube/Bayi türü mü, kullanıcı tarafından eklenebilen kategori mi? Tür alanı zorunlu mu? Aynı kayıt birden çok kategoriye girecek mi? İlk sürüm önerisi tek, sabit Şube/Bayi seçimi.
-3. Adreste il/ilçe zorunlu; ara bölge/mahalle/cadde seçimi kaynakta varsa ilerlenen isteğe bağlı seviyeler mi olacak? Eksik kaynak adresinde kullanıcı hangi alt seviyeye kadar kaydedebilmeli?
-4. Telefon, e-posta/site, çalışma saatleri ve harita alanlarından hangileri gerekli? Saatler kısa metin mi haftalık yapı mı? Öneri: isteğe bağlı kısa metin ve harita bağlantısı.
-5. Ziyaretçide yalnız liste/tema bölümü yeterli mi; tür ve il/ilçe filtreleri isteniyor mu? Ayrı detay sayfası gerekecek mi?
-6. Canlı Konum adları ve geçersiz kaynakta kaydı public listeden geçici dışlama önerisi kabul ediliyor mu? Tarihsel adres snapshot'ı gerektiren somut iş ihtiyacı varsa ayrıca belirtilmeli.
+1. **Kararlaştırıldı:** Panel adı “Şubeler / Bayiler”, teknik ad Branches; tek modül.
+2. **Kararlaştırıldı:** Kurulumda Şube/Bayi kategorileri seed edilir; ilk sürümde kategori CRUD'u yok, her kayıt tek kategori alır.
+3. **Kararlaştırıldı:** Tüm Konum hiyerarşisi alanları isteğe bağlıdır; seçilen alanlar kendi üst zinciriyle tutarlı olmalıdır.
+4. **Kararlaştırıldı:** Çalışma saatleri isteğe bağlı kısa metindir. Tabler saat picker bulunmadı; kısa metin alanı kullanıldı.
+5. **Uygulama varsayımı:** Ziyaretçi sunumu tema sorumluluğudur; modül özel public liste/detay route'u yoktur. Okuma servisi kategori filtrelemesini destekler.
+6. **Kararlaştırıldı:** Geçersiz Konum kaynağı nedeniyle public listeden çıkarma/uyarı için özel iş akışı geliştirilmeyecek.
 
-## Onay bekliyor / dağıtım önkoşulları
+## Dağıtım önkoşulu — ayrı iş
 
 Bu ilk sürüm için harici API, harita hesabı veya anahtar gerekmez. Elle harita URL'si/koordinat girişi yerel kapsamda kalır. Harita gömme, geocoding veya en yakın şube gibi daha sonraki istekler sağlayıcı/hesap/maliyet kararı ve ayrı onay olmadan geliştirilmez.
 
-Konum'un katalogda yayımlanması mevcut dağıtım altyapısıyla ayrı bir yayın işidir. Onay gelene kadar bu belgeyle yerel plan incelemesi yapılabilir; katalogdan temiz müşteri kurulumunun dağıtım zinciri tamamlanmış sayılmaz. Bu plan Konum veya Branches için release/push izni içermez.
+Ortak `catalog.json` dosyasında Konum 0.1.0 kaydı mevcut. Branches katalog/release adımları bu görevde yapılmadı; Konum asset URL'si ve hash'i de bu görevde uzaktan doğrulanmadı. Bu görev yalnız yerel uygulama ve `D:\localhost\ekAgentModules\Branches` kaynak staging'ini tamamladı; Git push, GitHub Release veya katalog değişikliği yapmadı.
+
+## Uygulama sonucu — 22 Ekim 2026
+
+- Branches modülü admin CRUD'u, kategori filtresi, isteğe bağlı hiyerarşik adres seçimi, Konum doğrulaması, kategori seed'i ve `BranchesFrontendService` ile uygulandı.
+- Konum bağımlılığı `module.json` içinde `konum: ^0.1.0` olarak tanımlandı. Yerel katalogda Konum 0.1.0 kaydı mevcut; URL/hash bu görevde uzaktan doğrulanmadı. Geçersiz kaynak nedeniyle public gizleme/uyarı akışı eklenmedi.
+- Modül tema rule/skill ve boş `features.json` eklendi. Tabler saat picker bulunmadığından çalışma saatleri kısa metindir.
+- Dar doğrulama: Branches feature testleri 12/12 geçti (49 assertion); `npm run build` başarılı. Build mevcut app uyarıları verdi (fontaine opsiyonu, login wallpaper yolu ve büyük chunk).
+- Kaynaklar `D:\localhost\ekAgentModules\Branches` konumuna stage edildi; 43 dosyanın SHA-256 karşılaştırması kaynakla eşleşti. Git push, ZIP, GitHub Release, katalog değişikliği veya uzak kurulum doğrulaması yapılmadı.
+- Tarayıcıda masaüstü/dar ekran doğrulaması bu görevde yapılmadı; HTTP feature testleri admin liste/form render'ını kontrol etti.
 
 ## İncelenen dayanaklar
 

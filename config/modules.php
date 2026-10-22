@@ -44,6 +44,7 @@ return [
             'views/master' => 'resources/views/components/layouts/master.blade.php',
             'scaffold/config' => 'config/config.php',
             'config/menus' => 'config/menus.php',
+            'config/widgets' => 'config/widgets.php',
             'composer' => 'composer.json',
         ],
         'replacements' => [

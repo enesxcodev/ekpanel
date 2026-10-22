@@ -9,25 +9,23 @@ use Illuminate\Support\Facades\Hash;
 
 uses(LazilyRefreshDatabase::class);
 
-test('seeder creates both active admin types and prints working initial passwords', function () {
+test('seeder creates both active admin types without printing passwords', function () {
     Artisan::call('db:seed', ['--class' => AdminAuthSeeder::class, '--no-interaction' => true]);
     $output = Artisan::output();
 
     $this->assertDatabaseCount('admins', 2);
     foreach (['admin@example.com' => AdminTypeEnum::Admin, 'superadmin@example.com' => AdminTypeEnum::SuperAdmin] as $email => $type) {
         $admin = Admin::query()->where('email', $email)->firstOrFail();
-        preg_match('/'.preg_quote($email, '/').' \| Şifre: (.+)/u', $output, $matches);
-        $password = trim($matches[1]);
         expect($admin->type)->toBe($type);
         expect($admin->status)->toBeTrue();
         expect($admin->name)->not->toBeEmpty();
         expect($admin->lastname)->not->toBeEmpty();
-        expect(Hash::check($password, $admin->password))->toBeTrue();
-        $this->post(route('admin.login.store'), ['email' => $email, 'password' => $password])
-            ->assertRedirectToRoute('admin.dashboard');
-        $this->assertAuthenticatedAs($admin, 'admin');
-        $this->post(route('admin.logout'));
+        expect(Hash::isHashed($admin->password))->toBeTrue();
+        expect($output)->toContain($email.' hesabı oluşturuldu.')
+            ->not->toContain($admin->password);
     }
+
+    expect($output)->not->toContain('Şifre:');
 });
 
 test('repeated seeding preserves existing account credentials and status', function () {

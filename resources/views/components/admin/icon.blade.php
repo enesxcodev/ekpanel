@@ -56,6 +56,9 @@
         @case('list')
             <path d="M9 6h12M9 12h12M9 18h12M3 6h1m-1 6h1m-1 6h1" />
             @break
+        @case('menu')
+            <path d="M4 7h16M4 12h16M4 17h16" />
+            @break
         @case('x')
             <path d="m6 6 12 12M6 18 18 6" />
             @break

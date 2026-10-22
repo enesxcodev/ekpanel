@@ -4,8 +4,9 @@ Bu dosya başlangıçta okunur. Önce yalnız bu index, `seri-durumu.md`, gerekl
 
 ## Çalışma durumu
 
-- Otomasyon: duraklatılmış; kullanıcı açıkça başlatmadan araştırma/üretim yok.
+- Otomasyon: PAUSED; seri PILOT-20261022-01, ego-browser skill kullanımıyla 30 dakikada bir çakışmasız devam eder, hedef 3 tamamlanmış paket.
 - Maps: görev başına en çok 10 farklı profil.
+- Tarayıcı araştırması: yalnız ego-browser skill. Skill dosyası ego lite kurulumundadır; çalışan komut yolu C:/Users/root/.local/share/ego/active_version_dir/ego-browser.exe. Her tarayıcı işinden önce ego-browser.exe skill kılavuzunu izle; Playwright, cua_repl veya genel web aramasına geçme. Ego-browser çalışmıyorsa araştırmayı durdur, durumu bildir ve otomasyonu duraklat.
 - Mükerrerlik: önce `check-business-duplicate.ps1` ile JSONL kayıtlarını karşılaştır; belirsiz telefon eşleşmesi otomatik birleştirilmez.
 - Eski kriterle elenmiş aday: aynı kalıcı kimliği koruyarak yeni kurallarla yeniden değerlendirilebilir.
 - Aşama kapıları ve tam kurallar: [is-plani.md](is-plani.md); yalnız gereken bölümleri aç.
@@ -17,3 +18,8 @@ Bu dosya başlangıçta okunur. Önce yalnız bu index, `seri-durumu.md`, gerekl
 - JSONL kayıtları güncellenir aşama sırasında; günlük Markdown raporu yalnız tur kapanışında üretilir. Mevcut/historical dosyalar silinmez veya sessizce yeniden yazılmaz.
 - Gönderim ve yanıtların kaynağı kullanıcının doldurduğu `takip.md`; müşteriyle iletişim yok.
 - Maliyet/token ölçümü erişilemiyorsa `ölçülemiyor` yaz; gerçek gibi tahmin üretme.
+
+
+
+
+

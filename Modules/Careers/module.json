@@ -1,0 +1,22 @@
+{
+    "name": "Careers",
+    "alias": "careers",
+    "version": "0.1.1",
+    "description": "İş ilanı ve aday başvurusu yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Careers\\Providers\\CareersServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "careers.menu",
+            "careers.view",
+            "careers.create",
+            "careers.update",
+            "careers.delete"
+        ],
+        "widgets": "config/widgets.php"
+    }
+}

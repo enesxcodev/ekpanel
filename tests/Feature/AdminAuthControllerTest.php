@@ -12,7 +12,7 @@ uses(LazilyRefreshDatabase::class);
 test('guests can see the login form without password management links', function () {
     $this->get(route('admin.login'))
         ->assertOk()
-        ->assertSee('Yönetim paneline giriş')
+        ->assertSee('Tekrar hoş geldiniz')
         ->assertSee('name="email"', false)
         ->assertSee('name="password"', false)
         ->assertDontSee('Şifremi unuttum')

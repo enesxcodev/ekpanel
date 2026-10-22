@@ -37,3 +37,4 @@ Thumbs.db
 /modules_statuses.json.lock
 /.module-status-*.tmp
 /customers
+/output

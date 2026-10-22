@@ -16,6 +16,9 @@ import { initializeModuleInstallations } from './admin/module-installations';
 import { initializeMedia } from './admin/media';
 import { initializeDatepickers } from './admin/datepicker';
 import { initializeFormBuilder } from './admin/form-builder';
+import { initializeTopbarSearch } from './admin/search-topbar';
+import { initializeSidebarEffect } from './admin/sidebar-effect';
+import { initializeDashboardWidgets } from './admin/dashboard-widgets';
 
 select2(window, $);
 window.$ = $;
@@ -39,6 +42,9 @@ if (document.querySelector('[data-hugerte]')) {
 initializeMedia();
 initializeDatepickers();
 initializeFormBuilder();
+initializeTopbarSearch();
+initializeSidebarEffect();
+initializeDashboardWidgets(window.Panel);
 initializeModuleAssets(window.Panel);
 initializeModuleInstallations();
 

@@ -1,0 +1,19 @@
+{
+    "name": "LogViewer",
+    "alias": "logviewer",
+    "version": "0.1.0",
+    "description": "Laravel uygulama loglarını güvenli ve salt okunur biçimde görüntüleme",
+    "keywords": ["logs", "monitoring", "admin"],
+    "priority": 0,
+    "providers": [
+        "Modules\\LogViewer\\Providers\\LogViewerServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "widgets": "config/widgets.php",
+        "permissions": [
+            "logviewer.menu",
+            "logviewer.view"
+        ]
+    }
+}

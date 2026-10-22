@@ -1,5 +1,42 @@
 <header class="navbar navbar-expand-md d-print-none admin-topbar">
     <div class="container-xl flex-nowrap gap-2">
+            <button
+                class="btn btn-icon btn-ghost-secondary d-none d-md-inline-flex admin-sidebar-toggle"
+                type="button"
+                data-bs-toggle="sidebar-folded"
+                aria-label="Menüyü daralt"
+                aria-pressed="false"
+                title="Menüyü daralt"
+            >
+                <x-admin.icon name="menu" />
+            </button>
+        <div class="admin-topbar-search">
+            <form class="position-relative" role="search" data-topbar-search>
+                <label class="visually-hidden" for="admin-topbar-search-input">Menülerde ara</label>
+                <div class="input-icon">
+                    <span class="input-icon-addon" aria-hidden="true"><x-admin.icon name="search" /></span>
+                    <input
+                        id="admin-topbar-search-input"
+                        class="form-control"
+                        type="search"
+                        placeholder="Menülerde ara..."
+                        autocomplete="off"
+                        aria-autocomplete="list"
+                        aria-controls="admin-topbar-search-results"
+                        aria-expanded="false"
+                        data-topbar-search-input
+                    >
+                </div>
+                <div
+                    id="admin-topbar-search-results"
+                    class="admin-topbar-search-results dropdown-menu"
+                    role="listbox"
+                    aria-label="Menü arama sonuçları"
+                    data-topbar-search-results
+                    hidden
+                ></div>
+            </form>
+        </div>
         <div class="navbar-nav flex-row align-items-center gap-1 ms-auto">
             <div class="nav-item">
                 <button class="nav-link px-2" type="button" data-admin-theme-toggle aria-label="Koyu temaya geç" title="Koyu temaya geç">

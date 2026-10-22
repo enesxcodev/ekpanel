@@ -1,7 +1,7 @@
 {
     "name": "Services",
     "alias": "services",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Hizmet yönetimi",
     "keywords": [],
     "priority": 0,
@@ -21,6 +21,7 @@
             "services.categories.create",
             "services.categories.update",
             "services.categories.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

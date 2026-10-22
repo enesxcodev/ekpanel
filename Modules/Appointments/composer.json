@@ -1,0 +1,32 @@
+{
+    "name": "ekagent/appointments",
+    "description": "Hizmet randevusu ve uygunluk yönetimi",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.4",
+        "laravel/framework": "^13.0",
+        "nwidart/laravel-modules": "^13.0",
+        "spatie/laravel-permission": "^8.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Appointments\\": "app/",
+            "Modules\\Appointments\\Database\\Factories\\": "database/factories/",
+            "Modules\\Appointments\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Appointments\\Tests\\": "tests/"
+        }
+    }
+}

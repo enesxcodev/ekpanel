@@ -1,7 +1,7 @@
 {
     "name": "Brand",
     "alias": "brand",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Çalışılan markaların yönetimi",
     "keywords": [],
     "priority": 0,
@@ -16,6 +16,7 @@
             "brand.create",
             "brand.update",
             "brand.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

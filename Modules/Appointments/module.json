@@ -1,0 +1,22 @@
+{
+    "name": "Appointments",
+    "alias": "appointments",
+    "version": "0.1.1",
+    "description": "Hizmet randevusu ve uygunluk yönetimi",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Appointments\\Providers\\AppointmentsServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "permissions": [
+            "appointments.menu",
+            "appointments.view",
+            "appointments.create",
+            "appointments.update",
+            "appointments.delete"
+        ],
+        "widgets": "config/widgets.php"
+    }
+}

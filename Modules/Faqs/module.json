@@ -1,7 +1,7 @@
 {
     "name": "Faqs",
     "alias": "faqs",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Sıkça sorulan sorular ve kategoriler yönetimi",
     "keywords": [],
     "priority": 0,
@@ -21,6 +21,7 @@
             "faqs.categories.create",
             "faqs.categories.update",
             "faqs.categories.delete"
-        ]
+        ],
+        "widgets": "config/widgets.php"
     }
 }

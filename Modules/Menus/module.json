@@ -1,18 +1,33 @@
 {
     "name": "Menus",
     "alias": "menus",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Yönetilebilir çok seviyeli ziyaretçi menüleri",
     "keywords": [],
     "priority": 0,
-    "providers": ["Modules\\Menus\\Providers\\MenusServiceProvider"],
+    "providers": [
+        "Modules\\Menus\\Providers\\MenusServiceProvider"
+    ],
     "files": [],
     "panel": {
         "assets": {
-            "routes": ["admin.menus.*"],
-            "js": ["resources/dist/panel.js"],
-            "css": ["resources/dist/panel.css"]
+            "routes": [
+                "admin.menus.*"
+            ],
+            "js": [
+                "resources/dist/panel.js"
+            ],
+            "css": [
+                "resources/dist/panel.css"
+            ]
         },
-        "permissions": ["menus.menu", "menus.view", "menus.create", "menus.update", "menus.delete"]
+        "permissions": [
+            "menus.menu",
+            "menus.view",
+            "menus.create",
+            "menus.update",
+            "menus.delete"
+        ],
+        "widgets": "config/widgets.php"
     }
 }

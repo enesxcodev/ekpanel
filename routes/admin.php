@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\AdminAuthController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Forms\FormController;
 use App\Http\Controllers\Admin\Forms\FormSubmissionController;
 use App\Http\Controllers\Admin\Modules\ModuleController;
@@ -43,7 +44,10 @@ Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')-
             Route::get('data', [FormController::class, 'data'])->name('data');
         });
         Route::resource('forms', FormController::class)->except('show')->parameters(['forms' => 'form']);
-        Route::view('/', 'admin.dashboard')->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/pages', [DashboardController::class, 'pages'])->name('dashboard.pages');
+        Route::post('/dashboard/widgets/data', [DashboardController::class, 'widgetData'])->name('dashboard.widgets.data');
+        Route::put('/dashboard/preferences', [DashboardController::class, 'updatePreferences'])->name('dashboard.preferences.update');
         Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('logout');
 
         Route::prefix('media')->name('media.')->group(function (): void {

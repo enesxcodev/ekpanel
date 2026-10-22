@@ -16,7 +16,7 @@
 
         <h1 class="navbar-brand navbar-brand-autodark">
             <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-brand" aria-label="{{ $companyName }}">
-                <img src="{{ asset('images/ekagent-logo-dark.png') }}" alt="{{ $companyName }}" class="admin-sidebar-brand-logo">
+                <img src="{{ asset('images/ekagent-logo-dark.png') }}" alt="{{ $companyName }}" class="navbar-brand-image admin-sidebar-brand-logo">
             </a>
         </h1>
 

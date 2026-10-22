@@ -28,6 +28,12 @@ KVKK/KBKK girdisi kapsam netleştirmesi bekliyor. Bu çalışmada tamamlanmış 
 | Etkinlikler | Blog haber/duyuru, Services hizmet kataloğu; etkinlik tarih/yer yönetimi belgelenmiyor. | İlk öneri listesinde yer aldı; kullanıcı seçimiyle Şubeler/Bayiler lehine değiştirildi. Plan/uygulama yok. |
 
 Tamamlanan yeni modül yok. KVKK/KBKK girdisi için yeni kanıt bulunmadı. Kod incelemesi, planlama, görsel, test/build ve staging yapılmadı.
+
+## 22 Ekim 2026 — Şubeler/Bayiler uygulaması
+
+| Modül | Geliştirilme nedeni | Sonuç |
+|---|---|---|
+| Branches (Şubeler / Bayiler) | Çok konumlu işletmelerin şube/bayi adres ve iletişim kayıtları; Settings tekil ayarları karşılıyor, kayıt CRUD'u için ayrı modül gerekiyor. Türkiye Konum bağımlılığı kullanıldı. | Yerel CRUD, kategori seed'i, adres seçimi, public okuma servisi ve tema yönergeleri tamamlandı. 12 feature testi geçti, `npm run build` başarılı, kaynak `D:\localhost\ekAgentModules\Branches` konumuna stage edildi. Release/push/katalog yapılmadı. |
 ## 22 Ekim 2026 — Şubeler/Bayiler planlaması
 
 Kullanıcı iki ayrı modül yerine tek birleşik modül istedi; Şube/Bayi ayrımı aynı kayıt türü/kategori alanında değerlendirilecek. Türkiye Konum zorunlu bağımlılık olarak planlandı. **Branches - Yeni.md** planı hazır; kullanıcı incelemesi bekliyor. Konum ortak depo klasöründe mevcut ancak `catalog.json` içinde kayıtlı değil. Bu turda kodlama, görsel, test/build, staging veya katalog güncellemesi yapılmadı.
@@ -42,3 +48,21 @@ Scheduler her çalışmanın sonunda yeni bir tarih başlığı ekler. Günde en
 Uygun aday bulunmayan gün için:
 
 > Bugün tamamlanabilir yeni modül adayı bulunmadı.
+
+## 23 Ekim 2026 — günlük modül keşfi
+
+> Yeni bağımsız modül adayı doğrulanmadı. Katalog değişikliği Konum ve Store kayıtlarıyla sınırlı; bunlar tamamlanmış Branches bağımlılığı ve Store kapsamı olduğundan yeniden açılmadı. KBKK/KVKK girdisi Settings/Pages sınırlarıyla kısmen karşılanabilir; ayrı operasyonel gizlilik iş akışı için kanıt bekliyor. Bugün yeni modül uygulama adayı yok.
+
+## 23 Ekim 2026 — kullanıcı isteğiyle LogViewer planı
+
+| Modül | Geliştirilme nedeni | Sonuç |
+|---|---|---|
+| LogViewer (Log İzleme) | Laravel loglarında ağaçtan dosya seçip son satırları görme ve elle yenileme ihtiyacı doğrudan kullanıcı tarafından belirtildi. | Ayrıntılı plan hazır ve paylaşıldı. Uygulama/görsel/test/build/staging yapılmadı; ayrı uygulama isteği bekleniyor. |
+
+| LogViewer frontend prototipi | Kullanıcı planlanan Log İzleme görünümünün frontend'ini istedi. | Statik, etkileşimli HTML prototipi hazır; yalnız örnek veri gösterir, gerçek log backend'i yok. Modül uygulaması ve staging yapılmadı. |
+
+## 23 Ekim 2026 — LogViewer uygulaması
+
+| Modül | Geliştirilme nedeni | Sonuç |
+|---|---|---|
+| LogViewer (Log İzleme) | Laravel loglarını dosya ağacından seçip son satırlarını güvenli biçimde inceleme ihtiyacı kullanıcı tarafından doğrudan belirtildi. | Yerel modül, 11 feature testi ve 21 assertion başarılı; 1 symlink testi Windows kısıtıyla atlandı. Pint ve Blade view cache geçti. 27 dosya D:\localhost\ekAgentModules\LogViewer konumuna SHA-256 eşleşmesiyle stage edildi. Release/push/katalog yapılmadı. |

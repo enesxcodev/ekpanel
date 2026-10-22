@@ -46,3 +46,21 @@ Mevcut ön tarama kimlikleri korundu; mükerrer yeni firma kaydı oluşturulmad�
 Gönderim yok. ImageGen çağrısı yok. Kullanıcı takip hücreleri değiştirilmedi. Her altı firma için maliyet kaydı vardır; erişilemeyen token/fatura ölçümleri `ölçülemiyor` yazıldı.
 
 ARTS BEAUTY STUDIO ek doğrulaması (2026-10-21): kullanıcı tarafından verilen `instagram.com/artsbeautystudio/` kamuya açık profilinde 317 gönderi ve 1.722 takipçi, Sağlık/Güzellik kategorisi ve bio hizmet listesi (protez tırnak, kalıcı oje, G5, lazer epilasyon, kirpik lifting, kaş tasarımı/laminasyonu) görüldü. Tasarım kararı bu doğrulanmış metinle güncellendi. Görseller indirilmedi veya izinli varlık olarak kaydedilmedi.
+
+## Yeni seri araştırma — 2026-10-22
+
+- Kalıcı kimlik: `STAR-BMW-SERVISI-IKITELLI-20261022`; ÖZEL STAR BMW SERVİSİ / özel oto servisi / Başakşehir, İstanbul.
+- Google Maps Place ID: `0x14caa3f8cabb66f3:0x6b3540c1fe65df83`; telefon `+905352971396`; adres Dolapdere Sanayi Sitesi 22. Ada.
+- İndeks öncesi karşılaştırma: `no_index_match`; mevcut kayda göre yeni işletme/şube.
+- 2026-10-22: ön puan 66, nihai puan 75; tasarım kararı ve gönderilmemiş teklif taslağı hazır. Paket: [firma klasörü](2026-10-22/ozel-star-bmw-servisi-basaksehir/).
+- Site: Maps alanı boş; kapsamlı isim/telefon/adres aramasında resmi site doğrulanmadı. Kesin yokluk iddiası yok. Görsel sayaç 21, fakat görseller tek tek incelenmedi/indirilmedi; puana katkısı yok. Yorum sayısı puana katkı sağlamadı.
+- Tekrar seçmeme durumu: `tamamlandi_tekrar_secme`; aynı firma yeni aday/paket olarak sayılmaz. Teklif gönderilmedi; müşteri yanıtı veya satış durumu kaydı yok.
+
+## Yeni seri araştırma — 2026-10-22 (ikinci işletme)
+
+- Kalıcı kimlik: `GENTURK-SEPETLI-VINC-KAGITHANE-20261022`; Gençtürk sepetli vinç kiralama / vinç ve iş makinesi kiralama / Kağıthane, İstanbul.
+- Google Maps Place ID: `0xa290b8dd19b66ebf:0xa99cb38cd85b8e55`; telefon `+905386379068`; adres Talatpaşa, Ertan Sk. No:5.
+- Mükerrerlik: `no_index_match`.
+- Maps web alanı boş; tam ad/telefon aramasında resmi site doğrulanmadı, kesin yokluk iddiası yok. Benzer isimli `gencturkkiralikvinc.com` telefon/adres farklı olduğu için eşleştirilmedi.
+- Ön puan 70, nihai puan 75; tasarım kararı, prompt, gönderilmemiş teklif taslağı ve maliyet kaydı `2026-10-22/gencturk-sepetli-vinc-kagithane/` içinde. Seri paketi 2/3.
+- Fotoğraf ve yorum sayısı skora katılmadı; görseller tek tek doğrulanmadı. Teklif gönderilmedi, ImageGen çağrısı yapılmadı.

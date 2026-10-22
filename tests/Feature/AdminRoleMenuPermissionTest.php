@@ -14,23 +14,23 @@ test('role editor renders the separate menu visibility checkbox', function () {
     $role = Role::findByName('customer-admin', 'admin');
 
     $this->actingAs($admin, 'admin')->get(route('admin.roles.edit', $role))
-        ->assertOk()->assertSee('Menü Show')->assertSee('value="users.menu"', false);
+        ->assertOk()->assertSee('Menü Show')->assertSee('value="admins.menu"', false);
 });
 
 test('super admins can grant and remove menu permission independently of page permission', function (array $permissions) {
     $this->seed(AdminPermissionSeeder::class);
     $admin = Admin::factory()->superAdmin()->create();
     $role = Role::findByName('customer-admin', 'admin');
-    $role->givePermissionTo(['users.menu', 'users.view']);
+    $role->givePermissionTo(['admins.menu', 'admins.view']);
 
     $this->actingAs($admin, 'admin')->put(route('admin.roles.update', $role), ['permissions' => $permissions])
         ->assertRedirectToRoute('admin.roles.edit', $role)->assertSessionHasNoErrors();
 
     expect($role->fresh()->permissions->pluck('name')->sort()->values()->all())->toBe($permissions);
 })->with([
-    'both permissions' => [['users.menu', 'users.view']],
-    'page access only' => [['users.view']],
-    'menu permission only' => [['users.menu']],
+    'both permissions' => [['admins.menu', 'admins.view']],
+    'page access only' => [['admins.view']],
+    'menu permission only' => [['admins.menu']],
     'no permissions' => [[]],
 ]);
 
@@ -38,11 +38,12 @@ test('customer admins cannot change menu permissions', function () {
     $this->seed(AdminPermissionSeeder::class);
     $admin = Admin::factory()->create();
     $role = Role::findByName('customer-admin', 'admin');
+    $originalPermissions = $role->permissions->pluck('id')->sort()->values()->all();
 
-    $this->actingAs($admin, 'admin')->put(route('admin.roles.update', $role), ['permissions' => ['users.menu']])
+    $this->actingAs($admin, 'admin')->put(route('admin.roles.update', $role), ['permissions' => ['admins.menu']])
         ->assertForbidden();
 
-    expect($role->fresh()->permissions)->toBeEmpty();
+    expect($role->fresh()->permissions->pluck('id')->sort()->values()->all())->toBe($originalPermissions);
 });
 
 test('permissions for another guard cannot be assigned to an admin role', function () {
@@ -50,14 +51,15 @@ test('permissions for another guard cannot be assigned to an admin role', functi
     Permission::findOrCreate('foreign.menu', 'web');
     $admin = Admin::factory()->superAdmin()->create();
     $role = Role::findByName('customer-admin', 'admin');
+    $originalPermissions = $role->permissions->pluck('id')->sort()->values()->all();
 
     $this->actingAs($admin, 'admin')->put(route('admin.roles.update', $role), ['permissions' => ['foreign.menu']])
         ->assertSessionHasErrors('permissions.0');
 
-    expect($role->fresh()->permissions)->toBeEmpty();
+    expect($role->fresh()->permissions->pluck('id')->sort()->values()->all())->toBe($originalPermissions);
 });
 
-test('users sidebar menu requires both menu and page permissions', function (array $permissions, bool $visible) {
+test('admins sidebar menu requires both menu and page permissions', function (array $permissions, bool $visible) {
     $this->seed(AdminPermissionSeeder::class);
     $admin = Admin::factory()->create();
     $admin->givePermissionTo($permissions);
@@ -70,7 +72,9 @@ test('users sidebar menu requires both menu and page permissions', function (arr
         $response->assertDontSee('Yöneticiler');
     }
 })->with([
-    'page permission only' => [['users.view'], false],
-    'menu permission only' => [['users.menu'], false],
-    'both permissions' => [['users.menu', 'users.view'], true],
+    'no permissions' => [[], false],
+    'page permission only' => [['admins.view'], false],
+    'menu permission only' => [['admins.menu'], false],
+    'both permissions' => [['admins.menu', 'admins.view'], true],
+    'web user permissions do not grant admin menu access' => [['users.menu', 'users.view'], false],
 ]);

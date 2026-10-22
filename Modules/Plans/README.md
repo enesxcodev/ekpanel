@@ -7,9 +7,9 @@ Bu klasör, modül kataloğundaki görünür kapsam boşluklarının özetini ve
 | Öncelik | Aday              | Neden gerekli                                                                                                                                                                                                                                      | Durum                                                  | Ayrıntılı plan                |
 | ------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------- |
 | 1       | Store (e-ticaret) | Katalogda `Products` vardır; modülün kendi tema kuralı fiyat, stok, varyant, sepet, sipariş ve ödemeyi açıkça kapsam dışında bırakır. Satış yapan kurulumların ürün satışını uçtan uca yönetmesi için bu işlevlerin tek modülde sunulması gerekir. | **Yerel uygulama tamamlandı** — ürün/varyant/medya/ayar/sepet/sipariş ve yönergeler doğrulandı; harici ödeme/kargo onayı ayrı. | [Store klasörünü aç](Store/Store%20-%20Tamamland%C4%B1.md) |
-| 2 | Şubeler/Bayiler | Çoklu şube ve bayi adres/iletişim kayıtları; Türkiye Konum modülüne bağımlı. Tek modül, gerekirse kayıt türüyle ayrılır. | **Plan hazır, kullanıcı incelemesi bekliyor** — Konum ortak depoda var ancak katalogda yok; dağıtım önkoşulu ayrıca ele alınmalı. | [Branches planı](Branches/Branches%20-%20Yeni.md) |
+| 2 | Şubeler/Bayiler | Çoklu şube ve bayi adres/iletişim kayıtları; Türkiye Konum modülüne bağımlı. Tek modül, kayıt kategorileriyle ayrılır. | **Yerel uygulama, test/build ve kaynak staging tamamlandı** — Konum katalogda kayıtlı; Branches için release/push yapılmadı. | [Branches planı](Branches/Branches%20-%20Tamamland%C4%B1.md) |
 
-Kullanıcı Kariyer/İş İlanları ve Etkinlikler önerilerini tek birleşik Şubeler/Bayiler modülüyle değiştirdi; planında Şube/Bayi türü aynı kayıt modelinde ve Türkiye Konum bağımlılığı olarak ele alındı.
+Kullanıcı Kariyer/İş İlanları ve Etkinlikler önerilerini tek birleşik Şubeler/Bayiler modülüyle değiştirdi; Şube/Bayi kategorileri aynı kayıt modelinde ve Türkiye Konum bağımlılığıyla uygulandı.
 
 Bu liste, belgelenmiş kapsam boşlukları ile CMS amacı ve kullanıcı tercihinden türetilen önerileri birlikte gösterir; güven düzeyi ve seçilme durumu ayrı belirtilir.
 
@@ -44,7 +44,7 @@ Sohbetlerde kullanıcı tarafından belirtilen ihtiyaçlar, henüz doğrulanmı�
 
 | Aday girdisi | Kaynak ve kısa gerekçe | Durum | Sonraki inceleme |
 | --- | --- | --- | --- |
-| KVKK ayarları | Kaynak notundaki kullanıcı ifadesi “KBKK ayarları”; olası “KVKK ayarları” olarak değerlendirildi. Settings tekil/sabit ayarları yapılandırabilir, Pages politika metni yayımlayabilir; operasyonel rıza, çerez tercihi, veri sahibi başvurusu veya saklama akışı ihtiyacı henüz kanıtlanmadı. | **Kapsam doğrulaması bekliyor** — tek başına yeni modül adayı doğrulanmadı; privacy/compliance iş akışları için kullanıcı ihtiyacı ve kapsam kanıtı gerekli. | KVKK/KBKK yazımını ve istenen işlevleri netleştir: yalnız gizlilik metni/ayar mı, yoksa çerez rızası kaydı, veri sahibi başvurusu, saklama/anonimleştirme gibi tekrarlanan iş akışları mı? Yeni modül ancak bağımsız iş akışı ve kullanıcı ihtiyacı doğrulanırsa planlanır; yasal kapsam varsayma. |
+| KVKK ayarları | Kaynak notundaki kullanıcı ifadesi “KBKK ayarları”; olası “KVKK ayarları” olarak değerlendirildi. Settings tekil/sabit ayarları yapılandırabilir, Pages politika metni yayımlayabilir; operasyonel rıza, çerez tercihi, veri sahibi başvurusu veya saklama akışı ihtiyacı henüz kanıtlanmadı. | **Ek kanıt bekliyor** — Settings alanları ve Pages gizlilik metnini karşılayabilir; bağımsız rıza/veri sahibi/saklama iş akışı kanıtı yok, yeni modül doğrulanmadı. | KVKK/KBKK yazımını ve istenen işlevleri netleştir: yalnız gizlilik metni/ayar mı, yoksa çerez rızası kaydı, veri sahibi başvurusu, saklama/anonimleştirme gibi tekrarlanan iş akışları mı? Yeni modül ancak bağımsız iş akışı ve kullanıcı ihtiyacı doğrulanırsa planlanır; yasal kapsam varsayma. |
 
 ### İlk tam baseline taraması
 
@@ -86,3 +86,12 @@ GitHub entegrasyonu repo ve metin dosyası işlemlerini destekleyebilir; release
 - Modül geliştirme akışı: `.ai/workflows/modul-gelistirme.md`
 - Adayın mevcut Products sınırı: `D:\localhost\ekAgentModules\Products\.ai\rules\tema-entegrasyonu.md` ve `D:\localhost\ekAgentModules\Products\skills\products-theme-integration\SKILL.md`
 - Blog formu görsel referansı: `output/playwright/blog-form-desktop.png`
+
+
+## Kullanıcı girdisi — 23 Ekim 2026
+
+| Aday | Kapsam ve dayanak | Karar / durum |
+| --- | --- | --- |
+| Log İzleme (LogViewer) | Kullanıcının doğrudan talebi: Laravel log dosyalarını ağaçta seçme, sağ panelde son satırları okuma ve manuel yenileme. Mevcut CMS modüllerinin içerik/kimlik/ticaret rollerinden bağımsız operasyonel sorumluluk. | **Yerel uygulama, test ve kaynak staging tamamlandı.** [LogViewer - Tamamlandı.md](LogViewer/LogViewer%20-%20Tamamland%C4%B1.md). Süper-admin-only, salt okunur; release/push/katalog yapılmadı. |
+
+

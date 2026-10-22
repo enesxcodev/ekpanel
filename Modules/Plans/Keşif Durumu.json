@@ -2,7 +2,7 @@
   "schema_version": 1,
   "baseline_scope": "full_catalog",
   "catalog_path": "D:\\localhost\\ekAgentModules\\catalog.json",
-  "catalog_sha256": "8537e58d3ce0e2ae03cb5e6db7922a3ba046064e835500bad0ddeeaf5e005c29",
+  "catalog_sha256": "af504ced4fc7282f5addd01dc34457970e0f18892724f3fe95c224087df36219",
   "baseline_candidate": "store",
   "baseline_result": "Store remains justified by the Products rules explicitly excluding commerce. No other new module candidate met the evidence threshold in the full rules/skills sweep. Appointment/booking is an unpromoted observation pending customer-demand evidence; see README.md.",
   "modules": [
@@ -329,20 +329,50 @@
       ],
       "assessment": "Web login, verification, password reset, and admin user management; no separate account module is justified. Store should decide optional account integration or guest checkout.",
       "candidates": null
+    },
+    {
+      "id": "konum",
+      "name": "Konum",
+      "version": "0.1.0",
+      "description": "Türkiye il, ilçe, ara bölge, mahalle ve cadde/sokak referans verileri",
+      "catalog_entry_sha256": "4230cd20d8272b4ac7fbe88de439ec22afb65cc91afa4cb316b00d24e8ad248d",
+      "inspected_at": "2026-10-23T00:20:29+03:00",
+      "rules_skills": [],
+      "assessment": "Türkiye administrative address reference data; existing dependency for completed Branches candidate, not an unmet module.",
+      "candidates": null
+    },
+    {
+      "id": "store",
+      "name": "Store",
+      "version": "0.1.0",
+      "description": "Satılabilir ürün, stok ve yerel sipariş yönetimi",
+      "catalog_entry_sha256": "bfaba6453186aed8f275aeb8d062f0c9abc0048249eb41c23cba4b9094ee87e5",
+      "inspected_at": "2026-10-23T00:20:29+03:00",
+      "rules_skills": [],
+      "assessment": "Commerce and local order management; previously completed candidate, do not reopen.",
+      "candidates": null
     }
   ],
-  "last_checked_at": "2026-10-22T08:34:54+03:00",
-  "last_discovery_completion_at": "2026-10-22T08:28:53+03:00",
-  "last_discovery_task_id": "TASK-20261022-0827-oneoff-discovery",
+  "last_checked_at": "2026-10-23T00:20:29+03:00",
+  "last_discovery_completion_at": "2026-10-23T00:20:29+03:00",
+  "last_discovery_task_id": "TASK-20261023-0020-daily-discovery",
   "baseline_completed_at": "2026-10-21T18:50:05+03:00",
   "candidate_inputs": [
     {
       "source_wording": "KBKK ayarları",
       "assessed_interpretation": "Likely KVKK/privacy settings; spelling ambiguity retained",
       "confidence": "medium for boundary; low for standalone module need",
-      "status": "awaiting_scope_evidence",
-      "assessment": "Settings can hold configurable single-value settings and Pages can publish privacy text. No evidence yet of required operational consent, cookie preference, data-subject request, or retention workflows.",
+      "status": "pending_validation",
+      "assessment": "Settings supports configurable single-value fields and Pages can publish privacy text. No evidence of recurring consent, data-subject request, retention, or anonymization workflow; clarification or concrete user workflow evidence is still needed. No standalone module validated.",
       "id": "privacy_settings"
+    },
+    {
+      "id": "log_viewer",
+      "source_wording": "Laravel log dosyaları: sol tarafta ağaç, seçince sağda son satırlar ve yenile butonu",
+      "assessed_interpretation": "Read-only admin log viewer for Laravel files under storage/logs",
+      "confidence": "high for user need and standalone operational responsibility; medium on production access scope",
+      "status": "implementation_completed_local_source_staged",
+      "assessment": "Direct user request validated; standalone read-only admin module implemented. Super-admin-only access, storage/logs file tree, bounded tail and manual refresh. Source staged and SHA-256 verified at D:\\localhost\\ekAgentModules\\LogViewer. Release/push/catalog publication not requested."
     }
   ],
   "recommendations": [
@@ -356,14 +386,17 @@
     {
       "id": "branches",
       "basis": "Repeated location CRUD belongs outside Settings; Brand and Sector have different documented roles.",
-      "status": "plan_ready_user_review",
+      "status": "implementation_completed_local_source_staged",
       "confidence": "medium",
       "name": "Şubeler/Bayiler",
       "dependency": "Konum (Türkiye Konum) required",
       "data_model": "single module; branch/dealer category within module",
       "selected_by_user_at": "2026-10-22",
-      "plan_path": "Modules/Plans/Branches/Branches - Yeni.md",
-      "dependency_catalog_prerequisite": "Konum absent from catalog.json; publish/catalog registration required before clean catalog installation"
+      "plan_path": "Modules/Plans/Branches/Branches - Tamamlandı.md",
+      "implementation_task_id": "TASK-20261022-0919-branches-implementation",
+      "source_staging": "D:\\localhost\\ekAgentModules\\Branches",
+      "release_status": "not_requested",
+      "dependency_catalog_prerequisite": "Konum 0.1.0 entry is present in local catalog.json; release asset and hash not remotely verified during Branches implementation"
     },
     {
       "basis": "Team rules describe current staff profiles; job posting and applicant workflow not documented. Forms boundary unresolved.",
@@ -380,6 +413,18 @@
       "name": "Etkinlikler",
       "id": "events",
       "superseded_by": "branches"
+    },
+    {
+      "id": "log_viewer",
+      "name": "Log İzleme",
+      "basis": "Direct user request for storage/logs tree, selected file tail, and manual refresh; separate operational responsibility absent from existing module role map.",
+      "confidence": "high",
+      "status": "implementation_completed_local_source_staged",
+      "plan_path": "Modules/Plans/LogViewer/LogViewer - Tamamlandı.md",
+      "task_id": "TASK-20261023-0028-log-monitoring-plan",
+      "scope": "Read-only super-admin viewer; last 200 lines by default; cap 500; no delete/download/external logging.",
+      "source_staging": "D:\\localhost\\ekAgentModules\\LogViewer",
+      "implementation_task_id": "TASK-20261023-0130-logviewer-implementation"
     }
   ],
   "last_planning_task_id": "TASK-20261022-0832-branches-plan"
