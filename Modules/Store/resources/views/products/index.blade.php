@@ -1,6 +1,8 @@
 <x-admin.layout title="Mağaza ürünleri">
-    <div class="card">
-        <div class="card-header d-flex align-items-center gap-3"><h2 class="card-title me-auto">Mağaza ürünleri</h2>@can('store.create')<a class="btn btn-primary" href="{{ route('admin.store.create') }}">Ürün ekle</a>@endcan</div>
-        <div class="table-responsive"><table class="table table-vcenter"><thead><tr><th>Ürün</th><th>SKU</th><th>Fiyat</th><th>Stok</th><th>Durum</th><th></th></tr></thead><tbody>@forelse($products as $product)<tr><td>{{ $product->title }}</td><td>{{ $product->sku }}</td><td>{{ number_format($product->price_minor / 100, 2, ',', '.') }} {{ $product->currency }}</td><td>{{ $product->stock_quantity }}</td><td>{{ $product->is_active ? 'Yayında' : 'Taslak' }}</td><td>@can('store.update')<a href="{{ route('admin.store.edit', $product) }}" class="btn btn-sm btn-outline-primary">Düzenle</a>@endcan</td></tr>@empty<tr><td colspan="6" class="text-secondary">Henüz ürün yok.</td></tr>@endforelse</tbody></table></div>
-    </div>
+<div class="card"><div class="card-header"><h2 class="card-title me-auto">Mağaza ürünleri</h2>@can('store.create')<a class="btn btn-primary" href="{{ route('admin.store.create') }}">Ürün ekle</a>@endcan</div>
+<x-admin.data-table id="store-products" :source="route('admin.store.data')" :columns="[
+['title'=>'ID','data'=>'id','name'=>'id'],['title'=>'Ürün','data'=>'title','name'=>'title'],['title'=>'SKU','data'=>'sku','name'=>'sku'],
+['title'=>'Fiyat','data'=>'price_minor','name'=>'price_minor'],['title'=>'Stok','data'=>'stock_summary','orderable'=>false,'searchable'=>false],['title'=>'Durum','data'=>'is_active','name'=>'is_active'],
+['title'=>'İşlemler','data'=>'actions','name'=>'actions','orderable'=>false,'searchable'=>false]
+]" /></div>
 </x-admin.layout>

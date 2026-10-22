@@ -19,6 +19,10 @@ class StoreSettingsSeeder extends Seeder
             ['key' => 'store.tax_included', 'label' => 'Fiyatlara vergiyi dahil et', 'input_type' => SettingInputType::Boolean, 'default_value' => true, 'validation' => ['required' => false], 'sort_order' => 20],
             ['key' => 'store.tax_rate', 'label' => 'Vergi oranı (%)', 'input_type' => SettingInputType::Number, 'default_value' => 0, 'validation' => ['required' => true, 'min' => 0, 'max' => 100], 'sort_order' => 30],
             ['key' => 'store.guest_checkout_enabled', 'label' => 'Misafir checkout etkin', 'input_type' => SettingInputType::Boolean, 'default_value' => false, 'validation' => ['required' => false], 'sort_order' => 40],
+            ['key' => 'store.shipping_price', 'label' => 'Sabit teslimat ücreti (TL)', 'input_type' => SettingInputType::Text, 'default_value' => '0.00', 'validation' => ['required' => true, 'regex' => '/^\d{1,9}([.,]\d{1,2})?$/D'], 'sort_order' => 50],
+            ['key' => 'store.free_shipping_threshold', 'label' => 'Ücretsiz teslimat eşiği (TL, boşsa kapalı)', 'input_type' => SettingInputType::Text, 'default_value' => null, 'validation' => ['required' => false, 'regex' => '/^\d{1,9}([.,]\d{1,2})?$/D'], 'sort_order' => 60],
+            ['key' => 'store.pickup_enabled', 'label' => 'Mağazadan teslim alma', 'input_type' => SettingInputType::Boolean, 'default_value' => false, 'validation' => ['required' => false], 'sort_order' => 70],
+            ['key' => 'store.manual_payment_instructions', 'label' => 'Manuel ödeme açıklaması', 'input_type' => SettingInputType::Textarea, 'default_value' => '', 'validation' => ['required' => false, 'max' => 2000], 'sort_order' => 80],
         ];
 
         foreach ($definitions as $definition) {

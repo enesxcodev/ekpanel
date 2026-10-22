@@ -3,6 +3,7 @@
 namespace Modules\Store\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Store\Services\StoreOrderService;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class StoreServiceProvider extends ModuleServiceProvider
@@ -36,11 +37,10 @@ class StoreServiceProvider extends ModuleServiceProvider
 
     /**
      * Define module schedules.
-     *
-     * @param  $schedule
      */
-    // protected function configureSchedules(Schedule $schedule): void
-    // {
-    //     $schedule->command('inspire')->hourly();
-    // }
+    protected function configureSchedules(Schedule $schedule): void
+    {
+        $schedule->call(fn (): int => app(StoreOrderService::class)->expire())
+            ->name('store:expire-reservations')->everyMinute()->withoutOverlapping();
+    }
 }

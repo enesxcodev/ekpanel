@@ -2,37 +2,74 @@
 
 namespace Modules\Store\Http\Requests;
 
+use App\Services\Fields\FeatureValues;
+use App\Services\Fields\ModuleFeatures;
+use App\Services\Media\ContentMediaService;
+use App\Services\Media\MediaSelection;
+use App\Services\Settings\SettingsService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Modules\Store\Services\StoreMoney;
 
 class SaveStoreProductRequest extends FormRequest
 {
     protected function prepareForValidation(): void
     {
-        $this->merge(['slug' => $this->input('slug') ?: Str::slug((string) $this->input('title'), language: 'tr'), 'currency' => strtoupper((string) ($this->input('currency') ?: config('store.default_currency')))]);
+        $this->merge([
+            'slug' => $this->input('slug') ?: Str::slug(is_string($this->input('title')) ? $this->input('title') : '', language: 'tr'),
+            'currency' => app(SettingsService::class)->get('store.currency', 'TRY'),
+            'image_media_ids' => MediaSelection::decode($this->input('image_media_ids')),
+        ]);
     }
 
-    public function rules(): array
+    /** @return array<string, mixed> */
+    public function rules(ContentMediaService $media, ModuleFeatures $features, FeatureValues $values): array
     {
         $product = $this->route('product');
+        $amount = ['nullable', 'regex:/^\d{1,9}([.,]\d{1,2})?$/D'];
 
         return [
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('store_products', 'slug')->ignore($product?->id)],
+            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', Rule::unique('store_products', 'slug')->ignore($product?->id)],
             'sku' => ['required', 'string', 'max:100', Rule::unique('store_products', 'sku')->ignore($product?->id)],
             'store_category_id' => ['nullable', 'integer', 'exists:store_categories,id'],
+            'source_product_id' => ['nullable', 'integer', 'min:1'],
             'short_description' => ['nullable', 'string', 'max:1000'],
             'content' => ['nullable', 'string', 'max:65535'],
-            'price_minor' => ['required', 'integer', 'min:0'],
-            'compare_at_price_minor' => ['nullable', 'integer', 'gte:price_minor'],
-            'currency' => ['required', 'string', 'size:3', 'alpha'],
-            'tracks_stock' => ['required', 'boolean'],
-            'stock_quantity' => ['required', 'integer', 'min:0'],
-            'low_stock_threshold' => ['required', 'integer', 'min:0'],
-            'allow_backorders' => ['required', 'boolean'],
-            'is_active' => ['required', 'boolean'],
+            'price' => ['required', ...$amount], 'compare_at_price' => $amount,
+            'currency' => ['required', Rule::in(array_keys(StoreMoney::Currencies))],
+            'tracks_stock' => ['required', 'boolean'], 'allow_backorders' => ['required', 'boolean'],
+            'stock_quantity' => ['required', 'integer', 'min:-1000000', 'max:1000000'],
+            'stock_reason' => ['nullable', 'string', 'max:255'],
+            'low_stock_threshold' => ['required', 'integer', 'min:0', 'max:1000000'],
+            'is_active' => ['required', 'boolean'], 'has_variants' => ['required', 'boolean'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
+            'option_groups' => ['nullable', 'array', 'max:3'],
+            'option_groups.*.name' => ['required', 'string', 'max:50', 'distinct', 'not_regex:/[\[\]]/'],
+            'option_groups.*.values' => ['required', 'string', 'max:500'],
+            'variants' => ['nullable', 'array', 'max:100'],
+            'variants.*.id' => ['nullable', 'integer', 'distinct'],
+            'variants.*.sku' => ['required', 'string', 'max:100', 'distinct'],
+            'variants.*.option_values' => ['required', 'array', 'min:1', 'max:3'],
+            'variants.*.option_values.*' => ['required', 'string', 'max:100'],
+            'variants.*.price' => $amount,
+            'variants.*.stock_quantity' => ['required', 'integer', 'min:-1000000', 'max:1000000'],
+            'variants.*.is_active' => ['required', 'boolean'],
+            'variants.*.image_media_id' => ['nullable', ...array_filter(app(MediaSelection::class)->imageRules(), fn ($rule): bool => ! in_array($rule, ['required', 'distinct'], true))],
+            'image_media_ids' => ['present', 'list', 'max:100'],
+            'image_media_ids.*' => app(MediaSelection::class)->imageRules(),
+            ...$media->rules($media->definition()),
+            ...$media->rules($media->definition('share_image', 'Paylaşım görseli')),
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:500'],
+            'weight_grams' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'width_cm' => ['nullable', 'integer', 'min:0', 'max:10000'],
+            'height_cm' => ['nullable', 'integer', 'min:0', 'max:10000'],
+            'length_cm' => ['nullable', 'integer', 'min:0', 'max:10000'],
+            'preparation_days' => ['required', 'integer', 'min:0', 'max:365'],
+            'delivery_description' => ['nullable', 'string', 'max:2000'],
+            ...$values->rules($features->form('Store', 'product')['fields'], $this->all(), $product?->extra_fields ?? []),
         ];
     }
 

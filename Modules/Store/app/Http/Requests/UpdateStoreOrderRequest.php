@@ -6,19 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateStoreOrderRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
-        return [];
+        return ['status' => ['required', 'in:pending,confirmed,preparing,ready,shipped,completed,cancelled'], 'payment_status' => ['required', 'in:unpaid,paid,refunded'], 'tracking_number' => ['nullable', 'string', 'max:255'], 'note' => ['nullable', 'string', 'max:1000']];
     }
 
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        return $this->user('admin')?->can('store.orders.update') ?? false;
     }
 }

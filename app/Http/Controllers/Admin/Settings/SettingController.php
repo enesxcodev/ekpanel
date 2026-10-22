@@ -21,7 +21,7 @@ class SettingController extends Controller
         $this->authorize('settings.view');
         $admin = auth('admin')->user();
         $sections = SettingSection::query()->orderBy('sort_order')->orderBy('id')->get()
-            ->reject(fn (SettingSection $section): bool => $section->key === 'store' && ! Module::isEnabled('Store'))
+            ->reject(fn (SettingSection $section): bool => $section->key === 'store' && ! (Module::find('Store')?->isEnabled() ?? false))
             ->filter(fn (SettingSection $section): bool => $admin->can('view', $section))->values();
         $sections->load('definitions.storedValue.media');
         $fields = [];
@@ -63,7 +63,7 @@ class SettingController extends Controller
 
     public function update(UpdateSettingsRequest $request, SettingSection $section, SettingsService $settings): RedirectResponse
     {
-        abort_if($section->key === 'store' && ! Module::isEnabled('Store'), 404);
+        abort_if($section->key === 'store' && ! (Module::find('Store')?->isEnabled() ?? false), 404);
         try {
             $settings->updateSection($section, $request->validated(), $request->user('admin'));
         } finally {

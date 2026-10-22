@@ -331,8 +331,56 @@
       "candidates": null
     }
   ],
-  "last_checked_at": "2026-10-21T18:50:05+03:00",
-  "last_discovery_completion_at": "2026-10-21T18:50:05+03:00",
-  "last_discovery_task_id": "TASK-20261021-1848-full-baseline",
-  "baseline_completed_at": "2026-10-21T18:50:05+03:00"
+  "last_checked_at": "2026-10-22T08:34:54+03:00",
+  "last_discovery_completion_at": "2026-10-22T08:28:53+03:00",
+  "last_discovery_task_id": "TASK-20261022-0827-oneoff-discovery",
+  "baseline_completed_at": "2026-10-21T18:50:05+03:00",
+  "candidate_inputs": [
+    {
+      "source_wording": "KBKK ayarları",
+      "assessed_interpretation": "Likely KVKK/privacy settings; spelling ambiguity retained",
+      "confidence": "medium for boundary; low for standalone module need",
+      "status": "awaiting_scope_evidence",
+      "assessment": "Settings can hold configurable single-value settings and Pages can publish privacy text. No evidence yet of required operational consent, cookie preference, data-subject request, or retention workflows.",
+      "id": "privacy_settings"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "appointments",
+      "basis": "Services is service catalogue; appointment workflow is an inferred need for service businesses, not verified customer demand.",
+      "status": "planning_preview_ready_scope_decisions_pending",
+      "confidence": "medium",
+      "name": "Randevu"
+    },
+    {
+      "id": "branches",
+      "basis": "Repeated location CRUD belongs outside Settings; Brand and Sector have different documented roles.",
+      "status": "plan_ready_user_review",
+      "confidence": "medium",
+      "name": "Şubeler/Bayiler",
+      "dependency": "Konum (Türkiye Konum) required",
+      "data_model": "single module; branch/dealer category within module",
+      "selected_by_user_at": "2026-10-22",
+      "plan_path": "Modules/Plans/Branches/Branches - Yeni.md",
+      "dependency_catalog_prerequisite": "Konum absent from catalog.json; publish/catalog registration required before clean catalog installation"
+    },
+    {
+      "basis": "Team rules describe current staff profiles; job posting and applicant workflow not documented. Forms boundary unresolved.",
+      "confidence": "medium-low",
+      "status": "superseded_by_user_selection",
+      "name": "Kariyer ve İş İlanları",
+      "id": "job_listings",
+      "superseded_by": "branches"
+    },
+    {
+      "basis": "Blog covers categorized news/announcements and Services a service catalogue; event time/place/registration workflow not documented.",
+      "confidence": "low-medium",
+      "status": "superseded_by_user_selection",
+      "name": "Etkinlikler",
+      "id": "events",
+      "superseded_by": "branches"
+    }
+  ],
+  "last_planning_task_id": "TASK-20261022-0832-branches-plan"
 }

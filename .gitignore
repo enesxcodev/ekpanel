@@ -36,3 +36,4 @@ Homestead.yaml
 Thumbs.db
 /modules_statuses.json.lock
 /.module-status-*.tmp
+/customers

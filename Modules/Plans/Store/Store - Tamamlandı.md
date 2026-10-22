@@ -1,12 +1,109 @@
 # Store (e-ticaret) modülü planı
 
+## Yerel uygulama sonucu — 21 Ekim 2026
+
+Güncel yerel kapsam uygulandı: bağımsız ürün/kategori, Products'tan kapak ve sıralı galeriyle isteğe bağlı aktarım, beş sekmeli ürün formu, ilk kayıt/edit varyantları, stok hareketleri, Settings ve queue etkinleştirmesi, yerel sepet/checkout/sipariş, manuel ödeme ve teslimat, güvenli sipariş erişimi, SEO ve frontend okuma servisi. Gerçek ödeme/taşıyıcı API'leri onay kaydındaki kapsam dışında kalır. Aşağıdaki ilk plan ve yeniden planlama metinleri karar geçmişidir.
+
+Doğrulama: Store'un 21 feature testi; ortak modül yönetimi/queue ile birlikte 60 test; Settings/Products/Blog regresyonlarında 66 test geçti. Son checkout anahtarı değişikliği ilgili testle ayrıca doğrulandı. Pint, Blade derleme ve npm build başarılı. Tarayıcıda admin varyant kombinasyonu, 390px taşmasız görünüm, ikonlu liste işlemleri, Store Settings sekmesi ve public ürün → sepet → hesap gerektiren checkout kontrol edildi. Tam misafir sipariş POST'u feature testinde doğrulandı; gerçek ödeme, ZIP kurulumu veya çok süreçli stok stres testi yapılmış sayılmaz.
+
+Store skill/rule ve StoreFrontendService sözleşmesi gerçek kodla güncellendi. Kaynak staging: `D:\localhost\ekAgentModules\Store`, 21:42 +03:00; tüm dosyaların SHA-256 eşitliği doğrulandı. Ortak ModuleManager, Settings görünürlüğü/alan doğrulaması ve SEO composer düzeltmeleri ana uygulamadadır; yalnız modül klasörünü kopyalamak bu çekirdek düzeltmelerin başka kurulumlara dağıtımı değildir. Rezervasyon süresi işi Laravel scheduler gerektirir. Release/push/katalog yayını yapılmadı.
+
 ## Amaç ve gerekçe
 
 Katalogdaki `Products` modülü kurumsal ürün kataloğudur. `D:\localhost\ekAgentModules\Products\.ai\rules\tema-entegrasyonu.md` ve `D:\localhost\ekAgentModules\Products\skills\products-theme-integration\SKILL.md`, fiyat, stok, varyant, sepet, sipariş ve ödeme işlevlerini açıkça bu modülün dışında tutar. Satış yapan bir müşteri kurulumu, katalog göstermekten siparişi tamamlamaya kadar bu işlevleri birlikte kurabilmelidir. Bu yüzden tek bir Store adayı, ayrı cart/orders/payments alt modüllerinden daha anlaşılır bir kurulum birimi olur.
 
-Bu doküman bir aday planıdır; uygulama başlangıcı veya ürün kapsamı için son onay değildir. Keşif özeti [README.md](README.md) içindedir.
+Bu doküman 21 Ekim 2026 tarihinde mevcut eksik uygulama ve kullanıcı geri bildirimleriyle yeniden planlandı. Aşağıdaki **Netleştirilmiş uygulama kapsamı** güncel uygulama sözleşmesidir; sonraki tarihsel önerilerle çelişirse bu bölüm önceliklidir. Bu çalışma plan revizyonudur; uygulama tamamlanmış sayılmaz. Keşif özeti [../README.md](../README.md) içindedir.
 
-## Kapsam önerisi
+## Netleştirilmiş uygulama kapsamı
+
+### Kararların durumu ve veri sahipliği
+
+Kullanıcı tarafından kesinleştirilen kararlar: varsayılan TRY/TL, ileride başka para birimlerine genişleme, verginin fiyata dahil/hariç olmasının Store ayarından seçilmesi, misafir checkout'un ayarla açılması ve Store ayar sekmesinin yalnız modül etkin olduğunda görünmesi.
+
+Yeniden planlama tercihi: Store kendi satılabilir ürünlerinin sahibidir ve Products kurulmadan çalışır. Ürün adı, açıklama, kapak, galeri, SEO, kategori, fiyat, stok ve varyantlar Store'da yönetilir. Products kurumsal katalog olarak kalır. Bu sahiplik, aşağıdaki isteğe bağlı aktarımı engellemez. Aktarım ve aşağıdaki ilk sürüm sınırları bu planın önerdiği kararlardır; geçmiş kullanıcı onayı olarak sunulmaz.
+
+Products etkin ve adminin Products okuma izni varsa Store ürün ekleme ekranında **Katalogdan ürün aktar** seçeneği bulunur. Ad ve mevcut katalog kimliği üzerinden sayfalı arama yapılır; seçim önizlemesinde başlık, açıklama, kapak ve galeri gösterilir. Aktarım, Store taslağına tek seferlik içerik kopyasıdır. Fiyat, SKU, stok ve varyant kullanıcı tarafından Store'da doldurulur. Slug çakışması doğrulamayla çözülür; Products kategorisi Store kategorisine sessizce bağlanmaz, kullanıcı Store kategorisini seçer.
+
+Aktarılan ürün mevcut ortak medya kayıtlarını kullanır; Store için ayrıca medya kullanım referansları oluşturulur. Kaynak ürün silinse, değiştirilse veya Products kapatılsa bile Store içeriği ve medya kullanım referansları korunur. Kaynak modül/ID yalnız köken bilgisi olarak saklanır; zorunlu foreign key ve otomatik senkronizasyon kurulmaz. Tekrarlı aktarımda mevcut Store kaydı gösterilip uyarılır; mevcut kayıt kendiliğinden üzerine yazılmaz. Products kurulu/etkin değilse arama kontrolü gösterilmez ve Store ürün oluşturma eksiksiz çalışır.
+
+### İlk sürümün sınırı
+
+İlk sürüm tek stok havuzu, fiziksel ürün, ürün/kategori yönetimi, varyant, medya, SEO, sepet, adres, yerel sipariş, manuel teslimat ve manuel ödeme kaydı içerir. Dijital dosya satışı, çoklu depo, kur dönüşümü, kupon/kampanya, müşteri iade portalı ve kısmi geri ödeme sonraki kapsamdır. Dijital ürün seçeneği çalışmayan bir alan olarak gösterilmez. Gerçek ödeme ve taşıyıcı API'leri mevcut onay kaydındaki durumunu korur.
+
+Sağlayıcı bağlanmadan checkout sonucu **Sipariş alındı, ödeme bekleniyor** olur. Sipariş oluşması ödeme tahsil edildi anlamına gelmez. Yetkili admin, referans ve açıklamayla manuel ödeme alındı kaydı girebilir; değişiklik denetim geçmişinde tutulur. Kart formu veya çalışmayan ödeme yöntemi gösterilmez.
+
+### Ürün formunun beş çalışan sekmesi
+
+Ekleme ve düzenleme aynı alanları ve doğrulama kurallarını kullanır. Taslak kaydetme mümkündür; yayınlama, ürünü gerçekten satılabilir yapan alanları doğrular. Tablo satır işlemleri ortak admin ikonlarını kullanır.
+
+| Sekme | Davranış ve kabul şartı |
+|---|---|
+| Ürün bilgileri | Ad, kategori, kısa açıklama, temizlenen zengin açıklama, slug, kapak ve sıralı galeri. Ortak medya seçimi/yükleme/silme/sıralama ve izinleri çalışır; başka kayıtta kullanılan medya fiziksel olarak silinmez. Slug ortak `data-slug-title` / `data-slug-field` bağlantısıyla addan üretilir, elle düzenlenebilir ve sunucuda benzersizliği doğrulanır. |
+| Fiyat ve stok | Kullanıcı TL cinsinden ondalık tutar girer; kuruş girmesi beklenmez. Satış fiyatı, isteğe bağlı karşılaştırma fiyatı, SKU, stok takibi, düşük stok eşiği ve stokta yokken satış ayarı bulunur. Karşılaştırma fiyatı varsa satış fiyatından büyük olmalı. Manuel stok düzeltmesi gerekçe ve hareket kaydı üretir. |
+| Varyantlar | Varyant kullan anahtarı, seçenek grupları/değerleri, kombinasyon üretme ve satır bazında SKU, fiyat, stok, görsel, aktiflik ve sıralama. İlk ürün oluşturulurken de varyantlar hazırlanıp ürünle birlikte kaydedilebilir. Kayıt sonrasında aynı gerçek editör açılır; statik “kaydedince kullanılabilir” metni kabul edilmez. |
+| Teslimat | Fiziksel üründe ağırlık (gram), en/boy/yükseklik (cm), hazırlık süresi ve teslimat açıklaması; yalnız kullanılan alanlar zorunludur. Ürün bilgileri teslimat hesaplama ve sipariş snapshot'ına bağlanır. Harici kargo teklifi varmış gibi davranılmaz. |
+| SEO | Ortak Blog SEO örüntüsü üzerinden meta başlık, meta açıklama ve paylaşım görseli. Boş başlık ürün adına, açıklama kısa açıklamaya, paylaşım görseli kapağa düşer. Public detay gerçek metadata üretir; slug'dan tek kanonik ürün adresi kullanılır. |
+
+Sağ kartta yayın durumu, sıralama, kapak önizlemesi ve kaydet/vazgeç bulunur. Sekmeler klavyeyle ve mobilde erişilir; hata olan sekme açılır, girilen alanlar/galeri sırası/varyant satırları korunur. Sekme tercihi ürün/form kapsamında tutulur. Placeholder sekme tamamlanmış özellik sayılmaz.
+
+### Varyant ve stok kuralları
+
+Varyantsız ürünün fiyat/stok kaynağı ürün kaydıdır. Varyantlı ürünün satılabilir birimi varyanttır; üst ürün stoğu ikinci kez azaltılmaz. Varyant fiyatı boşsa ürün temel fiyatını kullanır. Varyant ve basit ürün SKU'ları satılabilir birimler arasında benzersizdir. Aynı ürün altında aynı seçenek kombinasyonu iki kez oluşturulamaz; seçenek ve varyant ID'leri sunucuda ürün sahipliğiyle doğrulanır.
+
+Kombinasyon üretme mevcut satırları silip yeniden yaratmaz; aynı kombinasyonun ID, SKU, stok ve fiyatını korur. Yayımlanan varyantlı üründe en az bir aktif geçerli kombinasyon gerekir. Ziyaretçi gerekli seçenekleri seçmeden sepete ekleyemez; başka ürüne ait veya kapatılmış varyant reddedilir. Kombinasyon değiştiğinde fiyat, görsel ve stok durumu güncellenir.
+
+Varyant modunu değiştirmek stok miktarını otomatik taşımaz. Admin yeni modun fiyat/stoklarını açıkça doğrular; eski satırlar ve sipariş snapshot'ları korunur. Kullanılmış varyantlar arşivlenir. Stok düzeltme, sipariş ayırma ve iptal iadesi ayrı hareketlerdir. Stokta yokken satış kapalıysa stok negatif olamaz; açık olduğunda negatif bakiyeyi destekleyen saklama ve doğrulama kullanılır.
+
+### Para ve vergi sözleşmesi
+
+Para modeli tamsayı en küçük birim + ISO para kodudur. TRY iki basamaklıdır; yeni para birimi eklendiğinde hassasiyeti para birimi tanımından gelir, her para biriminin kuruş olduğu varsayılmaz. İlk sürümde etkin para birimi TRY'dir. Bir sepet ve sipariş tek para birimi taşır; kur dönüşümü yapılmaz. Ayarı değiştirmek mevcut fiyatları dönüştürmez veya geçmiş siparişi yeniden etiketlemez; ileride para birimi ekleme mevcut fiyatlar için açık geçiş gerektirir.
+
+Vergi oranı ilk sürümde mağaza genelinde tek oran, varsayılan %0'dır. Fiyatlar vergi dahil varsayılanıyla gelir; mevcut kullanıcı değeri korunur. Dahil modunda satır vergisi brüt tutardan ayrıştırılır, hariç modunda net tutara eklenir. Ondalık/float hesap yerine kesin oran ve tamsayı hesap kullanılır; vergi satır toplamı üzerinden en yakın en küçük birime yarım yukarı yuvarlanır. Sipariş toplamı yuvarlanmış satırların toplamıdır. İlk sürüm teslimat ücreti de aynı oran ve dahil/hariç kuralını izler. Vergi oranı, mod ve hesaplanan tutarlar siparişte sabitlenir; ayar değişikliği geçmişi etkilemez.
+
+### Store ayar sekmesi ve yaşam döngüsü
+
+Mevcut Settings tab yaklaşımına **Mağaza** sekmesi eklenir: para birimi, vergi dahil/hariç, vergi oranı, misafir checkout, sabit teslimat ücreti, ücretsiz teslimat eşiği (boşsa kapalı), mağazadan teslim alma ve manuel ödeme açıklaması. Genel ayar anahtarları korunur: `store.currency`, `store.tax_included`, `store.tax_rate`, `store.guest_checkout_enabled`. Yeni alanlar aynı bölümde kararlı anahtarlarla tanımlanır; desteklenmeyen Settings alan türleri uydurulmaz.
+
+Misafir checkout varsayılan kapalıdır. Kapalıysa ziyaretçi web hesabıyla girişe yönlenir; giriş sonrası sepet korunur. Users kurulu/etkin değilken misafir checkout da kapalıysa checkout kullanılamaz; admine çözüm gösterilir, hesap zorunluluğu sessizce kaldırılmaz. Users opsiyoneldir; modül yokken Store migration veya provider'ı Users tablosu/sınıfına zorunlu bağımlı olamaz.
+
+Paket kurulumu, mevcut kaynak modülün ilk etkinleştirilmesi, yeniden etkinleştirme ve başarısız işin tekrarı aynı zorunlu tanımları oluşturabilmelidir. İşlem idempotent olur; kullanıcı ayarlarını sıfırlamaz. Tanım oluşturma view render'ına bırakılmaz. Etkinleştirme ortak queue/progress akışından yürür ve gerekli hazırlık başarıyla tamamlanınca modül açılır. Ayar sekmesi etkinlik ve yetkiye göre görünür; doğrudan okuma/güncelleme aynı kontrolleri uygular. Kapatma ayarları ve siparişleri silmez.
+
+### Sepet, sipariş ve teslimat
+
+Public akış: sayfalı ürün/kategori listesi → slug detayı ve varyant seçimi → adet güncelleme/silme içeren sepet → giriş veya izinli misafir → iletişim/teslimat/fatura adresi → sipariş özeti → yerel sipariş sonucu. Her adım aktif ürün/kategori/varyant, güncel fiyat, para birimi, stok ve ayarları sunucuda doğrular. Fiyat değişmişse yeni toplam gösterilip yeniden onay alınır. İstemciden fiyat/vergi/toplam kabul edilmez.
+
+Sabit teslimat ücreti veya açık mağazadan teslim seçeneği uygulanır. Ücretsiz teslimat eşiği, ürünlerin vergi dahil toplamına göre değerlendirilir; teslim alma ücreti sıfırdır. İletişim ve adresler sunucuda doğrulanır; teslim almada gereksiz teslimat adresi zorunlu tutulmaz. Manuel takip numarası ve gönderim tarihi siparişe kaydedilebilir.
+
+Sipariş durumları bekliyor → onaylandı → hazırlanıyor → gönderildi → tamamlandı; teslim almada gönderildi yerine teslimata hazır kullanılır. Gönderim öncesi iptal mümkündür. Ödeme durumu ayrı tutulur: bekliyor, manuel ödendi, manuel iade kaydı. Her geçiş işlem izni ve önceki durumla doğrulanır. Ödenmiş sipariş iptali otomatik para iadesi anlamına gelmez; iade gereksinimi görünür kalır. Kısmi gönderim/iade ilk sürüm dışındadır.
+
+Sipariş oluşturma ürün/varyant kilitleri, satır snapshot'ları ve stok ayırmayı tek transaction'da tamamlar. Aynı checkout anahtarıyla çift POST tek sipariş üretir; farklı sepet/veriyle anahtar yeniden kullanılırsa reddedilir. İptal veya süre dolması ayrılan stoğu yalnız bir kez geri verir. Ödenmemiş sipariş için plan varsayılanı 24 saat rezervasyondur; süre sonunda ortak scheduler/queue işi iptal eder. Ödeme ve süre dolma yarışı aynı sipariş üzerinde kilitle çözülür.
+
+Sipariş satırları ad, SKU, seçenekler, birim fiyat, miktar, vergi, toplam ve para birimini; sipariş adresleri ve teslimat şartlarını kopya olarak tutar. Ürün/kategori/varyant veya müşteri hesabı değişimi geçmişi bozmaz. Misafir sonuç sayfası tahmin edilemeyen erişim anahtarıyla, hesap içi sipariş yalnız sahibine açılır; sıra numarası kişisel verilere erişim sağlamaz.
+
+### Mevcut koddan doğrulanan bulgular
+
+- `Modules/Products/resources/views/partials/form.blade.php`: ortak slug bağları, rich text, kapak, çoklu medya seçimi ve galeri sırası zaten var.
+- `Modules/Products/app/Services/ProductService.php`: ortak medya seçim yetkisi, kullanım referansı, içerik temizleme ve ek alan kayıt akışları var; bunların Store'a bağlantıları açıkça kurulmalı.
+- `Modules/Blog/resources/views/contents/partials/form.blade.php`: SEO alanlarının mevcut ortak form örneği. Public Blog sayfaları `x-seo-meta` tüketiyor.
+- `resources/js/admin/slug.js`: otomatik üretim ve elle düzenleme davranışının ortak sahibi.
+- Mevcut Store ürün formunda yalnız üç sekme var; varyant bölümü statik metin. Medya, teslimat ve SEO akışları bu formda bulunmuyor. Bunlar planlanmış olmakla tamamlanmış olmaz.
+
+### Uygulama sırası ve teslim ölçütleri
+
+1. Mevcut Store kodu, migration ve verileri incele; mevcut veriyi koruyan ek migration planla. Çalıştırılmış migration'ı yeniden yazarak veri sıfırlama. Products örneğini uçtan uca, Blog'u yalnız eksik SEO/sekme davranışı için karşılaştır; bulunan yeniden kullanım bağlantılarını görev kaydına yaz.
+2. Ürün/kategori, medya, slug, SEO ve isteğe bağlı katalog aktarımını tamamla. Store yalnız kurulu olduğunda da ürün oluşturma/düzenleme/yayınlama çalışmalı.
+3. İlk ekleme ve sonraki düzenlemede varyant editörünü, kombinasyon korumayı ve stok hareketlerini tamamla.
+4. Settings tanımları ve gerçek queue etkinleştirme yaşam döngüsünü tamamla; tanımlar testte elle seed edilerek eksik etkinleştirme gizlenmemeli.
+5. Teslimat, sepet, misafir/hesap dalları, sipariş snapshot, tekrar istek ve rezervasyon süresi akışlarını tamamla.
+6. Admin sipariş listesi/detayı, izinli durum/manuel ödeme/stok işlemleri, kullanıcıya güvenli sipariş erişimi ve public ekranları tamamla.
+7. Anlamlı regresyon kontrolleri: Products yok/kapalı/izinsiz ve aktarım sonrası kaynak silme; medya kullanımı; slug elle değiştirme; varyant oluştur/güncelle/arşivle ve yabancı varyant reddi; dahil/hariç vergi ve yuvarlama; misafir açık/kapalı ve Users yokluğu; çift checkout/son stok yarışı; iptalin tekrarı/süre dolması; gerçek etkinleştirmeden Settings görünürlüğü ve değer koruması; sipariş erişim yetkisi. Yalnız gereken dar testleri çalıştır, PHP değişirse Pint ve asset değişirse build uygula.
+8. Beş sekmeyi create/edit, doğrulama hatası ve dar ekranda; public varyant seçimi/sepet/checkout'u gerçek tarayıcıda kontrol et. Her özelliği uygulandı/doğrulandı/eksik olarak raporla. Placeholder veya başarısız temel akış varken tamamlandı deme. Başarılı uygulama sonrası proje staging sözleşmesini uygula; release ayrı kullanıcı talebi gerektirir.
+
+Bu revizyonun teslimi plan dosyasıdır. Mevcut uygulama işinin held kilidini veya tamamlanma durumunu kendiliğinden değiştirmez. Uygulama aşamasında plan tercihleri kullanıcıya geçmişte onaylanmış kararlar gibi sunulmaz; değişen kapsam gerekçesi görev kaydına işlenir.
+
+## İlk keşif planı ve tarihsel kapsam önerisi
+
+Aşağıdaki ilk plan geçmişi korumak için tutulur. Güncel karar, kapsam ve uygulama sırası için yukarıdaki Netleştirilmiş uygulama kapsamı esas alınır; buradaki açık sorular yeniden karar bekleyen iş olarak yorumlanmaz.
 
 Store modülünün tek kurulum ve izin sınırında değerlendireceği yetenekler:
 
@@ -33,7 +130,7 @@ Fiyat para birimi ve vergi gösterimi, misafir checkout ile hesap zorunluluğu, 
 ### Uygulama kararları
 
 - 21 Ekim 2026: Varsayılan para birimi TL (`TRY`) olarak onaylandı. Tutarlar kuruş tamsayısı ve üç harfli para birimi koduyla saklanır; bu, ileride başka birimlerin eklenmesine şema değişikliği olmadan izin verir.
-- Vergi gösterimi ve misafir checkout/hesap zorunluluğu henüz karar bekliyor. Bu kararlar, sipariş toplamı ve müşteri verisi saklama davranışını belirlediğinden yerel checkout tamamlanmadan önce netleştirilmelidir.
+- Verginin fiyata dahil/hariç olması ve misafir checkout Store ayarından seçilir. Store ayar sekmesi yalnız Store etkinse görünür. Ayrıntılı davranış yukarıdaki güncel sözleşmededir.
 
 ## Var olan Products modülüyle sınır
 

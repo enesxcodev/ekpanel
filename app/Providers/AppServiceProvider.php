@@ -46,7 +46,9 @@ class AppServiceProvider extends ServiceProvider
             if ($view->name() === 'blog::public.index') {
                 $data['seoTitle'] = 'Blog · '.($settings->get('site.title') ?: config('app.name'));
             }
-            $view->with('seoMetadata', $this->app->make(SeoMetadata::class)->build($data));
+            if (! isset($data['seoMetadata'])) {
+                $view->with('seoMetadata', $this->app->make(SeoMetadata::class)->build($data));
+            }
         });
         ViewFacade::composer('components.admin.topbar', function (View $view) use ($notifications): void {
             $admin = auth('admin')->user();

@@ -9,16 +9,18 @@ Bu dosya, modüllerin geliştirme sırasında kullanıcı onayı gerektiren kaps
 - Onay, yalnız belirtilen servis ve kapsam için geçerlidir; GitHub push, release veya katalog yayını izni değildir.
 - Bu kayıt zamanla yeni modül ve entegrasyon ihtiyaçlarıyla genişletilir. Kararlar tarih ve kapsamıyla eklenir; eski kararlar geçmiş olarak saklanır.
 
-## Bekleyen onaylar
+## Ertelenen entegrasyonlar
+
+Store'un yerel uygulama işi tamamlandığı için aşağıdaki iki entegrasyon bu görev kapsamında kapatılıp ertelendi. Bunlar onaylanmış veya uygulanmış değildir. İleride yeniden ele almak için yeni bir Store işi ve ilgili entegrasyon için açık kullanıcı onayı gerekir.
 
 | Modül | Kapsam                                                                                                                               | Neden onay gerekiyor                                                   | Onay gelene kadar yapılabilecekler                                                                               | Durum    |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------- |
-| Store | Gerçek ödeme sağlayıcısı entegrasyonu: sağlayıcı seçimi, hesap/anahtar yapılandırması, ödeme başlatma, callback/webhook, iade API'si | CMS projesinde onaylanmış bir ödeme sağlayıcısı/altyapısı belirtilmedi | Ürün, sepet ve yerel sipariş kapsamı; ödeme sağlayıcısından bağımsız durumlar yalnız Store planında yer alıyorsa | Bekliyor |
-| Store | Harici kargo/taşıyıcı entegrasyonu: fiyat teklifi, etiket/gönderi oluşturma, takip ve iptal API'si                                   | CMS projesinde onaylanmış bir kargo sağlayıcısı/altyapısı belirtilmedi | Ürün/sepet/sipariş kapsamı; manuel teslimat bilgileri ancak Store planında ayrıca seçilip tanımlanırsa           | Bekliyor |
+| Store | Gerçek ödeme sağlayıcısı entegrasyonu: sağlayıcı seçimi, hesap/anahtar yapılandırması, ödeme başlatma, callback/webhook, iade API'si | CMS projesinde onaylanmış bir ödeme sağlayıcısı/altyapısı belirtilmedi | Ürün, sepet ve yerel sipariş kapsamı; ödeme sağlayıcısından bağımsız durumlar yalnız Store planında yer alıyorsa | Ertelendi — Store işi kapandı; yeni istek ve açık onay gerekir |
+| Store | Harici kargo/taşıyıcı entegrasyonu: fiyat teklifi, etiket/gönderi oluşturma, takip ve iptal API'si | CMS projesinde onaylanmış bir kargo sağlayıcısı/altyapısı belirtilmedi | Ürün/sepet/sipariş kapsamı; manuel teslimat bilgileri ancak Store planında ayrıca seçilip tanımlanırsa | Ertelendi — Store işi kapandı; yeni istek ve açık onay gerekir |
 
 ## Onay kararı geçmişi
 
-Henüz bir entegrasyon için açık kullanıcı onayı kaydedilmedi.
+Store'un tamamlanan yerel uygulaması için ödeme veya kargo entegrasyonu onayı verilmedi; bu iki kapsam mevcut görevde ertelendi.
 
 Yeni kayıt eklerken şu alanları kullan:
 

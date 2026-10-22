@@ -46,6 +46,9 @@ class FieldRuleBuilder
         if ($type->hasOptions()) {
             $rules[] = Rule::in(array_column($definition->options ?? [], 'value'));
         }
+        if (isset($validation['regex']) && is_string($validation['regex'])) {
+            $rules[] = 'regex:'.$validation['regex'];
+        }
         foreach (['min', 'max'] as $bound) {
             if (isset($validation[$bound])) {
                 $rules[] = $bound.':'.$validation[$bound];

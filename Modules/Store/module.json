@@ -10,9 +10,11 @@
     ],
     "files": [],
     "panel": {
+        "assets": {"routes": ["admin.store.*"], "js": ["resources/dist/panel.js"]},
         "install": {
+            "ensure_on_enable": true,
             "seeders": ["Modules\\Store\\Database\\Seeders\\StoreSettingsSeeder"]
         },
-        "permissions": ["store.menu", "store.view", "store.create", "store.update", "store.delete", "store.categories.menu", "store.categories.view", "store.categories.create", "store.categories.update", "store.categories.delete", "store.stock.view", "store.stock.update", "store.orders.menu", "store.orders.view", "store.orders.update"]
+        "permissions": ["store.menu", "store.view", "store.create", "store.update", "store.delete", "store.categories.menu", "store.categories.view", "store.categories.create", "store.categories.update", "store.categories.delete", "store.stock.menu", "store.stock.view", "store.stock.update", "store.orders.menu", "store.orders.view", "store.orders.update", "store.orders.payment"]
     }
 }

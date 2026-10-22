@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
+    protected $table = 'store_stock_movements';
+
     use HasFactory;
 
     protected $fillable = ['store_product_id', 'store_variant_id', 'quantity', 'resulting_quantity', 'reason', 'reference_type', 'reference_id', 'admin_id'];

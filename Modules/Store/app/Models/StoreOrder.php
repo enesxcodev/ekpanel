@@ -13,11 +13,13 @@ class StoreOrder extends Model
     /** @use HasFactory<StoreOrderFactory> */
     use HasFactory;
 
-    protected $fillable = ['number', 'user_id', 'customer_name', 'customer_email', 'shipping_address', 'currency', 'subtotal_minor', 'tax_minor', 'shipping_minor', 'discount_minor', 'total_minor', 'status', 'payment_status', 'stock_released_at', 'status_history'];
+    protected $fillable = ['number', 'user_id', 'customer_name', 'customer_email', 'shipping_address', 'currency', 'subtotal_minor', 'tax_minor', 'shipping_minor', 'discount_minor', 'total_minor', 'status', 'payment_status', 'stock_released_at', 'status_history', 'checkout_key', 'checkout_hash', 'access_token', 'customer_phone', 'billing_address', 'delivery_snapshot', 'reserved_until', 'tracking_number', 'shipped_at'];
+
+    protected $hidden = ['access_token', 'checkout_key', 'checkout_hash'];
 
     protected function casts(): array
     {
-        return ['user_id' => 'integer', 'shipping_address' => 'array', 'subtotal_minor' => 'integer', 'tax_minor' => 'integer', 'shipping_minor' => 'integer', 'discount_minor' => 'integer', 'total_minor' => 'integer', 'stock_released_at' => 'datetime', 'status_history' => 'array'];
+        return ['reserved_until' => 'datetime', 'shipped_at' => 'datetime', 'billing_address' => 'array', 'delivery_snapshot' => 'array', 'user_id' => 'integer', 'shipping_address' => 'array', 'subtotal_minor' => 'integer', 'tax_minor' => 'integer', 'shipping_minor' => 'integer', 'discount_minor' => 'integer', 'total_minor' => 'integer', 'stock_released_at' => 'datetime', 'status_history' => 'array'];
     }
 
     public function lines(): HasMany

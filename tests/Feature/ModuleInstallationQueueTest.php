@@ -115,7 +115,8 @@ test('duplicate job delivery runs only one fresh artisan process and never repea
 
     expect($service->find($id)['status'])->toBe('succeeded');
     expect($service->find($id)['percentage'])->toBe(100);
-    Process::assertRanTimes(fn ($process): bool => in_array('module:install-queued', $process->command, true) && $process->timeout === 3300, 1);
+    Process::assertRanTimes(fn ($process): bool => in_array('module:install-queued', $process->command, true)
+        && in_array('max_execution_time=0', $process->command, true) && $process->timeout === 3300, 1);
     Queue::assertPushed(InstallQueuedModule::class, 1);
 });
 

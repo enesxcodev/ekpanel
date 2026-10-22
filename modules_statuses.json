@@ -15,5 +15,6 @@
     "Users": true,
     "Products": true,
     "Popup": true,
-    "Store": false
+    "Store": true,
+    "Konum": true
 }

@@ -33,7 +33,7 @@ class InstallQueuedModule implements ShouldQueue
         }
         try {
             $result = Process::path(base_path())->timeout(3300)->run([
-                PHP_BINARY, base_path('artisan'), 'module:install-queued', $this->installationId, (string) $this->index, '--no-interaction',
+                PHP_BINARY, '-d', 'max_execution_time=0', base_path('artisan'), 'module:install-queued', $this->installationId, (string) $this->index, '--no-interaction',
             ]);
             $error = $result->successful() ? null : 'Kurulum süreci başarısız: '.mb_substr(trim($result->errorOutput() ?: $result->output()), 0, 2000);
             $installations->finish($this->installationId, $this->index, $error);

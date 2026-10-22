@@ -155,7 +155,7 @@ class ModuleManager
         }
         $pending = $this->workingPath().'/pending-'.$module->getName().'.json';
         $progress?->__invoke(7, 'Tanımlı kurulum verileri hazırlanıyor');
-        if ($installing || is_file($pending)) {
+        if ($installing || is_file($pending) || ($module->get('panel', [])['install']['ensure_on_enable'] ?? false)) {
             foreach ($module->get('panel', [])['install']['seeders'] ?? [] as $seeder) {
                 if (! is_string($seeder) || ! str_starts_with($seeder, 'Modules'.chr(92).$module->getName().chr(92).'Database'.chr(92).'Seeders'.chr(92))
                     || ! preg_match('/^[A-Za-z0-9_\\\\]+$/D', $seeder)) {
