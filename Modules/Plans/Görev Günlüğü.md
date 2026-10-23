@@ -4,11 +4,30 @@ Bu dosya modül keşfi, planlama, uygulama, kaynak staging ve kullanıcı onayl�
 
 ## Güncel kilit ve zamanlama
 
-- `active_lock`: `none` veya etkin görev kimliği. Yeni modül işi/discovery, değer `none` değilse başlamaz.
+- `active_lock`: `none`
 - `last_module_completion_at`: `2026-10-23T01:20:17+03:00`
 - `last_module_task_id`: `TASK-20261023-0130-logviewer-implementation`
 - `baseline_discovery_completed_at`: ilk tam katalog taramasının tamamlanma zamanı. Boşsa sonraki uygun discovery tam baseline taramasıdır.
-- `last_discovery_completion_at`: en son discovery run'ının bitiş zamanı. Sonraki run'lar yeni adayları arar; özet/planlarda bulunan adayı yinelemez.
+- `last_discovery_completion_at`: `2026-10-23T18:34:07+03:00`
+- `last_discovery_task_id`: `TASK-20261023-1825-manual-discovery`
+
+### TASK-20261024-0015-automated-discovery
+- origin: automated-discovery
+- task_type: discovery
+- module: candidate-scan
+- status: completed
+- lock: released
+- started_at: 2026-10-24T00:15:00+03:00
+- updated_at: 2026-10-24T00:22:00+03:00
+- completed_at: 2026-10-24T00:22:00+03:00
+- relevant_tests: n/a — keşif
+- build_results: n/a
+- source_staging: n/a
+- release_requested: no
+- catalog_snapshot: af504ced4fc7282f5addd01dc34457970e0f18892724f3fe95c224087df36219
+- modules_reviewed: none — 18 kayıtlı modülde katalog metadata/rules/skills imza farkı yok; kayıtlı rol haritası ve tüm açık öneriler yeniden değerlendirildi
+- rules_skills_reviewed: imza kontrolü — kayıtlı modül rules/skills yolları; değişiklik yok. İlgili terimler .ai/rules içinde tarandı.
+- notes: Katalog SHA-256 ve modül imzaları baseline ile eşleşti. KVKK girdisi Settings/Pages kapsamıyla kısmen karşılanabilir; ayrı operasyonel rıza/veri sahibi/saklama akışları için ek kanıt bekliyor. URL yönlendirme, yönetici değişiklik geçmişi ve randevu kayıtları bağımsız modül eşiğini geçecek kanıt/kapsam netliğine ulaşmadı. Bugün yeni doğrulanmış aday çıkmadı. Model yönlendirme aracı bu oturumda yok; istenen GPT-6-luna low seçimi doğrulanamadı, model kullanıldığı iddia edilmiyor.
 
 Kilit sahibi işi başlatmadan önce günlüğe kaydeder, `active_lock` alanını görev kimliğine ayarlar ve her aşama değişiminde `updated_at` değerini yeniler. Başarıda `status: completed`, `lock: released`, `completed_at` kaydedilir ve global kilit `none` yapılır. Engellenmiş/askıda ama devam etmesi beklenen işte kilit tutulur. Stale kilidi otomasyon kendiliğinden temizlemez; görev sahibi işi tamamlayıp veya açıkça iptal edip günlüğü günceller.
 
@@ -50,7 +69,8 @@ Her discovery veya modül görevi için yeni bir kayıt ekle. Durum ve aşama de
 - `last_module_completion_at`: `2026-10-22T11:36:13+03:00`
 - `last_module_task_id`: `TASK-20261022-1335-three-module-implementation`
 - `baseline_discovery_completed_at`: `2026-10-21T18:50:05+03:00`
-- `last_discovery_completion_at`: `2026-10-22T08:28:53+03:00`
+- `last_discovery_completion_at`: `2026-10-23T18:34:07+03:00`
+- `last_discovery_task_id`: `TASK-20261023-1825-manual-discovery`
 - `last_discovery_task_id`: `TASK-20261022-0827-oneoff-discovery`
 
 ## Kayıtlar
@@ -349,3 +369,27 @@ Her discovery veya modül görevi için yeni bir kayıt ekle. Durum ve aşama de
 - catalog_snapshot: af504ced4fc7282f5addd01dc34457970e0f18892724f3fe95c224087df36219
 - modules_reviewed: Branches (module install/permission/menu conventions); Store (install and admin UI conventions); shared admin layout/sidebar/auth routes
 - rules_skills_reviewed: .ai/rules/index.md, .ai/rules/moduller.md, .ai/rules/admin-arayuz.md, .ai/rules/yetkilendirme.md, .ai/rules/mimari-kod-yapisi.md, .ai/workflows/modul-gelistirme.md, .claude/skills/testing-best-practices/SKILL.md
+
+### TASK-20261023-1825-manual-discovery
+- origin: user-started
+- task_type: discovery
+- module: candidate-scan
+- status: completed
+- lock: released
+- started_at: 2026-10-23T18:25:23+03:00
+- updated_at: 2026-10-23T18:34:07+03:00
+- completed_at: 2026-10-23T18:34:07+03:00
+- relevant_tests: n/a — keşif
+- build_results: n/a
+- source_staging: n/a
+- release_requested: no
+- release_package: not_requested
+- source_push: not_requested
+- github_release: not_requested
+- catalog_update: not_requested
+- catalog_push: not_requested
+- remote_verification: not_requested
+- notes: Kullanıcı tetiklemesiyle keşif tamamlandı. Katalog hash'i baseline ile aynı; 18 kayıtlı modülün metadata/rule/skill imzaları değişmedi, eksik imza dosyası yok. KVKK girdisi Settings/Pages mevcut kapsamıyla kısmen karşılanıyor; bağımsız iş akışı kanıtı bekliyor. URL yönlendirme ve yönetici değişiklik geçmişi yalnız orta-düşük/düşük güvenli hipotez olarak kaydedildi; kapsam soruları nedeniyle doğrulanmış aday, ayrıntılı plan veya uygulama başlatılmadı. LogViewer/Branches/Store tamamlandığı için yeniden açılmadı. Görev kilidi serbest.
+- catalog_snapshot: af504ced4fc7282f5addd01dc34457970e0f18892724f3fe95c224087df36219
+- modules_reviewed: none — 18 tracked entries unchanged; role/scope map reconsidered; targeted redirect keyword search only
+- rules_skills_reviewed: .ai/rules/settings.md; D:\localhost\ekAgentModules\Pages\.ai/rules/tema-entegrasyonu.md; D:\localhost\ekAgentModules\Pages\skills\pages-theme-integration\SKILL.md; other tracked rule/skill signatures unchanged

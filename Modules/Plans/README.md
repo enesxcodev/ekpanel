@@ -93,5 +93,26 @@ GitHub entegrasyonu repo ve metin dosyası işlemlerini destekleyebilir; release
 | Aday | Kapsam ve dayanak | Karar / durum |
 | --- | --- | --- |
 | Log İzleme (LogViewer) | Kullanıcının doğrudan talebi: Laravel log dosyalarını ağaçta seçme, sağ panelde son satırları okuma ve manuel yenileme. Mevcut CMS modüllerinin içerik/kimlik/ticaret rollerinden bağımsız operasyonel sorumluluk. | **Yerel uygulama, test ve kaynak staging tamamlandı.** [LogViewer - Tamamlandı.md](LogViewer/LogViewer%20-%20Tamamland%C4%B1.md). Süper-admin-only, salt okunur; release/push/katalog yapılmadı. |
+## 23 Ekim 2026 — kullanıcı tetiklemesiyle modül keşfi
 
+Katalog SHA-256 baseline ile aynı; 18 kayıtlı modülün katalog metadata ve kayıtlı rule/skill imzalarında değişiklik veya eksik dosya yok. Bu nedenle değişmeyen yönergeler yeniden okunmadı. Genel kapsam, kayıtlı rol haritası ve açık girdiler üzerinden yeniden değerlendirildi.
 
+| Öneri | Sınıflandırma ve gerekçe | Güven / karar |
+| --- | --- | --- |
+| URL Yönlendirme Yönetimi | Olası bağımsız, çapraz içerik modülü. Pages/Blog/Products/Store URL ve slug yönetiyor; merkezi eski-yeni URL yönlendirme kapsamı rol haritasında görünmüyor. Slug değişimlerinde kırık link/SEO kaybı olası kullanıcı ihtiyacı, çıkarımdır. | Orta-düşük; detaylı uygulanabilir plan için otomatik 301 mı/manuel kayıt mı, içerik türleri ve route entegrasyonu netleşmeli. |
+| Yönetici Değişiklik Geçmişi | Olası çekirdek yeteneği veya bağımsız denetim modülü. LogViewer uygulama hata günlüklerini okur; editör değişikliklerini kimin yaptığını izlemez. Çok modüllü CMS’de hesap verebilirlik olası ihtiyaçtır, talep kanıtı yoktur. | Düşük; kaydedilecek eylemler, hassas alan redaksiyonu, saklama süresi ve çekirdek/modül sınırı belirlenmeden planlanmadı. |
+
+Bu iki öneri doğrulanmış/uygulama adayı olarak sayılmıyor; sayı tamamlamak için modül veya plan uydurulmadı. Önceden kaydedilmiş Randevu önerisinin kararları hâlâ açık; Branches ve LogViewer tamamlandığından tekrar açılmadı. Kariyer ve Etkinlikler kullanıcı seçimiyle superseded durumda. KVKK girdisi bu turda da Settings tekil ayarları ve Pages gizlilik metni sınırında karşılanabilir; bağımsız rıza/veri sahibi/saklama akışı için ek kullanıcı kanıtı bekliyor.
+
+## 24 Ekim 2026 — günlük modül keşfi
+
+Katalog SHA-256 (`af504ced4fc7282f5addd01dc34457970e0f18892724f3fe95c224087df36219`) baseline ile eşleşti; kayıtlı 18 modülde metadata ve rules/skills imza farkı yok. Bu nedenle değişmeyen yönergeler yeniden okunmadı. Kayıtlı modül kapsamları ve açık öneriler yeniden değerlendirildi.
+
+| Öneri / girdi | Sınıflandırma ve dayanak | Güven / karar |
+| --- | --- | --- |
+| KVKK ayarları | Mevcut Settings tekil/sabit ayarları ve Pages politika metnini karşılayabilir. Operasyonel rıza/çerez tercihi, veri sahibi başvurusu veya saklama iş akışı ihtiyacı için yeni kanıt yok. | Bağımsız modül doğrulanmadı; kapsam ve ihtiyaç için ek kanıt bekliyor. |
+| URL Yönlendirme Yönetimi | İçerik URL/slug değişikliği kaynaklı kırık bağlantı ihtiyacı makul çıkarım; otomatik/manuel davranış, içerik türleri ve route entegrasyonu belirsiz. | Orta-düşük güven; planlanabilir aday değil, kapsam doğrulaması bekliyor. |
+| Yönetici Değişiklik Geçmişi | LogViewer uygulama loglarını okur; düzenleme geçmişi ayrı olabilir. Ancak kullanıcı ihtiyacı, çekirdek/modül sınırı, redaksiyon ve saklama koşulları kanıtlanmadı. | Düşük güven; ek kanıt ve kapsam kararı bekliyor. |
+| Randevu | Services katalog kapsamı randevu akışını açıklamıyor; ancak talep/kapasite/iptal kararları hâlâ taslak düzeyinde. | Orta güvenli hipotez; kapsam kararı bekliyor, uygulama adayı değil. |
+
+Bugün yeni, doğrulanmış modül adayı bulunmadı. Günde iki aday sınırını doldurmak için öneri uydurulmadı; kod, plan, görsel, test/build veya staging yapılmadı. Bu çalışma model yönlendirme seçeneğine erişemedi; GPT-6-luna low kullanıldığı iddia edilmedi.

@@ -353,18 +353,19 @@
       "candidates": null
     }
   ],
-  "last_checked_at": "2026-10-23T00:20:29+03:00",
-  "last_discovery_completion_at": "2026-10-23T00:20:29+03:00",
-  "last_discovery_task_id": "TASK-20261023-0020-daily-discovery",
+  "last_checked_at": "2026-10-24T00:22:00+03:00",
+  "last_discovery_completion_at": "2026-10-24T00:22:00+03:00",
+  "last_discovery_task_id": "TASK-20261024-0015-automated-discovery",
   "baseline_completed_at": "2026-10-21T18:50:05+03:00",
   "candidate_inputs": [
     {
       "source_wording": "KBKK ayarları",
       "assessed_interpretation": "Likely KVKK/privacy settings; spelling ambiguity retained",
       "confidence": "medium for boundary; low for standalone module need",
-      "status": "pending_validation",
-      "assessment": "Settings supports configurable single-value fields and Pages can publish privacy text. No evidence of recurring consent, data-subject request, retention, or anonymization workflow; clarification or concrete user workflow evidence is still needed. No standalone module validated.",
-      "id": "privacy_settings"
+      "status": "awaiting_additional_evidence",
+      "assessment": "2026-10-24 yeniden değerlendirildi: kayıtlı Settings/Pages kapsamı genel gizlilik ayarları ve politika metnini karşılayabilir. Ayrı operasyonel rıza/çerez, veri sahibi veya saklama akışı ihtiyacı için yeni kanıt yok; ek kanıt bekliyor.",
+      "id": "privacy_settings",
+      "evaluated_at": "2026-10-24T00:22:00+03:00"
     },
     {
       "id": "log_viewer",
@@ -381,7 +382,9 @@
       "basis": "Services is service catalogue; appointment workflow is an inferred need for service businesses, not verified customer demand.",
       "status": "planning_preview_ready_scope_decisions_pending",
       "confidence": "medium",
-      "name": "Randevu"
+      "name": "Randevu",
+      "last_assessed_at": "2026-10-24T00:22:00+03:00",
+      "assessment": "Tekrar değerlendirildi 2026-10-24: Services randevu kataloğu değil; kullanıcı ihtiyacı çıkarımsal ve akış kapsam kararları açık olduğundan uygulama adayı değil."
     },
     {
       "id": "branches",
@@ -425,6 +428,36 @@
       "scope": "Read-only super-admin viewer; last 200 lines by default; cap 500; no delete/download/external logging.",
       "source_staging": "D:\\localhost\\ekAgentModules\\LogViewer",
       "implementation_task_id": "TASK-20261023-0130-logviewer-implementation"
+    },
+    {
+      "id": "url_redirects",
+      "name": "URL Yönlendirme Yönetimi",
+      "classification": "possible_independent_module",
+      "basis": "Pages, Blog, Products ve Store içeriklerinde URL/slug ve metadata rolleri var; katalog rol haritasında eski URL-yeni URL yönlendirmesi kapsamı görünmüyor. Site adresi değişimlerinden doğan kırık bağlantı/SEO kaybı CMS kullanımından çıkarımdır, doğrudan kullanıcı talebi değil.",
+      "confidence": "medium-low",
+      "status": "scope_validation_needed",
+      "open_questions": [
+        "Slug değişince otomatik 301 kaydı mı, yoksa yalnız elle girilen yönlendirmeler mi?",
+        "Yönetim hangi içerik türlerini ve wildcard/path davranışını kapsamalı?",
+        "Mevcut route fallback noktasına entegre olmak için çekirdek değişikliği kabul ediliyor mu?"
+      ],
+      "last_assessed_at": "2026-10-24T00:22:00+03:00",
+      "assessment": "Tekrar değerlendirildi 2026-10-24: olası kırık bağlantı ihtiyacı çıkarım; otomatik/manuel kapsam, içerik türleri ve route entegrasyonu açık. Yeni doğrulanmış kullanıcı kanıtı yok; planlama eşiğini geçmedi."
+    },
+    {
+      "id": "admin_audit_trail",
+      "name": "Yönetici Değişiklik Geçmişi",
+      "classification": "core_capability_or_independent_module_unresolved",
+      "basis": "CMS içerik ve ayarları birden fazla modülde yönetiliyor; kullanıcıların kim, neyi, ne zaman değiştirdiğini incelemesi olası bir yönetişim ihtiyacıdır. LogViewer yalnız uygulama log dosyalarını gösterir, kayıt değişikliklerinin denetim geçmişi değildir. Bu ihtiyaç CMS işletiminden çıkarımdır; talep kanıtı yok.",
+      "confidence": "low",
+      "status": "boundary_and_need_validation",
+      "open_questions": [
+        "Hangi kullanıcı eylemleri ve eski/yeni değerler kaydedilmeli?",
+        "Retention, hassas alan redaksiyonu ve erişim yetkisi ne olmalı?",
+        "Ortak çekirdek davranışı mı, opsiyonel bağımsız modül mü isteniyor?"
+      ],
+      "last_assessed_at": "2026-10-24T00:22:00+03:00",
+      "assessment": "Tekrar değerlendirildi 2026-10-24: LogViewer uygulama loglarını kapsar; değişiklik geçmişi farklı sorumluluk olabilir, ancak kullanıcı ihtiyacı ve çekirdek/modül, redaksiyon/saklama kararları kanıtsız."
     }
   ],
   "last_planning_task_id": "TASK-20261022-0832-branches-plan"
