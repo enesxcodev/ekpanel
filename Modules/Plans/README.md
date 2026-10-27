@@ -45,6 +45,7 @@ Sohbetlerde kullanıcı tarafından belirtilen ihtiyaçlar, henüz doğrulanmı�
 | Aday girdisi | Kaynak ve kısa gerekçe | Durum | Sonraki inceleme |
 | --- | --- | --- | --- |
 | KVKK ayarları | Kaynak notundaki kullanıcı ifadesi “KBKK ayarları”; olası “KVKK ayarları” olarak değerlendirildi. Settings tekil/sabit ayarları yapılandırabilir, Pages politika metni yayımlayabilir; operasyonel rıza, çerez tercihi, veri sahibi başvurusu veya saklama akışı ihtiyacı henüz kanıtlanmadı. | **Ek kanıt bekliyor** — Settings alanları ve Pages gizlilik metnini karşılayabilir; bağımsız rıza/veri sahibi/saklama iş akışı kanıtı yok, yeni modül doğrulanmadı. | KVKK/KBKK yazımını ve istenen işlevleri netleştir: yalnız gizlilik metni/ayar mı, yoksa çerez rızası kaydı, veri sahibi başvurusu, saklama/anonimleştirme gibi tekrarlanan iş akışları mı? Yeni modül ancak bağımsız iş akışı ve kullanıcı ihtiyacı doğrulanırsa planlanır; yasal kapsam varsayma. |
+| URL Yönlendirme Yönetimi | Kullanıcı kapsamı: aynı host içinde elle tanımlanan eski path → yeni path kalıcı 301; site-içi içerik URL'leri Pages/Blog/Products/Store'da, merkezi yönlendirme kuralı rol haritasında yok. Kırık bağlantı/SEO koruma değeri ürün çıkarımıdır. | **Plan hazır; uygulama model seçimi bekliyor.** Güven orta-yüksek (kapsam için), değer çıkarım. [Redirects planı ve konsept](Redirects/Redirects%20-%20Yeni.md). | Uygulama öncesi Pages catch-all/request-hook sırasını ve kurulu route davranışını doğrula; gpt-5.6-terra medium yönlendirmesi seçilebilir olmalı. |
 
 ### İlk tam baseline taraması
 
@@ -116,3 +117,17 @@ Katalog SHA-256 (`af504ced4fc7282f5addd01dc34457970e0f18892724f3fe95c224087df362
 | Randevu | Services katalog kapsamı randevu akışını açıklamıyor; ancak talep/kapasite/iptal kararları hâlâ taslak düzeyinde. | Orta güvenli hipotez; kapsam kararı bekliyor, uygulama adayı değil. |
 
 Bugün yeni, doğrulanmış modül adayı bulunmadı. Günde iki aday sınırını doldurmak için öneri uydurulmadı; kod, plan, görsel, test/build veya staging yapılmadı. Bu çalışma model yönlendirme seçeneğine erişemedi; GPT-6-luna low kullanıldığı iddia edilmedi.
+
+## 28 Ekim 2026 — günlük modül keşfi ve Redirects planı
+
+Katalog SHA-256 `933c4a9024f6a590d8806884b2346bbf706e498e64758d408ca4aad38654afc9`; keşif indeksi 23 katalog kaydının metadata ve rule/skill imzalarıyla güncellendi. Önceki indekste olmayan Appointments, Branches, Careers, Events ve LogViewer katalog kapsamı/sahipliği indekse eklendi; yeni Appointments/Careers/Events tema rule+skill dosyaları derin okundu. Store, Branches ve LogViewer tamamlandığından yeniden adaylaştırılmadı.
+
+| Fikir | Sınıf, kullanıcı değeri ve dayanak | Güven / durum |
+| --- | --- | --- |
+| Redirects — aynı host path 301 | Olası opsiyonel bağımsız modül. Kullanıcı kapsamı manuel path-to-path kalıcı yönlendirme; Pages/Blog/Products/Store URL üretse de kayıtlı rol haritasında redirect kuralları yok. Kullanıcı, modül öneklerinin route isim çakışmasını önlediğini belirtti; Pages catch-all/request-hook sırası kodda doğrulanmalı. SEO/kırık link koruma yararı çıkarımdır. | Orta-yüksek (sınır), orta (ürün yararı). Plan ve form konsepti hazır. Uygulama `gpt-5.6-terra medium` seçilemediği için engelli; bu modelin kullanıldığı iddia edilmiyor. |
+| Appointments uygunluk/çakışma takvimi | Mevcut modül genişletmesi. Randevu akışının zaman uygunluğunu göstermesi kullanıcı değerini artırabilir; tema yönergeleri ilk sürümün takvim/uygunluk hesabı üretmediğini açıkça söylüyor. | Orta; çalışan/şube kaynakları, kapasite, saat dilimi ve iptal/slot politikası açık değil. Ayrı plan seçilmedi. |
+| KVKK operasyonları | Mevcut Settings/Pages kapsamı genel ayar/metni karşılayabilir; operasyonel rıza/veri sahibi/saklama ihtiyacı için yeni kanıt yok. | Düşük bağımsız modül ihtiyacı; ek kanıt bekliyor. |
+| Yönetici değişiklik geçmişi | Olası ortak çekirdek veya modül; LogViewer hata loglarıyla farklı sorumluluk taşır. Kayıt türleri, retansiyon ve redaksiyon kararı/kanıtı yok. | Düşük; kapsam ve ihtiyaç için ek kanıt bekliyor. |
+| Careers / Events | Katalogda tamamlanmış modüller mevcut; Team, Blog rollerinden ayrışıyor fakat yeni, değişmiş kanıt veya talep yok. | Mevcut katalog kapsamı; tekrar geliştirme adayı değil. |
+
+Bugün bir iş kalemi (Redirects) seçildi; ikinci güçlü aday bulunmadı. Plan [Redirects - Yeni.md](Redirects/Redirects%20-%20Yeni.md), konsept [Redirects-Form-Konsept.png](Redirects/Redirects-Form-Konsept.png). Kod/test/build/staging yapılmadı. `gpt-6-luna low` keşif yönlendirmesi de araçtan seçilemedi; model kullanıldığı iddia edilmiyor.

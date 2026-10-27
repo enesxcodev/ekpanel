@@ -1,0 +1,15 @@
+@extends('frontend.themes.default.layouts.app')
+
+@section('content')
+    @include('frontend.themes.default.sections.hero', ['hero' => $slider, 'advantages' => $advantages])
+    @include('frontend.themes.default.sections.brands', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'brands' => $brands])
+    @include('frontend.themes.default.sections.services', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'services' => $services, 'sectors' => $sectors])
+    @include('frontend.themes.default.sections.about', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'about' => $about])
+    @include('frontend.themes.default.sections.products', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'products' => $products, 'categories' => $productCategories])
+    @include('frontend.themes.default.sections.projects', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'projects' => $projects])
+    @include('frontend.themes.default.sections.testimonials', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'testimonials' => $testimonials])
+    @include('frontend.themes.default.sections.resources', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'resources' => $resources])
+    @include('frontend.themes.default.sections.opportunities', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'opportunities' => $opportunities])
+    @include('frontend.themes.default.sections.faqs', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'faqs' => $faqs])
+    @include('frontend.themes.default.sections.contact', ['copy' => $copy, 'contactAvailable' => $contactAvailable, 'site' => $site, 'contactFormKey' => $contactFormKey, 'appointmentAvailable' => $appointmentAvailable])
+@endsection

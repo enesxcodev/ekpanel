@@ -2,16 +2,232 @@
   "schema_version": 1,
   "baseline_scope": "full_catalog",
   "catalog_path": "D:\\localhost\\ekAgentModules\\catalog.json",
-  "catalog_sha256": "af504ced4fc7282f5addd01dc34457970e0f18892724f3fe95c224087df36219",
+  "catalog_sha256": "933c4a9024f6a590d8806884b2346bbf706e498e64758d408ca4aad38654afc9",
   "baseline_candidate": "store",
   "baseline_result": "Store remains justified by the Products rules explicitly excluding commerce. No other new module candidate met the evidence threshold in the full rules/skills sweep. Appointment/booking is an unpromoted observation pending customer-demand evidence; see README.md.",
   "modules": [
     {
+      "id": "appointments",
+      "name": "Appointments",
+      "version": "0.1.1",
+      "description": "Hizmet randevusu ve uygunluk yönetimi",
+      "catalog_entry_sha256": "adade9a3c8bb58d739a4ed21d49d87aa168e51be31e9ee9ea76d65d90304771e",
+      "inspected_at": "2026-10-28T00:19:23+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "4b19cd473f637fc4b560105cbc4268dadbc5e8e0dbe591c6126571fd5a1681e1"
+        },
+        {
+          "path": "skills/appointments-theme-integration/SKILL.md",
+          "sha256": "d9bf771905261afda7aa132c1c34fe6bc9a03d833ed568df79eb0e719dd6de20"
+        }
+      ],
+      "assessment": "Hizmet randevusu talebi ve yönetimi; tema rule/skill ilk sürümde çalışma takvimi/uygunluk hesabı üretmediğini söylüyor.",
+      "candidates": null
+    },
+    {
+      "id": "blog",
+      "name": "Blog",
+      "version": "0.1.3",
+      "description": "Blog, haber ve duyuru içeriklerinin yönetimi",
+      "catalog_entry_sha256": "139aa97df9028dc3749f032f2e6ddca0b34cf5d1e52406a768342fce98b1731f",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "5d2b8776f662c4cd770862f7cead2de03c2ea0aa4769c3ad03c5ed43d09292fa"
+        },
+        {
+          "path": "skills/blog-theme-integration/SKILL.md",
+          "sha256": "a505bd7e8439921af90334bbe0b69d724ab77983fd6e714c5e1960146a70337f"
+        }
+      ],
+      "assessment": "Blog/news/announcement content; not a commerce gap.",
+      "candidates": null
+    },
+    {
+      "id": "branches",
+      "name": "Branches",
+      "version": "0.1.1",
+      "description": "Şube ve bayi konumlarının yönetimi",
+      "catalog_entry_sha256": "fe044df7cf24a60bf68c6c80691a887293a7d191a20efc09e7cf1778f167d547",
+      "inspected_at": "2026-10-28T00:19:23+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "2af22c322f14e00ede0235aaf907bf650da689946834102813382e7d639f5762"
+        },
+        {
+          "path": "skills/branches-theme-integration/SKILL.md",
+          "sha256": "263e20785fb65ba56a377ba69c3501b164f98863478fe0fcdf554cf491801db5"
+        }
+      ],
+      "assessment": "Şube ve bayi adres/iletişim kayıtları; tamamlandı ve Konum bağımlılığı mevcut.",
+      "candidates": null
+    },
+    {
+      "id": "brand",
+      "name": "Brand",
+      "version": "0.1.2",
+      "description": "Çalışılan markaların yönetimi",
+      "catalog_entry_sha256": "4eb79f2432291f5962a50a73b388832f0266f9d2811977e48b1c845d1829f354",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "401f2815790f8bbeee1dcedb2587781398be645b8cd141e4c061b19f3ec25e6d"
+        },
+        {
+          "path": "skills/brand-theme-integration/SKILL.md",
+          "sha256": "08cdb5e4cf5a030d6d9cff0ebc24d2dfa5c6418817032fc5a836fd2a0e016727"
+        }
+      ],
+      "assessment": "Business partner brands; explicitly distinct from product brands, customers, and projects.",
+      "candidates": null
+    },
+    {
+      "id": "careers",
+      "name": "Careers",
+      "version": "0.1.1",
+      "description": "İş ilanı ve aday başvurusu yönetimi",
+      "catalog_entry_sha256": "01af82602d65df6079abc20c34dd3bc2db48b1fc0713e313db5819efa154288b",
+      "inspected_at": "2026-10-28T00:19:23+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "9418bdb42042e1a0d532da75a6e2a2f2b88e1eb9b590c74e323cd12a0505aaa5"
+        },
+        {
+          "path": "skills/careers-theme-integration/SKILL.md",
+          "sha256": "4829ac33d7fa005e5bc81a6df70c95aef9387c46714a867bf53538cc72037999"
+        }
+      ],
+      "assessment": "İş ilanı ve aday başvurusu; Team çalışan profillerinden ayrı, tamamlanmış modül.",
+      "candidates": null
+    },
+    {
+      "id": "documents",
+      "name": "Documents",
+      "version": "0.1.2",
+      "description": "Belgeler, sertifikalar, indirmeler ve ürün katalogları yönetimi",
+      "catalog_entry_sha256": "11943a3401d5ba5552e9bc0a7c5ce94abce92f811d0f499d82b7eaee26ba8e83",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "af3872ad93de56556dcb5a0c86cc634bdc4eb176f7167aabb5cd318db5b27793"
+        },
+        {
+          "path": "skills/documents-theme-integration/SKILL.md",
+          "sha256": "ff0196e6a186f312bb154aeb6ce2eb98f43ac4efc0a9e95e0175305b248dde52"
+        }
+      ],
+      "assessment": "Downloadable documents, brochures, certificates, and catalog files; product catalogue files are not shoppable products.",
+      "candidates": null
+    },
+    {
+      "id": "events",
+      "name": "Events",
+      "version": "0.1.1",
+      "description": "Etkinlik, kayıt ve katılım yönetimi",
+      "catalog_entry_sha256": "fecea0b4be4b386c8571dbeceeccfa6630bc6f292a6d674fcad291a1363e43de",
+      "inspected_at": "2026-10-28T00:19:23+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "ba7bf94677ef4976c442e0b4453e5fe6332ac85383f557ffd67e3c3baf15fc97"
+        },
+        {
+          "path": "skills/events-theme-integration/SKILL.md",
+          "sha256": "ae31819e6c1a4ecc1b31454da74a922891fd29bae47e22a6c6e96d364b470bf4"
+        }
+      ],
+      "assessment": "Etkinlik ve katılımcı kaydı; Blog haber/duyuru kapsamından ayrı, tamamlanmış modül.",
+      "candidates": null
+    },
+    {
+      "id": "faqs",
+      "name": "Faqs",
+      "version": "0.1.2",
+      "description": "Sıkça sorulan sorular ve kategoriler yönetimi",
+      "catalog_entry_sha256": "c0e46d755513d5ecb5471ef385450e9139109c26c4f9fcece669a0a5ce08e6c2",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "1d79619f297341bae7babf2402a3050cdd2561dd5b96c68cebf54101271166b0"
+        },
+        {
+          "path": "skills/faqs-theme-integration/SKILL.md",
+          "sha256": "fc90f457501f25edc1a44fababba044008212e7c2fbd2a3b34deb0c8d4ba9db4"
+        }
+      ],
+      "assessment": "Question/answer knowledge content.",
+      "candidates": null
+    },
+    {
+      "id": "galeriler",
+      "name": "Galeriler",
+      "version": "0.1.2",
+      "description": "Fotoğraf ve Video Galerisi",
+      "catalog_entry_sha256": "1aca19b81aab07537ee34e1bad95b11eed12190b4d6ad38bf558069f5a003c86",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "ed71ac2bd5a1fbd53d36f41179d52e6ef3864678e32e91ed50450fffd87fb655"
+        },
+        {
+          "path": "skills/galeriler-theme-integration/SKILL.md",
+          "sha256": "a1e7f9a9ab3b336090089333f467075c2fa3cfe0d3e083125bad62c8a8a14a7d"
+        }
+      ],
+      "assessment": "Photo/video gallery content.",
+      "candidates": null
+    },
+    {
+      "id": "konum",
+      "name": "Konum",
+      "version": "0.1.1",
+      "description": "Türkiye il, ilçe, ara bölge, mahalle ve cadde/sokak referans verileri",
+      "catalog_entry_sha256": "c470d27ef2166d78df893e0419b8d18ae7df8173267a41e8b28ecf70a898a12a",
+      "inspected_at": "2026-10-23T00:20:29+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "23da87e8adc366f9f505dd5bffc120d1e842a261e630c83f4bf5a070a517b54e"
+        },
+        {
+          "path": "skills/konum-theme-integration/SKILL.md",
+          "sha256": "e0f4321ff8db3bcde95aeaacc65d7d55b466b47ae47cbe1fe895575598a792ba"
+        }
+      ],
+      "assessment": "Türkiye administrative address reference data; existing dependency for completed Branches candidate, not an unmet module.",
+      "candidates": null
+    },
+    {
+      "id": "logviewer",
+      "name": "LogViewer",
+      "version": "0.1.0",
+      "description": "Laravel uygulama loglarını güvenli ve salt okunur biçimde görüntüleme",
+      "catalog_entry_sha256": "3a6514e36d01eff91d567ba59c84479ac7a6d601f27d261f03b8f2458dc92df5",
+      "inspected_at": "2026-10-28T00:19:23+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "c20ea1f1c31359be3aa074547f46a20b727188e4ef4e392ee4e0502a1d412a0b"
+        }
+      ],
+      "assessment": "Laravel uygulama loglarını salt okunur, yetkili admin ekranında görüntüleme; tamamlanmış modül.",
+      "candidates": null
+    },
+    {
       "id": "menus",
       "name": "Menus",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "description": "Yönetilebilir çok seviyeli ziyaretçi menüleri",
-      "catalog_entry_sha256": "9d546dfe5a9ddff599c0fba041e98d24ba82e48f1a53ad7e9c88885fd3587c7b",
+      "catalog_entry_sha256": "31b54c64abe01855756f88def88064ecdf882b9c97e820391892876ff9b08f21",
       "inspected_at": "2026-10-21T18:48:01+03:00",
       "rules_skills": [
         {
@@ -31,111 +247,11 @@
       "candidates": null
     },
     {
-      "id": "blog",
-      "name": "Blog",
-      "version": "0.1.2",
-      "description": "Blog, haber ve duyuru içeriklerinin yönetimi",
-      "catalog_entry_sha256": "e786726e4297900b7b00c4eea41c9d97db3995d47535eedca1fbe8e7061fff15",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "5d2b8776f662c4cd770862f7cead2de03c2ea0aa4769c3ad03c5ed43d09292fa"
-        },
-        {
-          "path": "skills/blog-theme-integration/SKILL.md",
-          "sha256": "a505bd7e8439921af90334bbe0b69d724ab77983fd6e714c5e1960146a70337f"
-        }
-      ],
-      "assessment": "Blog/news/announcement content; not a commerce gap.",
-      "candidates": null
-    },
-    {
-      "id": "brand",
-      "name": "Brand",
-      "version": "0.1.1",
-      "description": "Çalışılan markaların yönetimi",
-      "catalog_entry_sha256": "76fdd40dd7732d7f09a17e4c00517ad587b63251a2c5cee556c35e364662cef9",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "401f2815790f8bbeee1dcedb2587781398be645b8cd141e4c061b19f3ec25e6d"
-        },
-        {
-          "path": "skills/brand-theme-integration/SKILL.md",
-          "sha256": "08cdb5e4cf5a030d6d9cff0ebc24d2dfa5c6418817032fc5a836fd2a0e016727"
-        }
-      ],
-      "assessment": "Business partner brands; explicitly distinct from product brands, customers, and projects.",
-      "candidates": null
-    },
-    {
-      "id": "documents",
-      "name": "Documents",
-      "version": "0.1.1",
-      "description": "Belgeler, sertifikalar, indirmeler ve ürün katalogları yönetimi",
-      "catalog_entry_sha256": "e9300e44c57139b1e6df6d976f7a7bbfa3cb9d233a24df0dc06eb7e99cf455bf",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "af3872ad93de56556dcb5a0c86cc634bdc4eb176f7167aabb5cd318db5b27793"
-        },
-        {
-          "path": "skills/documents-theme-integration/SKILL.md",
-          "sha256": "ff0196e6a186f312bb154aeb6ce2eb98f43ac4efc0a9e95e0175305b248dde52"
-        }
-      ],
-      "assessment": "Downloadable documents, brochures, certificates, and catalog files; product catalogue files are not shoppable products.",
-      "candidates": null
-    },
-    {
-      "id": "faqs",
-      "name": "Faqs",
-      "version": "0.1.1",
-      "description": "Sıkça sorulan sorular ve kategoriler yönetimi",
-      "catalog_entry_sha256": "377f9c395e2e61e31977744ef5d8d25db6821a6bcc63d074d7e8247ae03fe6c4",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "1d79619f297341bae7babf2402a3050cdd2561dd5b96c68cebf54101271166b0"
-        },
-        {
-          "path": "skills/faqs-theme-integration/SKILL.md",
-          "sha256": "fc90f457501f25edc1a44fababba044008212e7c2fbd2a3b34deb0c8d4ba9db4"
-        }
-      ],
-      "assessment": "Question/answer knowledge content.",
-      "candidates": null
-    },
-    {
-      "id": "galeriler",
-      "name": "Galeriler",
-      "version": "0.1.1",
-      "description": "Fotoğraf ve Video Galerisi",
-      "catalog_entry_sha256": "bbd81fe410b362a535536145e3e3b00ad0e11a1a7f726a618277f4f0f26e6f89",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "ed71ac2bd5a1fbd53d36f41179d52e6ef3864678e32e91ed50450fffd87fb655"
-        },
-        {
-          "path": "skills/galeriler-theme-integration/SKILL.md",
-          "sha256": "a1e7f9a9ab3b336090089333f467075c2fa3cfe0d3e083125bad62c8a8a14a7d"
-        }
-      ],
-      "assessment": "Photo/video gallery content.",
-      "candidates": null
-    },
-    {
       "id": "pages",
       "name": "Pages",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "description": "Sayfa ve sayfa kategorisi yönetimi",
-      "catalog_entry_sha256": "c6f94d28c7ceebcf71bab2586a302335519327f89b281dfdd54d89c5bd9c9b63",
+      "catalog_entry_sha256": "4b8fb15ec9926401a49ba5ee342edb486c060917e254da59fa8a5e22b20cd757",
       "inspected_at": "2026-10-21T18:48:01+03:00",
       "rules_skills": [
         {
@@ -151,131 +267,11 @@
       "candidates": null
     },
     {
-      "id": "projects",
-      "name": "Projects",
-      "version": "0.1.1",
-      "description": "Projeler",
-      "catalog_entry_sha256": "a2379f14ad776a4064c38da7489b41f2dacb3d5bcc6861b4208be70fdf705022",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "69ce72a574fa9e92f432af524b14bdbca814bffe41fff6efcb3109a27977864f"
-        },
-        {
-          "path": "skills/projects-theme-integration/SKILL.md",
-          "sha256": "00a21d77bf2f48aaf44ab6d4b4ef5c0013edb0711d377276f1082eff5e8a6e79"
-        }
-      ],
-      "assessment": "Project portfolio and completed work.",
-      "candidates": null
-    },
-    {
-      "id": "sector",
-      "name": "Sector",
-      "version": "0.1.1",
-      "description": "Sektör yönetimi",
-      "catalog_entry_sha256": "821957b998ca14eef4302876488a87677eef2ce0051e1067ca7d4c9a0eb903b2",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "da07b4eed630a6ba2329771514bbebdc2ae23493e9ccc29cf4182e537f3b7799"
-        },
-        {
-          "path": "skills/sector-theme-integration/SKILL.md",
-          "sha256": "1e887780c15f84d6ec4ede872295129354b68cc70d84cb02fd66718255454e6b"
-        }
-      ],
-      "assessment": "Business sectors served; distinct from services and brands.",
-      "candidates": null
-    },
-    {
-      "id": "services",
-      "name": "Services",
-      "version": "0.1.1",
-      "description": "Hizmet yönetimi",
-      "catalog_entry_sha256": "7bd98bdd7c58257683108b3694d1ef413cd66a863828a512af32be3594f8686f",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "7eb01061896c2624ce7dc6e7e9b39f885551b871fcd98ff1e69af76e630ded57"
-        },
-        {
-          "path": "skills/services-theme-integration/SKILL.md",
-          "sha256": "48c91b244cfd79452d29811785bfe48916cf738597fa200d24fe0cf174e21b41"
-        }
-      ],
-      "assessment": "Service catalogue; not scheduling or booking.",
-      "candidates": null
-    },
-    {
-      "id": "slider",
-      "name": "Slider",
-      "version": "0.1.1",
-      "description": "Slider yönetimi",
-      "catalog_entry_sha256": "7251537c79d7c637a524b0f9e71a6f85f15d3cf0b72b49435e8342f929b25e7b",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "bc9ec0a65f59a820e086dbd3a668d3b356143feddcbaa58a8aec7dd949f3ca26"
-        },
-        {
-          "path": "skills/slider-theme-integration/SKILL.md",
-          "sha256": "23e50baa24b83b824c9ab6c55401c77c21fdd3e851443931564bbd01f1b999e3"
-        }
-      ],
-      "assessment": "Hero/banner slides; not commerce.",
-      "candidates": null
-    },
-    {
-      "id": "team",
-      "name": "Team",
-      "version": "0.1.1",
-      "description": "Ekip üyeleri yönetimi",
-      "catalog_entry_sha256": "32e30f04491812767fd4db2664426a2aec118cc7e5b8970f75bb777223075e70",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "91424a60c7c343c4ef029fd1e04cd52945921143f2bc63f769572a0415bafbee"
-        },
-        {
-          "path": "skills/team-theme-integration/SKILL.md",
-          "sha256": "e5d929441faadb8f5d9f044afda6348b621c951a7ce625f9d4cb2c9091c336d2"
-        }
-      ],
-      "assessment": "Team member profiles.",
-      "candidates": null
-    },
-    {
-      "id": "testimonials",
-      "name": "Testimonials",
-      "version": "0.1.1",
-      "description": "Müşteri yorumları ve başarı hikâyeleri yönetimi",
-      "catalog_entry_sha256": "4b0bfc060e485174af1a1eb82f5de13b5bb0b0f9f46040b61420c99f6476d627",
-      "inspected_at": "2026-10-21T18:48:01+03:00",
-      "rules_skills": [
-        {
-          "path": ".ai/rules/tema-entegrasyonu.md",
-          "sha256": "26b8addbe4e2cf4cb4879d63fddd4ca41acf7dc86af384dbea4f3bd68817b34e"
-        },
-        {
-          "path": "skills/testimonials-theme-integration/SKILL.md",
-          "sha256": "f45b81e6e53842b2f6a11345c24a081551b2d6380ba13001d9be53909b09cd51"
-        }
-      ],
-      "assessment": "Customer reviews with publication approval.",
-      "candidates": null
-    },
-    {
       "id": "popup",
       "name": "Popup",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Pop-up yönetimi",
-      "catalog_entry_sha256": "6204f757ec7bbd6aa060966ab2dedc33e6d25849ae1f1845c4e2c8c37aaca4e7",
+      "catalog_entry_sha256": "4220d8213a3aeed33002a6e177ee8c1660d1df08a450c8bbadea43e25ec300fa",
       "inspected_at": "2026-10-21T18:48:01+03:00",
       "rules_skills": [
         {
@@ -293,9 +289,9 @@
     {
       "id": "products",
       "name": "Products",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Ürün yönetimi",
-      "catalog_entry_sha256": "ab43c142342b8e7d40bd1ba65e4c4ed05274c4070c695069fe857df2cdf9d46e",
+      "catalog_entry_sha256": "1572ee5eb7ad9509a287c4ef6c666d997f629698b0893997096a6e6cace71ccb",
       "inspected_at": "2026-10-21T18:48:01+03:00",
       "rules_skills": [
         {
@@ -311,11 +307,151 @@
       "candidates": "store"
     },
     {
+      "id": "projects",
+      "name": "Projects",
+      "version": "0.1.2",
+      "description": "Projeler",
+      "catalog_entry_sha256": "a82234cce9b73a369c1bc743af0d3e6d132d16952e85d3bfd34cd3ca78303351",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "69ce72a574fa9e92f432af524b14bdbca814bffe41fff6efcb3109a27977864f"
+        },
+        {
+          "path": "skills/projects-theme-integration/SKILL.md",
+          "sha256": "00a21d77bf2f48aaf44ab6d4b4ef5c0013edb0711d377276f1082eff5e8a6e79"
+        }
+      ],
+      "assessment": "Project portfolio and completed work.",
+      "candidates": null
+    },
+    {
+      "id": "sector",
+      "name": "Sector",
+      "version": "0.1.2",
+      "description": "Sektör yönetimi",
+      "catalog_entry_sha256": "e290bcb1140f8cd602f305b97fefa5c12962cc72c8235bba52634faa9a346e77",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "da07b4eed630a6ba2329771514bbebdc2ae23493e9ccc29cf4182e537f3b7799"
+        },
+        {
+          "path": "skills/sector-theme-integration/SKILL.md",
+          "sha256": "1e887780c15f84d6ec4ede872295129354b68cc70d84cb02fd66718255454e6b"
+        }
+      ],
+      "assessment": "Business sectors served; distinct from services and brands.",
+      "candidates": null
+    },
+    {
+      "id": "services",
+      "name": "Services",
+      "version": "0.1.2",
+      "description": "Hizmet yönetimi",
+      "catalog_entry_sha256": "e14e36e75c93ae623d91e3f96378132398a745ffc42a796b80d4d9d03da30259",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "7eb01061896c2624ce7dc6e7e9b39f885551b871fcd98ff1e69af76e630ded57"
+        },
+        {
+          "path": "skills/services-theme-integration/SKILL.md",
+          "sha256": "48c91b244cfd79452d29811785bfe48916cf738597fa200d24fe0cf174e21b41"
+        }
+      ],
+      "assessment": "Service catalogue; not scheduling or booking.",
+      "candidates": null
+    },
+    {
+      "id": "slider",
+      "name": "Slider",
+      "version": "0.1.2",
+      "description": "Slider yönetimi",
+      "catalog_entry_sha256": "83bab0408a37af074d63a2640019d8d525da9defb203e6fe233ee12245099a2f",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "bc9ec0a65f59a820e086dbd3a668d3b356143feddcbaa58a8aec7dd949f3ca26"
+        },
+        {
+          "path": "skills/slider-theme-integration/SKILL.md",
+          "sha256": "23e50baa24b83b824c9ab6c55401c77c21fdd3e851443931564bbd01f1b999e3"
+        }
+      ],
+      "assessment": "Hero/banner slides; not commerce.",
+      "candidates": null
+    },
+    {
+      "id": "store",
+      "name": "Store",
+      "version": "0.1.2",
+      "description": "Satılabilir ürün, stok ve yerel sipariş yönetimi",
+      "catalog_entry_sha256": "9abaae217863347787af4633ef32b053f2acef6f0fc6291edde454c5ba7c9f0f",
+      "inspected_at": "2026-10-23T00:20:29+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "5f0e3562dd83066cebdf08541926dec0eefc53c1e485e9468386210d71477baa"
+        },
+        {
+          "path": "skills/store-theme-integration/SKILL.md",
+          "sha256": "3d257143c2c3502a100337f53c61ee6199f87a0c5249cc288e7a02ed43d942aa"
+        }
+      ],
+      "assessment": "Commerce and local order management; previously completed candidate, do not reopen.",
+      "candidates": null
+    },
+    {
+      "id": "team",
+      "name": "Team",
+      "version": "0.1.2",
+      "description": "Ekip üyeleri yönetimi",
+      "catalog_entry_sha256": "4061362b5ae7e927af205447b1db94336c99615191114944c9057396c7d2eb59",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "91424a60c7c343c4ef029fd1e04cd52945921143f2bc63f769572a0415bafbee"
+        },
+        {
+          "path": "skills/team-theme-integration/SKILL.md",
+          "sha256": "e5d929441faadb8f5d9f044afda6348b621c951a7ce625f9d4cb2c9091c336d2"
+        }
+      ],
+      "assessment": "Team member profiles.",
+      "candidates": null
+    },
+    {
+      "id": "testimonials",
+      "name": "Testimonials",
+      "version": "0.1.2",
+      "description": "Müşteri yorumları ve başarı hikâyeleri yönetimi",
+      "catalog_entry_sha256": "ab29c30b9696c237d332877fd0460c2923ed346c73d5c70c12aff14257780a19",
+      "inspected_at": "2026-10-21T18:48:01+03:00",
+      "rules_skills": [
+        {
+          "path": ".ai/rules/tema-entegrasyonu.md",
+          "sha256": "26b8addbe4e2cf4cb4879d63fddd4ca41acf7dc86af384dbea4f3bd68817b34e"
+        },
+        {
+          "path": "skills/testimonials-theme-integration/SKILL.md",
+          "sha256": "f45b81e6e53842b2f6a11345c24a081551b2d6380ba13001d9be53909b09cd51"
+        }
+      ],
+      "assessment": "Customer reviews with publication approval.",
+      "candidates": null
+    },
+    {
       "id": "users",
       "name": "Users",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Web kullanıcıları ve kimlik doğrulama altyapısı",
-      "catalog_entry_sha256": "64df0286ab3774a733c4794a2d4bdde9580d85cb67e1ef8ba7801322a520f1c5",
+      "catalog_entry_sha256": "43f5a8884d4eccebf199a973de59c220c1a81149c13dded17c941a1c02b9a06d",
       "inspected_at": "2026-10-21T18:48:01+03:00",
       "rules_skills": [
         {
@@ -329,33 +465,11 @@
       ],
       "assessment": "Web login, verification, password reset, and admin user management; no separate account module is justified. Store should decide optional account integration or guest checkout.",
       "candidates": null
-    },
-    {
-      "id": "konum",
-      "name": "Konum",
-      "version": "0.1.0",
-      "description": "Türkiye il, ilçe, ara bölge, mahalle ve cadde/sokak referans verileri",
-      "catalog_entry_sha256": "4230cd20d8272b4ac7fbe88de439ec22afb65cc91afa4cb316b00d24e8ad248d",
-      "inspected_at": "2026-10-23T00:20:29+03:00",
-      "rules_skills": [],
-      "assessment": "Türkiye administrative address reference data; existing dependency for completed Branches candidate, not an unmet module.",
-      "candidates": null
-    },
-    {
-      "id": "store",
-      "name": "Store",
-      "version": "0.1.0",
-      "description": "Satılabilir ürün, stok ve yerel sipariş yönetimi",
-      "catalog_entry_sha256": "bfaba6453186aed8f275aeb8d062f0c9abc0048249eb41c23cba4b9094ee87e5",
-      "inspected_at": "2026-10-23T00:20:29+03:00",
-      "rules_skills": [],
-      "assessment": "Commerce and local order management; previously completed candidate, do not reopen.",
-      "candidates": null
     }
   ],
-  "last_checked_at": "2026-10-24T00:22:00+03:00",
-  "last_discovery_completion_at": "2026-10-24T00:22:00+03:00",
-  "last_discovery_task_id": "TASK-20261024-0015-automated-discovery",
+  "last_checked_at": "2026-10-28T00:21:19+03:00",
+  "last_discovery_completion_at": "2026-10-28T00:21:19+03:00",
+  "last_discovery_task_id": "TASK-20261028-0015-automated-discovery-redirects-plan",
   "baseline_completed_at": "2026-10-21T18:50:05+03:00",
   "candidate_inputs": [
     {
@@ -363,9 +477,9 @@
       "assessed_interpretation": "Likely KVKK/privacy settings; spelling ambiguity retained",
       "confidence": "medium for boundary; low for standalone module need",
       "status": "awaiting_additional_evidence",
-      "assessment": "2026-10-24 yeniden değerlendirildi: kayıtlı Settings/Pages kapsamı genel gizlilik ayarları ve politika metnini karşılayabilir. Ayrı operasyonel rıza/çerez, veri sahibi veya saklama akışı ihtiyacı için yeni kanıt yok; ek kanıt bekliyor.",
+      "assessment": "2026-10-28 yeniden değerlendirildi: Settings genel ayarları, Pages gizlilik politikasını karşılayabilir. Operasyonel çerez/rıza, veri sahibi başvurusu veya saklama iş akışına dair yeni kanıt yok; ayrı iş ihtiyacı ek kanıt bekliyor.",
       "id": "privacy_settings",
-      "evaluated_at": "2026-10-24T00:22:00+03:00"
+      "evaluated_at": "2026-10-28T00:21:19+03:00"
     },
     {
       "id": "log_viewer",
@@ -374,17 +488,32 @@
       "confidence": "high for user need and standalone operational responsibility; medium on production access scope",
       "status": "implementation_completed_local_source_staged",
       "assessment": "Direct user request validated; standalone read-only admin module implemented. Super-admin-only access, storage/logs file tree, bounded tail and manual refresh. Source staged and SHA-256 verified at D:\\localhost\\ekAgentModules\\LogViewer. Release/push/catalog publication not requested."
+    },
+    {
+      "id": "url_redirects_user_scope",
+      "source_wording": "Elle yönetilen aynı site içi eski yol → yeni yol kalıcı 301 yönlendirmeleri; modül önekli route çakışması yok, Pages catch-all/request hook sırası uygulamada kontrol edilmeli.",
+      "assessed_interpretation": "Opsiyonel Redirects modülü; yalnız aynı host içinde path-to-path manuel 301 kuralları.",
+      "confidence": "medium-high for scoped user request; inferred broken-link/SEO value",
+      "status": "validated_candidate_plan_ready_implementation_blocked",
+      "assessment": "2026-10-28: Kullanıcının kapsam açıklaması kayıtlı bellekte yer alıyor. Pages/Blog/Products/Store rolleri eski-yeni path kuralı sahipliğini göstermiyor. Plan ve form konsepti hazır; uygulama modeli gpt-5.6-terra medium bu oturumda seçilemediği için uygulama başlamadı.",
+      "evaluated_at": "2026-10-28T00:21:19+03:00"
     }
   ],
   "recommendations": [
     {
       "id": "appointments",
       "basis": "Services is service catalogue; appointment workflow is an inferred need for service businesses, not verified customer demand.",
-      "status": "planning_preview_ready_scope_decisions_pending",
+      "status": "scope_decisions_pending_not_selected",
       "confidence": "medium",
       "name": "Randevu",
-      "last_assessed_at": "2026-10-24T00:22:00+03:00",
-      "assessment": "Tekrar değerlendirildi 2026-10-24: Services randevu kataloğu değil; kullanıcı ihtiyacı çıkarımsal ve akış kapsam kararları açık olduğundan uygulama adayı değil."
+      "last_assessed_at": "2026-10-28T00:19:23+03:00",
+      "assessment": "Uygunluk/çakışma takvimi kullanıcı değerini artırabilir; Appointments skill ilk sürümün takvim üretmediğini açıkça belirtiyor. Kapsama alınacak kaynaklar, çalışma saatleri, kapasite, zaman dilimi ve iptal/değişiklik kuralları karara bağlanmadan uygulama planı seçilmedi.",
+      "classification": "existing_module_expansion",
+      "open_questions": [
+        "Hizmet/çalışan/şube takvimlerinden hangileri gerekir?",
+        "Slot süresi, kapasite ve zaman dilimi kuralı nedir?",
+        "Randevu durumları zamanları bloke eder mi?"
+      ]
     },
     {
       "id": "branches",
@@ -399,7 +528,8 @@
       "implementation_task_id": "TASK-20261022-0919-branches-implementation",
       "source_staging": "D:\\localhost\\ekAgentModules\\Branches",
       "release_status": "not_requested",
-      "dependency_catalog_prerequisite": "Konum 0.1.0 entry is present in local catalog.json; release asset and hash not remotely verified during Branches implementation"
+      "dependency_catalog_prerequisite": "Konum 0.1.0 entry is present in local catalog.json; release asset and hash not remotely verified during Branches implementation",
+      "last_assessed_at": "2026-10-28T00:19:23+03:00"
     },
     {
       "basis": "Team rules describe current staff profiles; job posting and applicant workflow not documented. Forms boundary unresolved.",
@@ -407,7 +537,8 @@
       "status": "superseded_by_user_selection",
       "name": "Kariyer ve İş İlanları",
       "id": "job_listings",
-      "superseded_by": "branches"
+      "superseded_by": "branches",
+      "last_assessed_at": "2026-10-28T00:19:23+03:00"
     },
     {
       "basis": "Blog covers categorized news/announcements and Services a service catalogue; event time/place/registration workflow not documented.",
@@ -415,7 +546,8 @@
       "status": "superseded_by_user_selection",
       "name": "Etkinlikler",
       "id": "events",
-      "superseded_by": "branches"
+      "superseded_by": "branches",
+      "last_assessed_at": "2026-10-28T00:19:23+03:00"
     },
     {
       "id": "log_viewer",
@@ -427,22 +559,23 @@
       "task_id": "TASK-20261023-0028-log-monitoring-plan",
       "scope": "Read-only super-admin viewer; last 200 lines by default; cap 500; no delete/download/external logging.",
       "source_staging": "D:\\localhost\\ekAgentModules\\LogViewer",
-      "implementation_task_id": "TASK-20261023-0130-logviewer-implementation"
+      "implementation_task_id": "TASK-20261023-0130-logviewer-implementation",
+      "last_assessed_at": "2026-10-28T00:19:23+03:00"
     },
     {
       "id": "url_redirects",
       "name": "URL Yönlendirme Yönetimi",
-      "classification": "possible_independent_module",
+      "classification": "optional_independent_module",
       "basis": "Pages, Blog, Products ve Store içeriklerinde URL/slug ve metadata rolleri var; katalog rol haritasında eski URL-yeni URL yönlendirmesi kapsamı görünmüyor. Site adresi değişimlerinden doğan kırık bağlantı/SEO kaybı CMS kullanımından çıkarımdır, doğrudan kullanıcı talebi değil.",
-      "confidence": "medium-low",
-      "status": "scope_validation_needed",
+      "confidence": "medium-high for user-scoped behavior; inferred SEO value",
+      "status": "plan_ready_implementation_blocked_model_unavailable",
       "open_questions": [
-        "Slug değişince otomatik 301 kaydı mı, yoksa yalnız elle girilen yönlendirmeler mi?",
-        "Yönetim hangi içerik türlerini ve wildcard/path davranışını kapsamalı?",
-        "Mevcut route fallback noktasına entegre olmak için çekirdek değişikliği kabul ediliyor mu?"
+        "Uygulama öncesi Pages catch-all/request-hook sırası koddan doğrulansın."
       ],
-      "last_assessed_at": "2026-10-24T00:22:00+03:00",
-      "assessment": "Tekrar değerlendirildi 2026-10-24: olası kırık bağlantı ihtiyacı çıkarım; otomatik/manuel kapsam, içerik türleri ve route entegrasyonu açık. Yeni doğrulanmış kullanıcı kanıtı yok; planlama eşiğini geçmedi."
+      "last_assessed_at": "2026-10-28T00:19:23+03:00",
+      "assessment": "Kullanıcı manuel aynı-host path 301 kapsamını açıkladı; path önekleri route namespace collision riskini düşürür, Pages catch-all sırası uygulamada doğrulanmalı. Ayrıntılı plan ve form konsepti hazır; uygulama modeli yönlendirilemedi.",
+      "plan_path": "Modules/Plans/Redirects/Redirects - Yeni.md",
+      "design_path": "Modules/Plans/Redirects/Redirects-Form-Konsept.png"
     },
     {
       "id": "admin_audit_trail",
@@ -450,14 +583,14 @@
       "classification": "core_capability_or_independent_module_unresolved",
       "basis": "CMS içerik ve ayarları birden fazla modülde yönetiliyor; kullanıcıların kim, neyi, ne zaman değiştirdiğini incelemesi olası bir yönetişim ihtiyacıdır. LogViewer yalnız uygulama log dosyalarını gösterir, kayıt değişikliklerinin denetim geçmişi değildir. Bu ihtiyaç CMS işletiminden çıkarımdır; talep kanıtı yok.",
       "confidence": "low",
-      "status": "boundary_and_need_validation",
+      "status": "additional_evidence_and_boundary_pending",
       "open_questions": [
         "Hangi kullanıcı eylemleri ve eski/yeni değerler kaydedilmeli?",
         "Retention, hassas alan redaksiyonu ve erişim yetkisi ne olmalı?",
         "Ortak çekirdek davranışı mı, opsiyonel bağımsız modül mü isteniyor?"
       ],
-      "last_assessed_at": "2026-10-24T00:22:00+03:00",
-      "assessment": "Tekrar değerlendirildi 2026-10-24: LogViewer uygulama loglarını kapsar; değişiklik geçmişi farklı sorumluluk olabilir, ancak kullanıcı ihtiyacı ve çekirdek/modül, redaksiyon/saklama kararları kanıtsız."
+      "last_assessed_at": "2026-10-28T00:19:23+03:00",
+      "assessment": "LogViewer runtime loglarını kapsar; değişiklik geçmişi ayrı olabilir. Bugün de kullanıcı ihtiyacı, çekirdek/modül sınırı, redaksiyon ve saklama kararı için yeni kanıt yok."
     }
   ],
   "last_planning_task_id": "TASK-20261022-0832-branches-plan"
