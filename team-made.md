@@ -1,2 +1,2 @@
 değişklik
-başlık örnek metin
+başlık örnek metin buraya frontendi ekkledim
