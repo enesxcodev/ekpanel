@@ -14,11 +14,19 @@ export default defineConfig({
                 'resources/css/admin-dark.css',
                 'resources/css/admin-login.css',
                 'resources/js/panel.js',
+                'resources/css/frontend/default/app.css',
+                'resources/js/frontend/default/app.js',
             ],
             refresh: true,
             fonts: [
                 bunny('Instrument Sans', {
                     weights: [400, 500, 600],
+                }),
+                bunny('Manrope', {
+                    weights: [400, 500, 600, 700, 800],
+                    subsets: ['latin', 'latin-ext'],
+                    preload: [{ weight: 400 }, { weight: 700 }],
+                    optimizedFallbacks: false,
                 }),
             ],
         }),

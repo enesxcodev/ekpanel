@@ -128,11 +128,12 @@ test('category menu is visible only with both menu and view permissions', functi
     $admin->givePermissionTo($permissions);
 
     $response = $this->actingAs($admin, 'admin')->get(route('admin.dashboard'))->assertOk();
+    $categoryLink = 'href="'.route('admin.services.categories.index').'"';
 
     if ($visible) {
-        $response->assertSee('Hizmetler')->assertSee('Kategoriler');
+        $response->assertSee($categoryLink, false)->assertSee('Kategoriler');
     } else {
-        $response->assertDontSee('Hizmetler')->assertDontSee('Kategoriler');
+        $response->assertDontSee($categoryLink, false);
     }
 })->with([
     'none' => [[], false],

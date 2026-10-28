@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Admin\Settings;
 
+use App\Enums\Fields\FieldValueType as SettingValueType;
 use App\Enums\Settings\SettingInputType;
-use App\Enums\Settings\SettingValueType;
 use App\Models\Settings\SettingDefinition;
 use App\Services\Settings\SettingRuleBuilder;
 use Illuminate\Foundation\Http\FormRequest;

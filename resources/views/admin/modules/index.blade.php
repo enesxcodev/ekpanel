@@ -52,6 +52,7 @@
                         <p class="mb-0">{{ $module->getDescription() }}</p>
                     </div>
                     <div class="card-footer d-flex gap-2 flex-wrap">
+                        <a href="{{ route('admin.modules.features.show', $module->getName()) }}" class="btn btn-sm btn-primary">Detay</a>
                         <form method="POST" action="{{ route($module->isEnabled() ? 'admin.modules.disable' : 'admin.modules.enable', $module->getName()) }}">
                             @csrf
                             <button class="btn btn-sm">{{ $module->isEnabled() ? 'Devre dışı bırak' : 'Etkinleştir' }}</button>

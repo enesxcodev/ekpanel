@@ -5,16 +5,60 @@ namespace App\Services\Fields;
 use App\Enums\Fields\FieldInputType;
 use App\Enums\Fields\FieldValueType;
 use App\Services\Media\MediaFileInspector;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use JsonException;
 use Nwidart\Modules\Facades\Module;
 use RuntimeException;
+use Throwable;
 
 class ModuleFeatures
 {
     /** @var array<string, array<string, mixed>> */
     private array $documents = [];
+
+    /** @return array{schema_version: int, forms: array<string, mixed>} */
+    public function document(string $moduleName): array
+    {
+        $path = Module::findOrFail($moduleName)->getPath().'/features.json';
+
+        return is_file($path) ? $this->read($path) : ['schema_version' => 1, 'forms' => []];
+    }
+
+    public function revision(string $moduleName): string
+    {
+        $path = Module::findOrFail($moduleName)->getPath().'/features.json';
+
+        return hash('sha256', is_file($path) ? File::get($path) : '');
+    }
+
+    /** @param array<string, mixed> $document */
+    public function save(string $moduleName, array $document, string $revision): void
+    {
+        $path = Module::findOrFail($moduleName)->getPath().'/features.json';
+        $this->validateDocument($document);
+
+        Cache::lock('module-features:'.hash('sha256', $path), 10)->block(5, function () use ($moduleName, $document, $revision, $path): void {
+            if (! hash_equals($this->revision($moduleName), $revision)) {
+                throw ValidationException::withMessages(['revision' => 'Alanlar başka bir işlemde değiştirildi. Sayfayı yenileyip tekrar deneyin.']);
+            }
+            if (is_link($path) || ! is_writable(dirname($path)) || (is_file($path) && ! is_writable($path))) {
+                throw ValidationException::withMessages(['document' => 'Modülün alan tanımları dosyasına yazılamıyor.']);
+            }
+            $document['forms'] = (object) $document['forms'];
+            try {
+                File::replace($path, json_encode($document, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).PHP_EOL);
+            } catch (Throwable $exception) {
+                report($exception);
+
+                throw ValidationException::withMessages(['document' => 'Alan tanımları kaydedilemedi. Dosya yazma izinlerini kontrol edip tekrar deneyin.']);
+            }
+            unset($this->documents[$path]);
+        });
+    }
 
     /** @return array{label: string, fields: array<string, FieldDefinition>} */
     public function form(string $moduleName, string $form): array
@@ -47,6 +91,12 @@ class ModuleFeatures
             throw new RuntimeException('Geçersiz alan tanımı: '.$path, previous: $exception);
         }
 
+        return $this->validateDocument($document, $path);
+    }
+
+    /** @return array<string, mixed> */
+    public function validateDocument(mixed $document, string $path = 'features.json'): array
+    {
         $validator = Validator::make(['document' => $document], [
             'document' => ['required', 'array:schema_version,forms'],
             'document.schema_version' => ['required', 'integer', Rule::in([1])],

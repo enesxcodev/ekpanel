@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin\Admin;
+use App\Models\Media\MediaFile;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldFiles;
 use App\Services\Fields\ModuleFeatures;
@@ -106,20 +107,22 @@ test('feature images are uploaded kept replaced and removed through the same sli
     registerFeatureTestModules(['Slider' => featureTestDocument([
         ['key' => 'mobile_image', 'label' => 'Mobil görsel', 'input_type' => 'image', 'value_type' => 'file', 'validation' => ['extensions' => ['png'], 'max_size' => 1000]],
     ])]);
-    $this->actingAs($admin, 'admin')->post(route('admin.slider.store'), ['title' => 'Valid', 'image' => UploadedFile::fake()->image('main.png'), 'extra_fields' => ['mobile_image' => UploadedFile::fake()->image('mobile.png')]])
+    $imagePath = UploadedFile::fake()->image('main.png')->store('_media', 'public');
+    $image = MediaFile::factory()->create(['path' => $imagePath, 'kind' => 'image', 'mime_type' => 'image/png', 'extension' => 'png', 'size' => Storage::disk('public')->size($imagePath)]);
+    $this->actingAs($admin, 'admin')->post(route('admin.slider.store'), ['title' => 'Valid', 'image_media_id' => $image->id, 'extra_fields' => ['mobile_image' => UploadedFile::fake()->image('mobile.png')]])
         ->assertSessionHasNoErrors();
     $slider = Slider::query()->sole();
     $first = $slider->extra_fields['mobile_image'];
     Storage::disk('public')->assertExists([$first, $slider->image]);
     $this->get(route('admin.slider.edit', $slider))->assertOk()->assertSee('name="extra_fields[mobile_image]"', false)->assertSee('name="remove_features[mobile_image]"', false);
     $url = route('admin.slider.update', $slider);
-    $this->put($url, ['title' => 'Keep'])->assertSessionHasNoErrors();
+    $this->put($url, ['title' => 'Keep', 'image_media_id' => $image->id])->assertSessionHasNoErrors();
     expect($slider->fresh()->extra_fields['mobile_image'])->toBe($first);
-    $this->put($url, ['title' => 'Replace', 'extra_fields' => ['mobile_image' => UploadedFile::fake()->image('replacement.png')]])->assertSessionHasNoErrors();
+    $this->put($url, ['title' => 'Replace', 'image_media_id' => $image->id, 'extra_fields' => ['mobile_image' => UploadedFile::fake()->image('replacement.png')]])->assertSessionHasNoErrors();
     $second = $slider->fresh()->extra_fields['mobile_image'];
     Storage::disk('public')->assertMissing($first);
     Storage::disk('public')->assertExists($second);
-    $this->put($url, ['title' => 'Remove', 'remove_features' => ['mobile_image' => '1']])->assertSessionHasNoErrors();
+    $this->put($url, ['title' => 'Remove', 'image_media_id' => $image->id, 'remove_features' => ['mobile_image' => '1']])->assertSessionHasNoErrors();
     expect($slider->fresh()->extra_fields['mobile_image'])->toBeNull();
     Storage::disk('public')->assertMissing($second);
     Storage::disk('public')->assertExists($slider->image);

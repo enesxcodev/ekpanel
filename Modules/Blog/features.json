@@ -1,7 +1,26 @@
 {
     "schema_version": 1,
     "forms": {
-        "content": { "label": "Ek içerik alanları", "fields": [] },
-        "category": { "label": "Ek içerik kategorisi alanları", "fields": [] }
+        "content": {
+            "label": "Ek içerik alanları",
+            "fields": [
+                {
+                    "key": "yazarin_ozeti",
+                    "label": "Yazarın Özeti",
+                    "input_type": "textarea",
+                    "value_type": "string",
+                    "options": [],
+                    "validation": [],
+                    "attributes": {
+                        "placeholder": "özetiniizi giriniz"
+                    },
+                    "description": "yazarım genel özet girer"
+                }
+            ]
+        },
+        "category": {
+            "label": "Ek içerik kategorisi alanları",
+            "fields": []
+        }
     }
 }

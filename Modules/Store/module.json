@@ -1,7 +1,7 @@
 {
     "name": "Store",
     "alias": "store",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Satılabilir ürün, stok ve yerel sipariş yönetimi",
     "keywords": [],
     "priority": 0,

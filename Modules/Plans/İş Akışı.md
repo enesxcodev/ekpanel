@@ -6,9 +6,9 @@ Bu belge modül adaylarını keşiften uygulama tamamlanmasına kadar izlenecek 
 
 ### Her çalışmanın keşif istemi ve değerlendirmesi
 
-Keşif modeli her çalışmada önce şu istemi yanıtlar: **Amaç: Site Genel ayarlarında veya modüllerin içindeki skill ve rule'ları inceleyerek bu panel için başka 2 modül önerisi keşfet. Kısıtlama: Kodu ancak skill ve rule açıklamaları ilgili belirsizliği çözmeye yetmezse incele. İstenenler: Bu CMS'i geliştirmek için başka hangi modülleri önerirsin? Çıktı: 2 tane gerekçeli öneri sun; sayı tamamlamak için öneri uydurma.**
+Keşif modeli her çalışmada önce şu soruyu yanıtlar: **“Bu CMS'yi sen geliştiriyor olsaydın mevcut özelliklerde neyi iyileştirir veya genişletirdin; ayrıca hangi yeni bağımsız modül kullanıcıya anlamlı değer katardı ve neden?”** En fazla iki güçlü iş kalemi seç; iki öneri bulmak zorunlu değildir.
 
-Ardından çıkan iki öneriyi mevcut modüllerin rolleriyle karşılaştırarak değerlendir: yeni bağımsız modül mü, mevcut modül genişletmesi mi, harici entegrasyon mu? Öneri üretmek için yönergelerde işlevin açıkça kapsam dışı yazılmasını veya önceden kanıtlanmış müşteri talebini zorunlu tutma; CMS amacı ve mevcut modül rollerinden makul ihtiyacı çıkarabilirsin. Kanıtı, çıkarımı, güven düzeyini ve açık kapsam sorularını belirt. Daha az gerekçeli öneri bulunursa nedenini raporla. Öneri ile uygulamaya uygun aday aynı şey değildir: kapsamı belirsiz öneriyi görünür tut, uygulamaya geçiş için gereken bilgiyi kaydet. Aşağıdaki aday doğrulama kuralları öneri üretimini engelleyen bir ön filtre olarak uygulanmaz.
+Her fikri bug/kalite düzeltmesi, mevcut modül genişletmesi, ortak çekirdek iyileştirmesi, yeni bağımsız modül veya harici entegrasyon olarak sınıflandır. Kullanıcı değerini, doğrudan kanıtı, model çıkarımını, mevcut kapsam/sahiplik sınırını, güven düzeyini ve açık soruları belirt. Makul ürün ihtiyacı için açık kapsam dışı kuralı veya önceden kanıtlanmış müşteri talebi şartı koyma; çıkarımı doğrulanmış talep gibi sunma. Belirsiz fikri sessizce eleme; karar/kanıt bekleyen girdi olarak kaydet. Fikir veya aday bulunmayan gün de değerlendirilen alanları ve eşiği geçmeme nedenini raporla; iş uydurma.
 
 ### 1. Katalog envanteri ve kural keşfi — 6 Luna, low
 
@@ -19,13 +19,13 @@ Her keşifte ana soru şudur: **“Bu CMS'nin amacı ve hedef kullanıcıların�
 1. Önce `D:\localhost\ekAgentModules\catalog.json` dosyasını incele ve mevcut modül kayıtlarını/işlev alanlarını çıkar.
 2. Katalogda görünür boşlukla ilgili modüllerin `.ai/rules/` ve `skills/` dosyalarını oku. Bu yönergeler modülün kasıtlı sınırlarını ve benzer kapsamı gösterir.
 3. Belirsizlik sürerse yalnız o belirsizliği giderecek ilgili koda bak. Geniş kod taraması yapma.
-4. CMS'nin amacı ve beklenen kullanıcı işleri için mevcut modüllerin dışında kalan bağımsız modül ihtiyaçlarını ara. Katalog ve ilgili yönergelerle mevcut kapsamı doğrula; en önemli, kanıtı yeterli tüm adayları seç. Store seed'ini kanıtla doğrula/ele; e-ticaret keşif filtresi değildir. E-ticaretle ilişkili birden çok işlev aday çıkarsa tek modülde gruplandır. Her adaya kısa, somut gerekçe yaz; kısa listeyi `README.md` içinde güncelle.
+4. CMS amacı ve kullanıcı işleri açısından mevcut modüllerde iyileştirme/genişletme ile yeni bağımsız modül ihtiyaçlarını birlikte ara. Store seed'ini kanıtla doğrula/ele; e-ticaret keşif filtresi değildir. E-ticaretle ilişkili işlevleri gerektiğinde tek modülde grupla. En fazla iki güçlü iş kalemini kısa gerekçeyle `README.md` içinde güncelle.
 
 Kullanıcının sohbetlerde belirttiği ihtiyaçlar da keşif girdisidir. Yeni bir öneri geldiğinde `README.md` içindeki **Bekleyen değerlendirme girdileri** listesine kaydet; öneriyi tek başına adayın doğruluğuna dair kanıt sayma. Sonraki tarama, katalog ve yönerge imzaları değişmese bile bu girdileri modüllerin kayıtlı kapsam değerlendirmeleriyle karşılaştırır. Yalnız ilgili alanı belirsiz bırakan rules/skills dosyalarını ve gerekirse ilgili kodu incele. Her girdiyi doğrulanmış aday, mevcut modülde karşılanıyor veya ek kanıt bekliyor durumlarından birine gerekçeyle geçir; sessizce silme ya da atlama.
 
 ### 2. Ayrıntılı uygulanabilir plan — 6.1 SOL, low
 
-Seçilen her yeni aday için `Modules/Plans/<Aday>/` klasörü oluştur ve içinde `<Aday> - Yeni.md` planı aç. Aday tamamlandığında planı `<Aday> - Tamamlandı.md` olarak yeniden adlandır. İlgili tasarım/çıktı görsellerini de aynı klasörde tut ve plan içinden bağla. Plan, 5.6 TERA medium uygulayıcının doğrudan takip edebileceği görev sırası ve tamamlanma koşulları içersin. Şunları kapsasın:
+Seçilen her modül veya mevcut özellik geliştirmesi için `Modules/Plans/<İş Kalemi>/` klasörü oluştur ve `<İş Kalemi> - Yeni.md` planını yaz. İş tamamlandığında `<İş Kalemi> - Tamamlandı.md` olarak yeniden adlandır. İlgili tasarım görselini yalnız UI değişikliği gerektiren işlerde üret ve aynı klasörde tut. Plan, uygulayıcının doğrudan takip edebileceği görev sırası ve tamamlanma koşulları içersin. Şunları kapsasın:
 
 - Aday gerekçesi, iş sınırı ve mevcut modüllerle ilişkisi; varsa sınır/karar soruları.
 - CMS modül kurulum sözleşmesi: paket metadata'sı, `features.json`, route/izin/menü, migrations, açık install seeder'ları, asset yayını, bağımlılık uyumluluğu, etkinlik/kapatma/kaldırma davranışı ve ortak kurulum servisleri.

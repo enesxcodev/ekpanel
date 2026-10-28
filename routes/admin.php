@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\Forms\FormController;
 use App\Http\Controllers\Admin\Forms\FormSubmissionController;
 use App\Http\Controllers\Admin\Modules\ModuleController;
+use App\Http\Controllers\Admin\Modules\ModuleFeatureController;
 use App\Http\Controllers\Admin\Notifications\NotificationController;
 use App\Http\Controllers\Admin\Roles\AdminRoleController;
 use App\Http\Controllers\Admin\Settings\SettingConfigurationController;
@@ -74,6 +75,8 @@ Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')-
             Route::get('/catalog/{id}', [ModuleController::class, 'show'])->name('show');
             Route::get('/installations/{installation}', [ModuleController::class, 'installation'])->whereUuid('installation')->name('installations.show');
             Route::post('/', [ModuleController::class, 'store'])->middleware('throttle:6,1')->name('store');
+            Route::get('/{module}/details', [ModuleFeatureController::class, 'show'])->where('module', '[A-Z][A-Za-z0-9]*')->name('features.show');
+            Route::put('/{module}/features', [ModuleFeatureController::class, 'update'])->where('module', '[A-Z][A-Za-z0-9]*')->name('features.update');
             Route::post('/{module}/enable', [ModuleController::class, 'enable'])->name('enable');
             Route::post('/{module}/disable', [ModuleController::class, 'disable'])->name('disable');
             Route::delete('/{module}', [ModuleController::class, 'destroy'])->name('destroy');
