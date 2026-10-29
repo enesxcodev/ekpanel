@@ -21,5 +21,6 @@
     "Appointments": true,
     "Careers": true,
     "Events": true,
-    "LogViewer": true
+    "LogViewer": true,
+    "Redirects": false
 }

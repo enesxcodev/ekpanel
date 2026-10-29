@@ -1,6 +1,6 @@
 # Redirects — Uygulama Planı
 
-**Durum:** plan hazır; uygulama engelli (istenen uygulama modeli bu oturumda seçilemiyor)  
+**Durum:** plan hazır; uygulama engelli (`gpt-6.1-terra, medium` bu oturumda seçilemiyor)
 **Sınıf:** mevcut özellik iyileştirmesi / olası bağımsız, opsiyonel URL yönlendirme modülü  
 **Güven:** orta-yüksek — kullanıcı kapsamı doğrudan açıkladı; kırık bağlantı riski CMS kullanımından çıkarımdır.  
 **Kaynak konsept:** [Redirects-Form-Konsept.png](Redirects-Form-Konsept.png)
@@ -63,4 +63,4 @@ Harici servis, API veya yeni altyapı gerekmiyor. İlk sürüm aynı uygulama ho
 
 ## Uygulama engeli
 
-İş akışı uygulama aşamasında `gpt-5.6-terra, medium` modelini gerektiriyor. Bu oturum model yönlendirmesini seçemedi; bu nedenle uygulamaya farklı modelle geçilmedi ve belirtilen model kullanılmış gibi gösterilmiyor. Model yönlendirmesi kullanılabilir olduğunda bu plan ve konsept hazırdır. Görsel konsept tüm ekranlar için zorunlu tasarım spesifikasyonu değildir.
+İş akışı uygulama aşamasında kullanıcının seçtiği `gpt-6.1-terra, medium` modelini gerektiriyor. Bu oturum model yönlendirmesini seçemedi; bu nedenle uygulamaya farklı modelle geçilmedi ve belirtilen model kullanılmış gibi gösterilmiyor. Otomasyonun sonraki çalışmaları için uygulayıcı modeli talimatı güncellendi. Model yönlendirmesi kullanılabilir olduğunda bu plan ve konsept hazırdır. Görsel konsept tüm ekranlar için zorunlu tasarım spesifikasyonu değildir.

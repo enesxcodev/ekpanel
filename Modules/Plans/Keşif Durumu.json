@@ -495,7 +495,7 @@
       "assessed_interpretation": "Opsiyonel Redirects modülü; yalnız aynı host içinde path-to-path manuel 301 kuralları.",
       "confidence": "medium-high for scoped user request; inferred broken-link/SEO value",
       "status": "validated_candidate_plan_ready_implementation_blocked",
-      "assessment": "2026-10-28: Kullanıcının kapsam açıklaması kayıtlı bellekte yer alıyor. Pages/Blog/Products/Store rolleri eski-yeni path kuralı sahipliğini göstermiyor. Plan ve form konsepti hazır; uygulama modeli gpt-5.6-terra medium bu oturumda seçilemediği için uygulama başlamadı.",
+      "assessment": "2026-10-28: Kullanıcının kapsam açıklaması kayıtlı bellekte yer alıyor. Pages/Blog/Products/Store rolleri eski-yeni path kuralı sahipliğini göstermiyor. Plan ve form konsepti hazır; uygulama modeli gpt-6.1-terra medium bu oturumda seçilemediği için uygulama başlamadı.",
       "evaluated_at": "2026-10-28T00:21:19+03:00"
     }
   ],

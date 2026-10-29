@@ -1,0 +1,15 @@
+{
+    "name": "Redirects",
+    "alias": "redirects",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Redirects\\Providers\\RedirectsServiceProvider"
+    ],
+    "files": [],
+    "panel": {
+        "widgets": "config/widgets.php",
+        "permissions": ["redirects.menu", "redirects.view"]
+    }
+}

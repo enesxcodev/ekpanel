@@ -10,10 +10,10 @@ Bu rapor, günlük scheduler çalışmasının ardından tamamlanan modülleri k
 
 | İş kalemi | Tür | Gerekçe | Sonuç |
 |---|---|---|---|
-| Redirects (URL Yönlendirme Yönetimi) | Olası bağımsız modül | Kullanıcı aynı host içindeki eski path'ten yeni path'e elle 301 kuralı istedi; mevcut içerik modüllerinin kapsam haritasında merkezi yönlendirme sahipliği yok. | Ayrıntılı plan ve form konsepti hazır. Uygulama, gerekli `gpt-5.6-terra medium` model yönlendirmesi bu oturumda seçilemediğinden engelli; test/build/staging yapılmadı. Görev kilidi model seçimi çözümlenene dek tutuluyor. |
+| Redirects (URL Yönlendirme Yönetimi) | Olası bağımsız modül | Kullanıcı aynı host içindeki eski path'ten yeni path'e elle 301 kuralı istedi; mevcut içerik modüllerinin kapsam haritasında merkezi yönlendirme sahipliği yok. | Ayrıntılı plan ve form konsepti hazır. Uygulama, gerekli `gpt-6.1-terra medium` model yönlendirmesi bu oturumda seçilemediğinden engelli; test/build/staging yapılmadı. Görev kilidi model seçimi çözümlenene dek tutuluyor. |
 | Appointments uygunluk/çakışma takvimi | Mevcut modül genişletmesi adayı | Tema yönergeleri ilk sürümde uygunluk takvimi olmadığını söylüyor; ziyaretçi doğru zamanı seçebilsin diye yararlı olabilir. | Çıkarım orta güven; kapasite, kaynak takvimi ve slot/iptal kuralları açık olmadığı için ikinci iş olarak seçilmedi, plan/uygulama yok. |
 
-Katalog 23 metadata/rule-skill imzasıyla eşitlendi; yeni Appointments, Careers ve Events rule/skill dosyaları incelendi. KVKK ve yönetici değişiklik geçmişi için yeni kanıt bulunmadı. Bu çalışma model yönlendirme seçeneği sunmadığından `gpt-6-luna low` veya `gpt-5.6-terra medium` kullanıldığı iddia edilmedi.
+Katalog 23 metadata/rule-skill imzasıyla eşitlendi; yeni Appointments, Careers ve Events rule/skill dosyaları incelendi. KVKK ve yönetici değişiklik geçmişi için yeni kanıt bulunmadı. Bu çalışma model yönlendirme seçeneği sunmadığından `gpt-6-luna low` veya `gpt-6.1-terra medium` kullanıldığı iddia edilmedi.
 
 ## 21 Ekim 2026
 
