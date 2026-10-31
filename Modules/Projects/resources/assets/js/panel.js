@@ -1,4 +1,4 @@
-export default function initializeProjects() {
+export default function initialize(panel) {
     document.querySelectorAll('[data-project-form]').forEach((form) => {
         const input = form.querySelector('[name="image_media_ids"]');
         const cover = form.querySelector('[data-project-cover]');

@@ -1,5 +1,6 @@
 @csrf
 @isset($product) @method('PUT') @endisset
+<input type="hidden" name="lang_id" value="{{ $language?->id }}">
 @if($errors->any())
     <div class="alert alert-danger" role="alert"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
 @endif
@@ -82,6 +83,10 @@
     </div>
 </div></div></div>
 <div class="col-lg-4"><div class="card"><div class="card-body">
+    <label class="form-label" for="store-language">{{ __('store::store.content_language') }}</label>
+    <select id="store-language" class="form-select mb-3" onchange="if(this.value) location.href=this.value">
+        @foreach($languages as $item)<option value="{{ $product ? route('admin.store.edit', ['product'=>$product, 'lang'=>$item['code']]) : route('admin.store.create', ['lang'=>$item['code']]) }}" @selected($language?->code === $item['code'])>{{ strtoupper($item['code']) }}{{ $product && !$item['has_translation'] ? ' — '.__('store::store.translation_missing') : '' }}</option>@endforeach
+    </select>
     <x-admin.form.select name="is_active" label="Yayın durumu" :options="[['value'=>0,'label'=>'Taslak'],['value'=>1,'label'=>'Yayında']]" :value="(int)($product?->is_active ?? false)" :placeholder="false" />
     <x-admin.form.input name="sort_order" label="Sıralama" type="number" :value="$product?->sort_order ?? 0" min="0" required />
     @if($product?->image_url)<img src="{{ $product->image_url }}" alt="{{ $product->title }}" class="img-fluid mb-3">@endif

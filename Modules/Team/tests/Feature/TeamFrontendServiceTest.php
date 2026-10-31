@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -23,6 +24,20 @@ test('lists only published frontend records', function () {
     $result = app(TeamFrontendService::class)->getAll();
 
     expect($result->modelKeys())->toEqualCanonicalizing($records->modelKeys());
+});
+
+test('returns only members translated into the requested active language', function () {
+    $english = Language::query()->firstOrCreate(['code' => 'en'], ['is_active' => true]);
+    $english->forceFill(['is_active' => true])->save();
+    $translated = TeamMember::factory()->create(['is_active' => true]);
+    $translated->translations()->create(['lang_id' => $english->id, 'name' => 'English member', 'title' => 'English title']);
+    $untranslated = TeamMember::factory()->create(['is_active' => true]);
+
+    $results = app(TeamFrontendService::class)->getAll('en');
+
+    expect($results->modelKeys())->toBe([$translated->id]);
+    expect($results->first()?->name)->toBe('English member');
+    expect(app(TeamFrontendService::class)->find($untranslated->id, 'en'))->toBeNull();
 });
 
 test('single record and identifier lookup respect frontend visibility', function () {

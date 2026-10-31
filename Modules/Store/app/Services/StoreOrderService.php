@@ -20,7 +20,8 @@ class StoreOrderService
         usort($items, fn (array $a, array $b): int => [$a['product_id'], $a['variant_id']] <=> [$b['product_id'], $b['variant_id']]);
 
         return Cache::lock('store.checkout.'.$customer['checkout_key'], 120)->block(10, fn (): StoreOrder => DB::transaction(function () use ($items, $customer, $user): StoreOrder {
-            $hash = hash('sha256', json_encode([$items, $customer, $user?->id], JSON_THROW_ON_ERROR));
+            $languageCode = (string) request()->attributes->get('store_language', request()->query('lang', 'tr'));
+            $hash = hash('sha256', json_encode([$items, $customer, $user?->id, $languageCode], JSON_THROW_ON_ERROR));
             $existing = StoreOrder::query()->where('checkout_key', $customer['checkout_key'])->lockForUpdate()->first();
             if ($existing) {
                 if (! hash_equals($existing->checkout_hash, $hash)) {
@@ -43,7 +44,7 @@ class StoreOrderService
                 'customer_name' => $customer['customer_name'], 'customer_email' => $customer['customer_email'], 'customer_phone' => $customer['customer_phone'],
                 'shipping_address' => $customer['delivery_method'] === 'pickup' ? null : $customer['address'],
                 'billing_address' => array_filter($customer['billing_address'] ?? [], fn ($value): bool => filled($value)) !== [] ? $customer['billing_address'] : ($customer['address'] ?? null),
-                'delivery_snapshot' => ['method' => $customer['delivery_method'], 'tax_rate' => $quote['rate'], 'tax_included' => $quote['included'], 'shipping' => $quote['shippingAmounts']],
+                'delivery_snapshot' => ['method' => $customer['delivery_method'], 'tax_rate' => $quote['rate'], 'tax_included' => $quote['included'], 'shipping' => $quote['shippingAmounts'], 'language' => $languageCode],
                 'currency' => $quote['currency'], 'subtotal_minor' => $quote['net'], 'tax_minor' => $quote['tax'] + $quote['shippingAmounts']['tax'],
                 'shipping_minor' => $quote['shippingAmounts']['gross'], 'total_minor' => $quote['total'],
                 'reserved_until' => now()->addHours(24),
@@ -57,7 +58,7 @@ class StoreOrderService
                     'store_product_id' => $product->id, 'store_variant_id' => $variant?->id,
                     'product_title' => $product->title, 'variant_title' => $variant?->title, 'sku' => $variant?->sku ?? $product->sku,
                     'unit_price_minor' => $line['unit'], 'quantity' => $line['quantity'], 'line_total_minor' => $line['amounts']['gross'],
-                    'snapshot' => ['currency' => $quote['currency'], 'tax_rate' => $quote['rate'], 'tax_included' => $quote['included'], 'amounts' => $line['amounts'], 'options' => $variant?->option_values, 'tracks_stock' => $product->tracks_stock, 'weight_grams' => $product->weight_grams, 'dimensions_cm' => [$product->width_cm, $product->height_cm, $product->length_cm], 'preparation_days' => $product->preparation_days, 'delivery_description' => $product->delivery_description],
+                    'snapshot' => ['language' => $languageCode, 'product_title' => $product->title, 'variant_title' => $variant?->title, 'currency' => $quote['currency'], 'tax_rate' => $quote['rate'], 'tax_included' => $quote['included'], 'amounts' => $line['amounts'], 'options' => $variant?->option_values, 'tracks_stock' => $product->tracks_stock, 'weight_grams' => $product->weight_grams, 'dimensions_cm' => [$product->width_cm, $product->height_cm, $product->length_cm], 'preparation_days' => $product->preparation_days, 'delivery_description' => $product->delivery_description],
                 ]);
             }
 

@@ -1,5 +1,6 @@
 <x-admin.layout title="İçerikler">
     <div class="card">
+        <div class="card-body"><label class="form-label" for="blog-contents-table-language">Dil</label><select id="blog-contents-table-language" class="form-select" data-table-filter="lang" data-table-target="blog-contents-table">@foreach (app(\Modules\Blog\Services\BlogLanguageService::class)->active() as $language)<option value="{{ $language->code }}">{{ config('languages.catalog.'.$language->code.'.name', $language->code) }}</option>@endforeach</select></div>
         <div class="card-header d-flex gap-3 align-items-center"><h2 class="card-title me-auto">İçerikler</h2>@can('blog.create')<a href="{{ route('admin.blog.create') }}" class="btn btn-primary">İçerik ekle</a>@endcan</div>
         <div class="card-body border-bottom">
             <div class="row g-2 align-items-end">

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Modules\Services\Database\Factories\ServiceFactory;
 
@@ -18,11 +19,35 @@ class Service extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ['service_category_id', 'title', 'slug', 'sort_order', 'short_description', 'content', 'meta_title', 'meta_keywords', 'meta_description', 'image', 'image_media_id', 'icon', 'is_active', 'extra_fields'];
+    protected $with = ['translations.language'];
+
+    public function getAttribute($key): mixed
+    {
+        if (in_array($key, ['title', 'slug', 'short_description', 'content', 'meta_title', 'meta_keywords', 'meta_description', 'extra_fields'], true) && ! array_key_exists($key, $this->attributes)) {
+            if ($this->relationLoaded('selectedTranslation')) {
+                return $this->getRelation('selectedTranslation')?->getAttribute($key);
+            }
+            if (! $this->relationLoaded('translations')) {
+                return null;
+            }
+            $code = request()->attributes->get('services_language', 'tr');
+
+            return $this->getRelation('translations')->first(fn ($item): bool => $item->relationLoaded('language') && $item->language?->code === $code)?->getAttribute($key);
+        }
+
+        return parent::getAttribute($key);
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(ServiceTranslation::class);
+    }
+
+    protected $fillable = ['service_category_id', 'sort_order', 'image', 'image_media_id', 'icon', 'is_active'];
 
     protected function casts(): array
     {
-        return ['image_media_id' => 'integer', 'sort_order' => 'integer', 'is_active' => 'boolean', 'extra_fields' => 'array'];
+        return ['image_media_id' => 'integer', 'sort_order' => 'integer', 'is_active' => 'boolean'];
     }
 
     public function category(): BelongsTo

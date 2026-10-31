@@ -23,7 +23,17 @@ import { initializeDashboardWidgets } from './admin/dashboard-widgets';
 select2(window, $);
 window.$ = $;
 window.jQuery = $;
-$('.js-select2').select2({ width: '100%' });
+function renderSelectOption(option) {
+    const flag = option.element?.dataset.flag;
+    if (!flag || !/^[a-z]{2}$/.test(flag)) {
+        return option.text;
+    }
+    const content = $('<span class="d-inline-flex align-items-center gap-2"></span>');
+    $('<span aria-hidden="true"></span>').addClass(`flag flag-country-${flag}`).appendTo(content);
+    return content.append(document.createTextNode(option.text));
+}
+
+$('.js-select2').select2({ width: '100%', templateResult: renderSelectOption, templateSelection: renderSelectOption });
 
 window.Panel = { notify, confirm: confirmWithModal };
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Modules\Documents\Database\Factories\DocumentFactory;
 
@@ -17,7 +18,7 @@ class Document extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ['category_id', 'name', 'content', 'slug', 'file', 'file_media_id', 'status', 'extra_fields'];
+    protected $fillable = ['category_id', 'file', 'file_media_id', 'status'];
 
     protected $attributes = ['status' => 'draft'];
 
@@ -29,6 +30,11 @@ class Document extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(DocumentCategory::class, 'category_id');
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(DocumentTranslation::class);
     }
 
     public function fileMedia(): BelongsTo

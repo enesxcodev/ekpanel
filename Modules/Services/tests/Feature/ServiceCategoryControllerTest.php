@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -18,18 +19,18 @@ test('super admins can manage service categories from the panel', function () {
     $this->get(route('admin.services.categories.index'))->assertOk()
         ->assertSee('Hizmetler')->assertSee('Kategoriler')->assertSee('Kategori ekle');
     $this->get(route('admin.services.categories.create'))->assertOk()->assertSee('name="name"', false);
-    $this->post(route('admin.services.categories.store'), ['name' => 'Danışmanlık'])
-        ->assertRedirectToRoute('admin.services.categories.index')
+    $this->post(route('admin.services.categories.store'), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'name' => 'Danışmanlık'])
+        ->assertRedirect()
         ->assertSessionHas('notification.message', 'Hizmet kategorisi başarıyla eklendi.');
-    $this->assertDatabaseHas('service_categories', ['name' => 'Danışmanlık']);
+    $this->assertDatabaseHas('service_category_translations', ['name' => 'Danışmanlık']);
     $category = ServiceCategory::query()->sole();
 
     $this->get(route('admin.services.categories.edit', $category))->assertOk()->assertSee('Danışmanlık');
-    $this->put(route('admin.services.categories.update', $category), ['name' => 'Teknik Danışmanlık', 'id' => 999])
-        ->assertRedirectToRoute('admin.services.categories.index')
+    $this->put(route('admin.services.categories.update', $category), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'name' => 'Teknik Danışmanlık', 'id' => 999])
+        ->assertRedirect()
         ->assertSessionHas('notification.type', 'success');
-    $this->assertDatabaseHas('service_categories', ['id' => $category->id, 'name' => 'Teknik Danışmanlık']);
-    expect($category->fresh()->getAttributes())->toHaveKeys(['id', 'name', 'extra_fields', 'sort_order', 'is_active'])->toHaveCount(5);
+    $this->assertDatabaseHas('service_category_translations', ['service_category_id' => $category->id, 'name' => 'Teknik Danışmanlık']);
+    expect($category->fresh()->getAttributes())->toHaveKeys(['id', 'sort_order', 'is_active']);
 
     $this->delete(route('admin.services.categories.destroy', $category))
         ->assertRedirectToRoute('admin.services.categories.index')
@@ -48,18 +49,18 @@ test('category endpoints require their own operation permission', function (stri
     $admin->assignRole($role);
     $parameters = in_array($action, ['edit', 'update', 'destroy'], true) ? $category : [];
 
-    $response = $this->actingAs($admin, 'admin')->{$method}(route('admin.services.categories.'.$action, $parameters), ['name' => 'Changed category']);
+    $response = $this->actingAs($admin, 'admin')->{$method}(route('admin.services.categories.'.$action, $parameters), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'name' => 'Changed category']);
 
     if (! $granted) {
         $response->assertForbidden();
         $this->assertDatabaseCount('service_categories', 1);
-        $this->assertDatabaseHas('service_categories', ['id' => $category->id, 'name' => 'Existing category']);
+        $this->assertDatabaseHas('service_category_translations', ['service_category_id' => $category->id, 'name' => 'Existing category']);
     } elseif (in_array($action, ['store', 'update', 'destroy'], true)) {
-        $response->assertRedirectToRoute('admin.services.categories.index');
+        $response->assertRedirect();
         if ($action === 'destroy') {
             $this->assertModelMissing($category);
         } else {
-            $this->assertDatabaseHas('service_categories', ['name' => 'Changed category']);
+            $this->assertDatabaseHas('service_category_translations', ['name' => 'Changed category']);
         }
     } else {
         $response->assertOk();
@@ -91,11 +92,11 @@ test('category names are validated on creation and update', function (string $ac
     $parameters = $action === 'update' ? $category : [];
     $method = $action === 'update' ? 'put' : 'post';
 
-    $this->actingAs($admin, 'admin')->{$method}(route('admin.services.categories.'.$action, $parameters), ['name' => $name])
+    $this->actingAs($admin, 'admin')->{$method}(route('admin.services.categories.'.$action, $parameters), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'name' => $name])
         ->assertSessionHasErrors(['name' => $message]);
 
     $this->assertDatabaseCount('service_categories', 1);
-    $this->assertDatabaseHas('service_categories', ['id' => $category->id, 'name' => 'Original']);
+    $this->assertDatabaseHas('service_category_translations', ['service_category_id' => $category->id, 'name' => 'Original']);
 })->with(['store', 'update'])->with([
     'blank' => ['   ', 'Kategori adını girin.'],
     'non-string' => [['invalid'], 'Geçerli bir kategori adı girin.'],

@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Modules\Blog\Models\BlogCategory;
@@ -79,4 +81,41 @@ test('category filtering includes descendants and excludes unrelated content', f
     expect($service->getAll($category->id)->modelKeys())->toEqualCanonicalizing([$record->id, $childRecord->id]);
     expect($service->getFirst($category->id)?->id)->toBe($record->id);
     expect($service->getAll(999))->toBeEmpty();
+});
+
+test('slug and pagination resolve each language without adding translated attributes to the model', function () {
+    $english = Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $category = BlogCategory::factory()->create(['name' => 'Türkçe kategori']);
+    $category->translations()->create(['lang_id' => $english->id, 'name' => 'English category', 'slug' => 'english-category']);
+    $content = BlogContent::factory()->for($category, 'category')->create(['status' => 'published', 'title' => 'Türkçe', 'slug' => 'turkce']);
+    $content->translations()->create(['lang_id' => $english->id, 'title' => 'English', 'slug' => 'english']);
+    $service = app(BlogFrontendService::class);
+
+    $tr = $service->findBySlug('turkce', 'tr');
+    $en = $service->findBySlug('english', 'en');
+    expect($tr->title)->toBe('Türkçe')->and($en->title)->toBe('English');
+    expect($en->category->path)->toBe('English category');
+    expect($en->getAttributes())->not->toHaveKey('title')->not->toHaveKey('slug');
+    expect($en->isDirty())->toBeFalse();
+    expect($service->findBySlug('english', 'tr'))->toBeNull();
+    expect($service->paginate(languageCode: 'en')->items()[0]->title)->toBe('English');
+    request()->attributes->set('blog_language', 'en');
+    expect($service->find($content->id)->title)->toBe('English');
+    request()->attributes->remove('blog_language');
+    $english->update(['is_active' => false]);
+    expect($service->paginate(languageCode: 'en'))->toBeNull();
+});
+
+test('deep translated category paths are loaded without additional queries', function () {
+    $root = BlogCategory::factory()->create(['name' => 'Root']);
+    $parent = BlogCategory::factory()->create(['parent_id' => $root->id, 'name' => 'Parent']);
+    $child = BlogCategory::factory()->create(['parent_id' => $parent->id, 'name' => 'Child']);
+    $content = BlogContent::factory()->for($child, 'category')->create(['status' => 'published']);
+    $result = app(BlogFrontendService::class)->find($content->id);
+
+    DB::enableQueryLog();
+    DB::flushQueryLog();
+    expect($result->category->path)->toBe('Root / Parent / Child');
+    expect(DB::getQueryLog())->toBeEmpty();
+    DB::disableQueryLog();
 });

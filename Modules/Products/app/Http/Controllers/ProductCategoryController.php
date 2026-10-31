@@ -16,16 +16,19 @@ use Modules\Products\Http\Requests\StoreProductCategoryRequest;
 use Modules\Products\Http\Requests\UpdateProductCategoryRequest;
 use Modules\Products\Models\ProductCategory;
 use Modules\Products\Services\ProductCategoryService;
+use Modules\Products\Services\ProductsLanguageService;
 
 class ProductCategoryController extends Controller
 {
     public function __construct(private MediaService $media) {}
 
-    public function index(): View
+    public function index(ProductsLanguageService $languages, Request $request): View
     {
         $this->authorize('products.categories.view');
 
-        return view('products::categories.index');
+        $selectedLanguage = $languages->forAdmin($request->query('lang'));
+
+        return view('products::categories.index', compact('selectedLanguage'));
     }
 
     public function data(ProductCategoriesDataTable $dataTable): JsonResponse
@@ -35,14 +38,18 @@ class ProductCategoryController extends Controller
         return $dataTable->handle();
     }
 
-    public function create(ModuleFeatures $features, FeatureValues $values): View
+    public function create(ModuleFeatures $features, FeatureValues $values, ProductsLanguageService $languages, Request $request): View
     {
         $this->authorize('products.categories.create');
 
         $featureForm = $features->form('Products', 'category');
         $featureFields = $values->fields($featureForm['fields'], []);
+        $languages = $languages->active();
+        $selectedLanguage = app(ProductsLanguageService::class)->forAdmin($request->query('lang'));
+        $translation = null;
+        $translatedLanguageIds = [];
 
-        return view('products::categories.create', compact('featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
+        return view('products::categories.create', compact('featureForm', 'featureFields', 'languages', 'selectedLanguage', 'translation', 'translatedLanguageIds') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function store(StoreProductCategoryRequest $request, ProductCategoryService $product, NotifyService $notifications): RedirectResponse
@@ -60,14 +67,19 @@ class ProductCategoryController extends Controller
         ]);
     }
 
-    public function edit(ProductCategory $category, ModuleFeatures $features, FeatureValues $values): View
+    public function edit(ProductCategory $category, ModuleFeatures $features, FeatureValues $values, ProductsLanguageService $languages, Request $request): View
     {
         $this->authorize('products.categories.update');
 
         $featureForm = $features->form('Products', 'category');
-        $featureFields = $values->fields($featureForm['fields'], $category->extra_fields ?? []);
+        $languages = $languages->active();
+        $selectedLanguage = app(ProductsLanguageService::class)->forAdmin($request->query('lang'));
+        $category->load('translations');
+        $translation = $category->translations->firstWhere('lang_id', $selectedLanguage?->id);
+        $featureFields = $values->fields($featureForm['fields'], $translation?->extra_fields ?? []);
+        $translatedLanguageIds = $category->translations->pluck('lang_id')->all();
 
-        return view('products::categories.edit', compact('category', 'featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
+        return view('products::categories.edit', compact('category', 'translation', 'featureForm', 'featureFields', 'languages', 'selectedLanguage', 'translatedLanguageIds') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function update(UpdateProductCategoryRequest $request, ProductCategory $category, ProductCategoryService $product, NotifyService $notifications): RedirectResponse

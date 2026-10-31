@@ -7,7 +7,7 @@
             @endcan
         </div>
         <x-admin.data-table
-            id="sliders-table" :source="route('admin.slider.data')"
+            id="sliders-table" :source="route('admin.slider.data', request()->only('lang'))"
             :options="['order' => [[0, 'desc']]]"
             :columns="[
                 ['title' => 'ID', 'data' => 'id', 'name' => 'id'],

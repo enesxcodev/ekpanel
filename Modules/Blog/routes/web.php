@@ -11,6 +11,8 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Blo
     ->prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')
     ->name('admin.')
     ->group(function (): void {
+        Route::get('blog/translations/{translation}/edit', [BlogContentController::class, 'translationEdit'])->name('blog.translations.edit');
+        Route::get('blog/categories/translations/{translation}/edit', [BlogCategoryController::class, 'translationEdit'])->name('blog.categories.translations.edit');
         Route::get('blog/data', [BlogContentController::class, 'data'])->name('blog.data');
         Route::get('blog/categories/data', [BlogCategoryController::class, 'data'])->name('blog.categories.data');
         Route::get('blog/tags/data', [BlogTagController::class, 'data'])->name('blog.tags.data');
@@ -20,6 +22,8 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Blo
     });
 
 Route::middleware('module.enabled:Blog')->group(function (): void {
+    Route::get('/{lang}/blog', [PublicBlogController::class, 'index'])->where('lang', '[a-z]{2}')->name('blog.localized.index');
+    Route::get('/{lang}/blog/{slug}', [PublicBlogController::class, 'show'])->where('lang', '[a-z]{2}')->name('blog.localized.show');
     Route::get('/blog', [PublicBlogController::class, 'index'])->name('blog.public.index');
     Route::get('/blog/{slug}', [PublicBlogController::class, 'show'])->name('blog.public.show');
 });

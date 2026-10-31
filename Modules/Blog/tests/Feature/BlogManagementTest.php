@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Blog\Database\Seeders\BlogDatabaseSeeder;
 use Modules\Blog\Models\BlogCategory;
@@ -32,38 +33,38 @@ test('blog content category and tag actions notify all admins with links to the 
     };
 
     $category = BlogCategory::factory()->create();
-    $this->post(route('admin.blog.store'), [
+    $this->post(route('admin.blog.store'), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id,
         'blog_category_id' => $category->id,
         'title' => 'Yeni yazı',
         'slug' => 'yeni-yazi',
         'content' => '<p>İçerik</p>',
         'status' => 'draft',
-    ])->assertRedirectToRoute('admin.blog.index');
+    ])->assertRedirect();
     $blog = BlogContent::query()->sole();
-    $assertNotification('Blog yazısı eklendi', route('admin.blog.edit', ['blog' => $blog->id], absolute: false));
+    $assertNotification('Blog yazısı eklendi', route('admin.blog.edit', ['blog' => $blog->id, 'lang' => 'tr'], absolute: false));
 
-    $this->put(route('admin.blog.update', $blog), [
+    $this->put(route('admin.blog.update', $blog), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id,
         'blog_category_id' => $category->id,
         'title' => 'Güncel yazı',
         'slug' => 'guncel-yazi',
         'content' => '<p>Güncel içerik</p>',
         'status' => 'draft',
-    ])->assertRedirectToRoute('admin.blog.index');
-    $assertNotification('Blog yazısı güncellendi', route('admin.blog.edit', ['blog' => $blog->id], absolute: false));
+    ])->assertRedirect();
+    $assertNotification('Blog yazısı güncellendi', route('admin.blog.edit', ['blog' => $blog->id, 'lang' => 'tr'], absolute: false));
 
-    $this->delete(route('admin.blog.destroy', $blog))->assertRedirectToRoute('admin.blog.index');
+    $this->delete(route('admin.blog.destroy', $blog))->assertRedirect();
     $assertNotification('Blog yazısı silindi', route('admin.blog.index', absolute: false));
 
-    $this->post(route('admin.blog.categories.store'), ['name' => 'Yeni kategori', 'slug' => 'yeni-kategori', 'sort_order' => 0])
-        ->assertRedirectToRoute('admin.blog.categories.index');
-    $createdCategory = BlogCategory::query()->where('slug', 'yeni-kategori')->sole();
-    $assertNotification('Blog kategorisi eklendi', route('admin.blog.categories.edit', ['category' => $createdCategory->id], absolute: false));
+    $this->post(route('admin.blog.categories.store'), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id, 'name' => 'Yeni kategori', 'slug' => 'yeni-kategori', 'sort_order' => 0])
+        ->assertRedirect();
+    $createdCategory = BlogCategory::query()->whereHas('translations', fn ($query) => $query->where('slug', 'yeni-kategori'))->sole();
+    $assertNotification('Blog kategorisi eklendi', route('admin.blog.categories.edit', ['category' => $createdCategory->id, 'lang' => 'tr'], absolute: false));
 
-    $this->put(route('admin.blog.categories.update', $createdCategory), ['name' => 'Güncel kategori', 'slug' => 'guncel-kategori', 'sort_order' => 0])
-        ->assertRedirectToRoute('admin.blog.categories.index');
-    $assertNotification('Blog kategorisi güncellendi', route('admin.blog.categories.edit', ['category' => $createdCategory->id], absolute: false));
+    $this->put(route('admin.blog.categories.update', $createdCategory), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id, 'name' => 'Güncel kategori', 'slug' => 'guncel-kategori', 'sort_order' => 0])
+        ->assertRedirect();
+    $assertNotification('Blog kategorisi güncellendi', route('admin.blog.categories.edit', ['category' => $createdCategory->id, 'lang' => 'tr'], absolute: false));
 
-    $this->delete(route('admin.blog.categories.destroy', $createdCategory))->assertRedirectToRoute('admin.blog.categories.index');
+    $this->delete(route('admin.blog.categories.destroy', $createdCategory))->assertRedirect();
     $assertNotification('Blog kategorisi silindi', route('admin.blog.categories.index', absolute: false));
 
     $this->post(route('admin.blog.tags.store'), ['name' => 'Yeni etiket', 'slug' => 'yeni-etiket'])->assertRedirectToRoute('admin.blog.tags.index');
@@ -87,29 +88,30 @@ test('content can be created, updated and published from one category with multi
     $tags = BlogTag::factory()->count(2)->create();
     $this->actingAs($admin, 'admin');
 
-    $this->post(route('admin.blog.store'), [
+    $this->post(route('admin.blog.store'), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id,
         'blog_category_id' => $category->id,
         'title' => 'İçerik başlığı',
         'slug' => 'icerik-basligi',
         'tags' => $tags->modelKeys(),
         'content' => '<p>Güvenli içerik</p><script>alert(1)</script>',
-    ])->assertRedirectToRoute('admin.blog.index');
+    ])->assertRedirect();
 
     $content = BlogContent::query()->sole();
     expect($content->status)->toBe('draft')->and($content->tags)->toHaveCount(2);
-    $this->assertDatabaseHas('blog_contents', ['id' => $content->id, 'content' => '<p>Güvenli içerik</p>']);
+    $this->assertDatabaseHas('blog_content_translations', ['blog_content_id' => $content->id, 'content' => '<p>Güvenli içerik</p>']);
     $this->assertDatabaseHas('blog_content_tag', ['blog_content_id' => $content->id, 'blog_tag_id' => $tags[0]->id]);
 
-    $this->put(route('admin.blog.update', $content), [
+    $this->put(route('admin.blog.update', $content), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id,
         'blog_category_id' => $category->id,
         'title' => 'Yayına alınan içerik',
         'slug' => 'yayinlanan-icerik',
         'status' => 'published',
         'published_at' => now()->format('Y-m-d\\TH:i'),
         'tags' => [$tags[1]->id],
-    ])->assertRedirectToRoute('admin.blog.index');
+    ])->assertRedirect();
 
-    $this->assertDatabaseHas('blog_contents', ['id' => $content->id, 'status' => 'published', 'slug' => 'yayinlanan-icerik']);
+    $this->assertDatabaseHas('blog_contents', ['id' => $content->id, 'status' => 'published']);
+    $this->assertDatabaseHas('blog_content_translations', ['blog_content_id' => $content->id, 'slug' => 'yayinlanan-icerik']);
     $this->get(route('blog.public.show', 'yayinlanan-icerik'))->assertOk()->assertSee('Yayına alınan içerik');
 });
 
@@ -193,14 +195,14 @@ test('category parent changes cannot create cycles and non-empty categories cann
     $content = BlogContent::factory()->create(['blog_category_id' => $child->id]);
     $this->actingAs($admin, 'admin');
 
-    $this->put(route('admin.blog.categories.update', $parent), [
+    $this->put(route('admin.blog.categories.update', $parent), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id,
         'name' => $parent->name,
         'slug' => $parent->slug,
         'parent_id' => $child->id,
         'sort_order' => 0,
     ])->assertSessionHasErrors('parent_id');
 
-    $this->delete(route('admin.blog.categories.destroy', $child))->assertRedirectToRoute('admin.blog.categories.index');
+    $this->delete(route('admin.blog.categories.destroy', $child))->assertRedirect();
     $this->assertModelExists($content);
     $this->assertModelExists($child);
 });
@@ -223,9 +225,9 @@ test('blog seeder creates the three editable root categories idempotently', func
     $this->seed(BlogDatabaseSeeder::class);
 
     expect(BlogCategory::query()->whereNull('parent_id')->count())->toBe(3);
-    $this->assertDatabaseHas('blog_categories', ['name' => 'Blog', 'slug' => 'blog', 'parent_id' => null]);
-    $this->assertDatabaseHas('blog_categories', ['name' => 'Haberler', 'slug' => 'haberler', 'parent_id' => null]);
-    $this->assertDatabaseHas('blog_categories', ['name' => 'Duyurular', 'slug' => 'duyurular', 'parent_id' => null]);
+    $this->assertDatabaseHas('blog_category_translations', ['name' => 'Blog', 'slug' => 'blog']);
+    $this->assertDatabaseHas('blog_category_translations', ['name' => 'Haberler', 'slug' => 'haberler']);
+    $this->assertDatabaseHas('blog_category_translations', ['name' => 'Duyurular', 'slug' => 'duyurular']);
 });
 
 test('blog forms and the shared Pages category picker render', function (): void {

@@ -8,6 +8,7 @@ use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\ContentMediaService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Modules\Documents\Models\Document;
 
 class SaveDocumentRequest extends FormRequest
 {
@@ -20,15 +21,20 @@ class SaveDocumentRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values, ContentMediaService $media): array
     {
         $document = $this->route('document');
+        $languageId = $this->input('lang_id');
+        $translation = $document instanceof Document && is_numeric($languageId)
+            ? $document->translations()->where('lang_id', $languageId)->first()
+            : null;
 
         return [
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'name' => ['required', 'string', 'max:255'],
             'content' => ['nullable', 'string', 'max:65535'],
             'category_id' => ['nullable', 'integer', 'exists:document_categories,id'],
-            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('documents', 'slug')->ignore($document?->id)],
+            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('document_translations', 'slug')->where(fn ($query) => $query->where('lang_id', $languageId))->ignore($translation?->id)],
             ...$media->rules($media->definition('file', 'Dosya', 15360, ['png', 'jpg', 'jpeg', 'webp', 'pdf', 'doc', 'pptx'])),
             'status' => ['required', Rule::in(['draft', 'published'])],
-            ...$values->rules($features->form('Documents', 'document')['fields'], $this->all(), $document?->extra_fields ?? []),
+            ...$values->rules($features->form('Documents', 'document')['fields'], $this->all(), $translation?->extra_fields ?? []),
         ];
     }
 

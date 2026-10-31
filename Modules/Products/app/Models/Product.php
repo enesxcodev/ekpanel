@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Modules\Products\Database\Factories\ProductFactory;
 
@@ -20,7 +21,20 @@ class Product extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ['product_category_id', 'title', 'slug', 'sort_order', 'short_description', 'content', 'image', 'image_media_id', 'site_form_id', 'is_active', 'extra_fields'];
+    protected $fillable = ['product_category_id', 'sort_order', 'image', 'image_media_id', 'site_form_id', 'is_active'];
+
+    public function getAttribute($key): mixed
+    {
+        if (in_array($key, ['title', 'slug', 'short_description', 'content', 'extra_fields'], true) && ! array_key_exists($key, $this->attributes)) {
+            $translations = $this->relationLoaded('translations') ? $this->getRelation('translations') : $this->translations;
+            $languageId = request()->attributes->get('products_language_id');
+            $translation = $translations->first(fn (ProductTranslation $item): bool => (int) $item->lang_id === (int) $languageId);
+
+            return $translation?->getAttribute($key);
+        }
+
+        return parent::getAttribute($key);
+    }
 
     protected function casts(): array
     {
@@ -30,6 +44,11 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class, 'product_category_id');
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(ProductTranslation::class);
     }
 
     public function images(): BelongsToMany

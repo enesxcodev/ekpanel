@@ -2,6 +2,7 @@
 
 use App\Models\Admin\Admin;
 use App\Models\Media\MediaFile;
+use App\Models\Settings\Language;
 use App\Services\Admin\Modules\ModulePanelService;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -12,6 +13,24 @@ use Nwidart\Modules\Facades\Module;
 use Nwidart\Modules\Laravel\LaravelFileRepository;
 
 uses(LazilyRefreshDatabase::class);
+
+function teamTestLanguageId(): int
+{
+    return Language::query()->where('code', 'tr')->valueOrFail('id');
+}
+
+function teamTestEditUrl(?TeamMember $member = null): string
+{
+    return route('admin.team.edit', ['member' => $member?->id ?? TeamMember::query()->latest('id')->valueOrFail('id'), 'lang' => 'tr']);
+}
+
+function teamTestMember(array $translation): TeamMember
+{
+    $member = TeamMember::factory()->create();
+    $member->translations()->where('lang_id', teamTestLanguageId())->firstOrFail()->forceFill($translation)->save();
+
+    return $member->fresh();
+}
 
 function teamTestImage(string $name, bool $oversized = false): MediaFile
 {
@@ -35,35 +54,38 @@ function teamTestDocument(): MediaFile
 
 test('team has a single sidebar link with its table and create button and shared forms', function () {
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
-    $member = TeamMember::factory()->inactive()->create(['name' => '<script>name</script>', 'title' => '<script>title</script>']);
+    $member = teamTestMember(['name' => '<script>name</script>', 'title' => '<script>title</script>']);
+    $member->update(['is_active' => false]);
 
     $index = $this->get(route('admin.team.index'))->assertOk()
         ->assertSee('id="team-members-table"', false)->assertSee('Ekip ekle')
         ->assertSee('href="'.route('admin.team.create').'"', false);
     expect(substr_count($index->getContent(), 'href="'.route('admin.team.index').'"'))->toBe(1);
     $this->get(route('admin.team.create'))->assertOk()
-        ->assertSeeInOrder(['name="image_media_id"', 'name="name"', 'name="title"', 'name="is_active"'], false);
+        ->assertSeeInOrder(['name="image_media_id"', 'name="is_active"', 'name="name"', 'name="title"'], false);
     $this->get(route('admin.team.edit', $member))->assertOk()
         ->assertSee('&lt;script&gt;name&lt;/script&gt;', false)->assertSee('&lt;script&gt;title&lt;/script&gt;', false)
         ->assertDontSee('<script>name</script>', false)->assertDontSee('<script>title</script>', false)
-        ->assertSee('name="is_active" value="1" >', false);
+        ->assertSee('name="is_active"', false);
 });
 
 test('team can save an inactive member without a title or image and activate it later', function () {
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
 
-    $this->post(route('admin.team.store'), ['name' => 'Ayşe Yılmaz', 'is_active' => '0'])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.team.index')
+    $this->post(route('admin.team.store'), ['lang_id' => teamTestLanguageId(), 'name' => 'Ayşe Yılmaz', 'is_active' => '0'])
+        ->assertSessionHasNoErrors()->assertRedirect(teamTestEditUrl())
         ->assertSessionHas('notification.message', 'Ekip üyesi başarıyla eklendi.');
     $member = TeamMember::query()->sole();
     expect($member->is_active)->toBeFalse();
     expect($member->image)->toBeNull();
     expect($member->title)->toBeNull();
-    $this->assertDatabaseHas('team_members', ['id' => $member->id, 'name' => 'Ayşe Yılmaz', 'is_active' => false]);
+    $this->assertDatabaseHas('team_members', ['id' => $member->id, 'is_active' => false]);
+    $this->assertDatabaseHas('team_member_translations', ['team_member_id' => $member->id, 'lang_id' => teamTestLanguageId(), 'name' => 'Ayşe Yılmaz', 'title' => null]);
 
-    $this->put(route('admin.team.update', $member), ['name' => 'Ayşe Yılmaz', 'title' => 'Proje Yöneticisi', 'is_active' => '1'])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.team.index');
-    $this->assertDatabaseHas('team_members', ['id' => $member->id, 'title' => 'Proje Yöneticisi', 'is_active' => true]);
+    $this->put(route('admin.team.update', $member), ['lang_id' => teamTestLanguageId(), 'name' => 'Ayşe Yılmaz', 'title' => 'Proje Yöneticisi', 'is_active' => '1'])
+        ->assertSessionHasNoErrors()->assertRedirect(teamTestEditUrl($member));
+    $this->assertDatabaseHas('team_members', ['id' => $member->id, 'is_active' => true]);
+    $this->assertDatabaseHas('team_member_translations', ['team_member_id' => $member->id, 'lang_id' => teamTestLanguageId(), 'title' => 'Proje Yöneticisi']);
 });
 
 test('team selects preserves replaces and detaches the member image', function () {
@@ -71,18 +93,18 @@ test('team selects preserves replaces and detaches the member image', function (
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
 
     $firstMedia = teamTestImage('first.png');
-    $this->post(route('admin.team.store'), ['name' => 'Ali Yılmaz', 'is_active' => '1', 'image_media_id' => $firstMedia->id])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.team.index');
+    $this->post(route('admin.team.store'), ['lang_id' => teamTestLanguageId(), 'name' => 'Ali Yılmaz', 'is_active' => '1', 'image_media_id' => $firstMedia->id])
+        ->assertSessionHasNoErrors()->assertRedirect(teamTestEditUrl());
     $member = TeamMember::query()->sole();
     $firstImage = $member->image;
     Storage::disk('public')->assertExists($firstImage);
 
-    $this->put(route('admin.team.update', $member), ['name' => 'Ali Yılmaz', 'is_active' => '0'])->assertSessionHasNoErrors();
+    $this->put(route('admin.team.update', $member), ['lang_id' => teamTestLanguageId(), 'name' => 'Ali Yılmaz', 'is_active' => '0'])->assertSessionHasNoErrors();
     expect($member->fresh()->image)->toBe($firstImage);
     Storage::disk('public')->assertExists($firstImage);
 
     $secondMedia = teamTestImage('second.png');
-    $this->put(route('admin.team.update', $member), ['name' => 'Ali Yılmaz', 'is_active' => '1', 'image_media_id' => $secondMedia->id])
+    $this->put(route('admin.team.update', $member), ['lang_id' => teamTestLanguageId(), 'name' => 'Ali Yılmaz', 'is_active' => '1', 'image_media_id' => $secondMedia->id])
         ->assertSessionHasNoErrors();
     $secondImage = $member->fresh()->image;
     Storage::disk('public')->assertExists($secondImage);
@@ -102,14 +124,14 @@ test('team removes an image reference and rejects simultaneous replacement and r
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
 
     $replacement = teamTestImage('replacement.png');
-    $this->put(route('admin.team.update', $member), ['name' => 'Yeni isim', 'is_active' => '0', 'remove_image' => '1', 'image_media_id' => $replacement->id])
+    $this->put(route('admin.team.update', $member), ['lang_id' => teamTestLanguageId(), 'name' => 'Yeni isim', 'is_active' => '0', 'remove_image' => '1', 'image_media_id' => $replacement->id])
         ->assertSessionHasErrors('image_media_id');
     Storage::disk('public')->assertExists('team/images/existing.png');
     Storage::disk('public')->assertCount('team/images', 1);
     expect($member->fresh()->image)->toBe('team/images/existing.png');
 
-    $this->put(route('admin.team.update', $member), ['name' => 'Yeni isim', 'is_active' => '0', 'remove_image' => '1'])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.team.index');
+    $this->put(route('admin.team.update', $member), ['lang_id' => teamTestLanguageId(), 'name' => 'Yeni isim', 'is_active' => '0', 'remove_image' => '1'])
+        ->assertSessionHasNoErrors()->assertRedirect(teamTestEditUrl($member));
     expect($member->fresh()->image)->toBeNull();
     Storage::disk('public')->assertExists('team/images/existing.png');
 });
@@ -124,7 +146,7 @@ test('team requires the member name and an explicit active state', function () {
 
 test('team rejects invalid input without saving a member or its image', function (string $field, mixed $value, string $message) {
     Storage::fake('public');
-    $payload = ['name' => 'Yeni ekip üyesi', 'is_active' => '1', 'image_media_id' => teamTestImage('valid.png')->id];
+    $payload = ['lang_id' => teamTestLanguageId(), 'name' => 'Yeni ekip üyesi', 'is_active' => '1', 'image_media_id' => teamTestImage('valid.png')->id];
     data_set($payload, $field, $value);
 
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')->post(route('admin.team.store'), $payload)
@@ -146,7 +168,7 @@ test('team rejects non images and oversized uploads', function (bool $oversized)
     $image = $oversized ? teamTestImage('large.png', true) : teamTestDocument();
 
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
-        ->post(route('admin.team.store'), ['name' => 'Yeni ekip üyesi', 'is_active' => '1', 'image_media_id' => $image->id])
+        ->post(route('admin.team.store'), ['lang_id' => teamTestLanguageId(), 'name' => 'Yeni ekip üyesi', 'is_active' => '1', 'image_media_id' => $image->id])
         ->assertSessionHasErrors('image_media_id');
 
     $this->assertDatabaseCount('team_members', 0);
@@ -166,22 +188,38 @@ test('team connects configured extra fields to its forms validation and persiste
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
 
     $this->get(route('admin.team.create'))->assertOk()->assertSee('name="extra_fields[biography]"', false);
-    $this->post(route('admin.team.store'), ['name' => 'Ekip üyesi', 'is_active' => '1', 'extra_fields' => ['biography' => '<script>Metin</script>']])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.team.index');
+    $this->post(route('admin.team.store'), ['lang_id' => teamTestLanguageId(), 'name' => 'Ekip üyesi', 'is_active' => '1', 'extra_fields' => ['biography' => '<script>Metin</script>']])
+        ->assertSessionHasNoErrors()->assertRedirect(teamTestEditUrl());
     $member = TeamMember::query()->sole();
-    expect($member->extra_fields)->toBe(['biography' => '<script>Metin</script>']);
+    expect($member->translations()->firstOrFail()->extra_fields)->toBe(['biography' => '<script>Metin</script>']);
     $this->get(route('admin.team.edit', $member))->assertOk()->assertSee('&lt;script&gt;Metin&lt;/script&gt;', false);
-    $this->put(route('admin.team.update', $member), ['name' => 'Ekip üyesi', 'is_active' => '1', 'extra_fields' => ['biography' => str_repeat('a', 51)]])
+    $this->put(route('admin.team.update', $member), ['lang_id' => teamTestLanguageId(), 'name' => 'Ekip üyesi', 'is_active' => '1', 'extra_fields' => ['biography' => str_repeat('a', 51)]])
         ->assertSessionHasErrors(['extra_fields.biography' => 'Biyografi en fazla 50 karakter olabilir.']);
-    expect($member->fresh()->extra_fields)->toBe(['biography' => '<script>Metin</script>']);
+    expect($member->translations()->firstOrFail()->extra_fields)->toBe(['biography' => '<script>Metin</script>']);
 });
 
 test('team rejects undefined extra fields', function () {
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
-        ->post(route('admin.team.store'), ['name' => 'Ekip üyesi', 'is_active' => '1', 'extra_fields' => ['unknown' => 'injected']])
+        ->post(route('admin.team.store'), ['lang_id' => teamTestLanguageId(), 'name' => 'Ekip üyesi', 'is_active' => '1', 'extra_fields' => ['unknown' => 'injected']])
         ->assertSessionHasErrors('extra_fields');
 
     $this->assertDatabaseCount('team_members', 0);
+});
+
+test('team edits the selected language without replacing the Turkish translation', function () {
+    $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
+    $member = teamTestMember(['name' => 'Türkçe QA', 'title' => 'Türkçe Ünvan']);
+    $english = Language::query()->firstOrCreate(['code' => 'en'], ['is_active' => true]);
+    $english->forceFill(['is_active' => true])->save();
+
+    $this->get(route('admin.team.edit', ['member' => $member, 'lang' => 'en']))->assertOk()
+        ->assertSee('Çeviri yok')->assertSee('name="name"', false);
+    $this->put(route('admin.team.update', $member), [
+        'lang_id' => $english->id, 'name' => 'English QA', 'title' => 'English Title',
+    ])->assertSessionHasNoErrors()->assertRedirect(route('admin.team.edit', ['member' => $member->id, 'lang' => 'en']));
+
+    $this->assertDatabaseHas('team_member_translations', ['team_member_id' => $member->id, 'lang_id' => teamTestLanguageId(), 'name' => 'Türkçe QA', 'title' => 'Türkçe Ünvan']);
+    $this->assertDatabaseHas('team_member_translations', ['team_member_id' => $member->id, 'lang_id' => $english->id, 'name' => 'English QA', 'title' => 'English Title']);
 });
 
 test('team endpoints enforce their operation permissions', function (string $method, string $action, string $permission, bool $granted) {
@@ -191,11 +229,11 @@ test('team endpoints enforce their operation permissions', function (string $met
     if ($granted) {
         $admin->givePermissionTo($permission);
     }
-    $member = TeamMember::factory()->create(['name' => 'Original']);
+    $member = teamTestMember(['name' => 'Original']);
     $parameters = in_array($action, ['edit', 'update', 'destroy'], true) ? $member : [];
 
     $response = $this->actingAs($admin, 'admin')->{$method}(route('admin.team.'.$action, $parameters), [
-        'name' => 'Updated', 'is_active' => '0',
+        'lang_id' => teamTestLanguageId(), 'name' => 'Updated', 'is_active' => '0',
     ]);
 
     if (! $granted) {
@@ -206,8 +244,10 @@ test('team endpoints enforce their operation permissions', function (string $met
         $response->assertRedirectToRoute('admin.team.index');
         $this->assertModelMissing($member);
     } elseif (in_array($action, ['store', 'update'], true)) {
-        $response->assertRedirectToRoute('admin.team.index');
-        $this->assertDatabaseHas('team_members', ['name' => 'Updated', 'is_active' => false]);
+        $response->assertRedirect(teamTestEditUrl($action === 'update' ? $member : null));
+        $savedMember = $action === 'store' ? TeamMember::query()->latest('id')->firstOrFail() : $member;
+        $this->assertDatabaseHas('team_member_translations', ['team_member_id' => $savedMember->id, 'lang_id' => teamTestLanguageId(), 'name' => 'Updated']);
+        $this->assertDatabaseHas('team_members', ['id' => $savedMember->id, 'is_active' => false]);
     } else {
         $response->assertOk();
     }
@@ -262,7 +302,7 @@ test('disabled team module is hidden and all endpoints reject even super admins'
     $parameters = in_array($action, ['edit', 'update', 'destroy'], true) ? $member : [];
 
     $this->get(route('admin.dashboard'))->assertOk()->assertDontSee('href="'.route('admin.team.index').'"', false);
-    $this->{$method}(route('admin.team.'.$action, $parameters), ['name' => 'Forbidden', 'is_active' => '1'])->assertNotFound();
+    $this->{$method}(route('admin.team.'.$action, $parameters), ['lang_id' => teamTestLanguageId(), 'name' => 'Forbidden', 'is_active' => '1'])->assertNotFound();
 
     $this->assertModelExists($member);
     $this->assertDatabaseCount('team_members', 1);
@@ -275,8 +315,9 @@ test('team data table escapes user text displays both statuses and only offers p
     app(ModulePanelService::class)->syncPermissions();
     $admin = Admin::factory()->create();
     $admin->givePermissionTo(['team.view', 'team.update']);
-    TeamMember::factory()->create(['name' => '<script>name</script>', 'title' => '<script>title</script>']);
-    TeamMember::factory()->inactive()->create(['name' => 'Pasif üye']);
+    teamTestMember(['name' => '<script>name</script>', 'title' => '<script>title</script>']);
+    $inactive = teamTestMember(['name' => 'Pasif üye']);
+    $inactive->update(['is_active' => false]);
 
     $this->actingAs($admin, 'admin')->getJson(route('admin.team.data'))
         ->assertOk()->assertJsonPath('recordsTotal', 2)

@@ -1,13 +1,18 @@
 <?php
 
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Modules\Products\Models\Product;
+use Modules\Store\Models\StoreCategory;
+use Modules\Store\Models\StoreCategoryTranslation;
 use Modules\Store\Models\StoreOrder;
 use Modules\Store\Models\StoreProduct;
+use Modules\Store\Models\StoreProductTranslation;
 use Modules\Store\Services\StoreCartService;
+use Modules\Store\Services\StoreFrontendService;
 use Modules\Store\Services\StoreOrderService;
 
 uses(LazilyRefreshDatabase::class);
@@ -17,18 +22,39 @@ beforeEach(function () {
 
 require_once __DIR__.'/../Fixtures/store.php';
 
+test('frontend exposes only matching language translations and slugs', function () {
+    storeStatuses();
+    $english = Language::factory()->create(['code' => 'en', 'is_active' => true]);
+    $translatedCategory = StoreCategory::factory()->create();
+    $untranslatedCategory = StoreCategory::factory()->create();
+    $translatedProduct = StoreProduct::factory()->create(['store_category_id' => $translatedCategory->id]);
+    $hiddenProduct = StoreProduct::factory()->create(['store_category_id' => $untranslatedCategory->id]);
+    StoreCategoryTranslation::query()->create(['store_category_id' => $translatedCategory->id, 'lang_id' => $english->id, 'name' => 'Doors', 'slug' => 'doors', 'extra_fields' => []]);
+    foreach ([[$translatedProduct, 'Door', 'door'], [$hiddenProduct, 'Window', 'window']] as [$product, $title, $slug]) {
+        StoreProductTranslation::query()->create(['store_product_id' => $product->id, 'lang_id' => $english->id, 'title' => $title, 'slug' => $slug, 'extra_fields' => []]);
+    }
+    $turkishSlug = $translatedProduct->translations()->whereHas('language', fn ($query) => $query->where('code', 'tr'))->value('slug');
+
+    $frontend = app(StoreFrontendService::class);
+    expect($frontend->products(languageCode: 'en')->getCollection()->modelKeys())->toBe([$translatedProduct->id]);
+    expect($frontend->categories('en')->modelKeys())->toBe([$translatedCategory->id]);
+    expect($frontend->findBySlug('door', 'en')?->id)->toBe($translatedProduct->id);
+    expect($frontend->findBySlug($turkishSlug, 'en'))->toBeNull();
+});
+
 test('creates independent products with editable slug money media delivery and SEO', function () {
     storeStatuses(['Products' => false]);
     Storage::fake('public');
     $admin = Admin::factory()->superAdmin()->create();
     $image = storeImage('kapak.png');
     $second = storeImage('galeri.png');
-    $this->actingAs($admin, 'admin')->post(route('admin.store.store'), storePayload(['slug' => 'ozel-kapi', 'image_media_id' => $image->id, 'image_media_ids' => [$second->id, $image->id], 'meta_title' => 'Özel SEO', 'weight_grams' => 2500, 'content' => '<p>Detay</p><script>alert(1)</script>', 'id' => 999]))->assertRedirectToRoute('admin.store.index');
+    $this->actingAs($admin, 'admin')->post(route('admin.store.store'), storePayload(['slug' => 'ozel-kapi', 'image_media_id' => $image->id, 'image_media_ids' => [$second->id, $image->id], 'meta_title' => 'Özel SEO', 'weight_grams' => 2500, 'content' => '<p>Detay</p><script>alert(1)</script>', 'id' => 999]))->assertRedirectToRoute('admin.store.edit', ['product' => StoreProduct::query()->latest('id')->firstOrFail(), 'lang' => 'tr']);
     $product = StoreProduct::query()->sole();
     expect($product->price_minor)->toBe(12050);
     expect($product->images->modelKeys())->toBe([$second->id, $image->id]);
     expect($product->content)->not->toContain('<script>');
-    $this->assertDatabaseHas('store_products', ['slug' => 'ozel-kapi', 'meta_title' => 'Özel SEO', 'weight_grams' => 2500]);
+    $this->assertDatabaseHas('store_product_translations', ['store_product_id' => $product->id, 'lang_id' => Language::query()->where('code', 'tr')->value('id'), 'slug' => 'ozel-kapi', 'meta_title' => 'Özel SEO']);
+    $this->assertDatabaseHas('store_products', ['id' => $product->id, 'weight_grams' => 2500]);
     $this->assertDatabaseHas('media_usages', ['owner_type' => StoreProduct::class, 'owner_id' => $product->id, 'field' => 'image']);
     $this->get(route('admin.store.edit', $product))->assertOk()->assertSee('SEO ayarları')->assertSee('Teslimat')->assertSee('data-variant-editor', false);
     $this->get(route('store.show', $product->slug))->assertOk()->assertSee('Özel SEO')->assertDontSee('<script>alert(1)', false);
@@ -42,7 +68,7 @@ test('imports catalogue media and preserves Store content after the source is de
     $source = Product::factory()->create(['image_media_id' => $image->id, 'image' => $image->path]);
     $source->images()->attach($image, ['sort_order' => 0]);
     $this->actingAs($admin, 'admin')->getJson(route('admin.store.catalog', ['q' => $source->title]))->assertOk()->assertJsonPath('items.0.image_media_id', $image->id)->assertJsonPath('items.0.images.0.id', $image->id);
-    $this->post(route('admin.store.store'), storePayload(['source_product_id' => $source->id, 'image_media_id' => $image->id, 'image_media_ids' => [$image->id]]))->assertRedirectToRoute('admin.store.index');
+    $this->post(route('admin.store.store'), storePayload(['source_product_id' => $source->id, 'image_media_id' => $image->id, 'image_media_ids' => [$image->id]]))->assertRedirectToRoute('admin.store.edit', ['product' => StoreProduct::query()->latest('id')->firstOrFail(), 'lang' => 'tr']);
     $product = StoreProduct::query()->sole();
     $source->delete();
     storeStatuses(['Products' => false]);
@@ -55,12 +81,12 @@ test('creates and edits variants on the product form and rejects a foreign varia
     storeStatuses();
     $admin = Admin::factory()->superAdmin()->create();
     $payload = storePayload(['has_variants' => 1, 'option_groups' => [['name' => 'Renk', 'values' => 'Siyah, Beyaz']], 'variants' => [['sku' => 'BLACK', 'option_values' => ['Renk' => 'Siyah'], 'price' => '130.00', 'stock_quantity' => 3, 'is_active' => 1]]]);
-    $this->actingAs($admin, 'admin')->post(route('admin.store.store'), $payload)->assertRedirectToRoute('admin.store.index');
+    $this->actingAs($admin, 'admin')->post(route('admin.store.store'), $payload)->assertRedirectToRoute('admin.store.edit', ['product' => StoreProduct::query()->latest('id')->firstOrFail(), 'lang' => 'tr']);
     $product = StoreProduct::query()->sole();
     $variant = $product->variants->sole();
     $payload['variants'][0]['id'] = $variant->id;
     $payload['variants'][0]['price'] = '140.25';
-    $this->put(route('admin.store.update', $product), $payload)->assertRedirectToRoute('admin.store.index');
+    $this->put(route('admin.store.update', $product), $payload)->assertRedirectToRoute('admin.store.edit', ['product' => $product, 'lang' => 'tr']);
     expect($variant->fresh()->price_minor)->toBe(14025);
     $this->assertDatabaseCount('store_variants', 1);
     $this->post(route('store.cart.add'), ['product_id' => $product->id, 'quantity' => 1])->assertSessionHasErrors('variant_id');
@@ -107,8 +133,8 @@ test('guest checkout creates an unpaid order and protects its result token', fun
     storeStatuses();
     storeSettings(['store.guest_checkout_enabled' => true]);
     $product = StoreProduct::factory()->create();
-    $this->post(route('store.cart.add'), ['product_id' => $product->id, 'quantity' => 1])->assertRedirectToRoute('store.cart');
-    $this->get(route('store.checkout.form'))->assertOk()->assertSee('Özeti onayla');
+    $this->post(route('store.cart.add'), ['product_id' => $product->id, 'quantity' => 1])->assertRedirectToRoute('store.cart', ['lang' => 'tr']);
+    $this->get(route('store.checkout.form'))->assertOk()->assertSee(__('store::store.confirm_create_order'));
     $items = [['product_id' => $product->id, 'variant_id' => null, 'quantity' => 1]];
     $customer = storeCustomer($items, ['checkout_key' => session('store.checkout_key')]);
     $this->post(route('store.checkout'), $customer)->assertRedirect();
@@ -120,7 +146,7 @@ test('guest checkout creates an unpaid order and protects its result token', fun
     $this->get(route('store.order.complete', ['number' => $order->number, 'token' => $order->access_token]))->assertOk()->assertSee($order->number);
     $this->get(route('store.order.complete', ['number' => $order->number, 'token' => str_repeat('x', 64)]))->assertNotFound();
     $this->get(route('store.account.order', $order->number))->assertForbidden();
-    $this->post(route('store.cart.add'), ['product_id' => $product->id, 'quantity' => 1])->assertRedirectToRoute('store.cart');
+    $this->post(route('store.cart.add'), ['product_id' => $product->id, 'quantity' => 1])->assertRedirectToRoute('store.cart', ['lang' => 'tr']);
     $this->get(route('store.checkout.form'))->assertOk();
     expect(session('store.checkout_key'))->not->toBe($customer['checkout_key']);
     $nextCustomer = storeCustomer($items, ['checkout_key' => session('store.checkout_key')]);
@@ -130,7 +156,7 @@ test('guest checkout creates an unpaid order and protects its result token', fun
 test('requires a web account when guests are disabled and does not bypass missing Users', function () {
     storeStatuses(['Users' => false]);
     storeSettings();
-    $this->get(route('store.checkout.form'))->assertOk()->assertSee('Users modülünü etkinleştirmeli');
+    $this->get(route('store.checkout.form'))->assertOk()->assertSee(__('store::store.login_unavailable'));
     $this->post(route('store.checkout'), [])->assertForbidden();
     $this->assertDatabaseCount('store_orders', 0);
 });

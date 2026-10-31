@@ -70,6 +70,9 @@ function initializeDefinitionForm(form) {
 }
 
 export function initializeSettings() {
+    document.querySelectorAll('[data-language-status]').forEach((input) => {
+        input.addEventListener('change', () => input.form.requestSubmit());
+    });
     document.querySelectorAll('[data-setting-definition]').forEach(initializeDefinitionForm);
     document.querySelectorAll('[data-clear-radio]').forEach((button) => {
         button.addEventListener('click', () => {

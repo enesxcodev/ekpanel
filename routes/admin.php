@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Modules\ModuleController;
 use App\Http\Controllers\Admin\Modules\ModuleFeatureController;
 use App\Http\Controllers\Admin\Notifications\NotificationController;
 use App\Http\Controllers\Admin\Roles\AdminRoleController;
+use App\Http\Controllers\Admin\Settings\LanguageController;
 use App\Http\Controllers\Admin\Settings\SettingConfigurationController;
 use App\Http\Controllers\Admin\Settings\SettingController;
 use App\Http\Controllers\Admin\Settings\SettingDefinitionController;
@@ -83,6 +84,8 @@ Route::prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')-
         });
 
         Route::prefix('settings')->name('settings.')->group(function (): void {
+            Route::post('/languages', [LanguageController::class, 'store'])->name('languages.store');
+            Route::patch('/languages/{language}', [LanguageController::class, 'update'])->name('languages.update');
             Route::get('/', [SettingController::class, 'index'])->name('index');
             Route::put('/sections/{section}/values', [SettingController::class, 'update'])->name('update');
 

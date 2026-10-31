@@ -3,6 +3,7 @@
 namespace Modules\Services\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
@@ -15,7 +16,9 @@ use Modules\Services\DataTables\ServiceCategoriesDataTable;
 use Modules\Services\Http\Requests\StoreServiceCategoryRequest;
 use Modules\Services\Http\Requests\UpdateServiceCategoryRequest;
 use Modules\Services\Models\ServiceCategory;
+use Modules\Services\Models\ServiceCategoryTranslation;
 use Modules\Services\Services\ServiceCategoryService;
+use Modules\Services\Services\ServicesLanguageService;
 
 class ServiceCategoryController extends Controller
 {
@@ -40,9 +43,10 @@ class ServiceCategoryController extends Controller
         $this->authorize('services.categories.create');
 
         $featureForm = $features->form('Services', 'category');
+        $options = $this->languageOptions();
         $featureFields = $values->fields($featureForm['fields'], []);
 
-        return view('services::categories.create', compact('featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
+        return view('services::categories.create', compact('featureForm', 'featureFields') + $options + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function store(StoreServiceCategoryRequest $request, ServiceCategoryService $service, NotifyService $notifications): RedirectResponse
@@ -52,10 +56,10 @@ class ServiceCategoryController extends Controller
             $request->user('admin'),
             'Hizmet kategorisi eklendi',
             'Bir hizmet kategorisi eklendi.',
-            route('admin.services.categories.edit', ['category' => $category->id], absolute: false),
+            route('admin.services.categories.edit', ['category' => $category->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code], absolute: false),
         );
 
-        return redirect()->route('admin.services.categories.index')->with('notification', [
+        return redirect()->route('admin.services.categories.edit', ['category' => $category->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code])->with('notification', [
             'type' => 'success', 'message' => 'Hizmet kategorisi başarıyla eklendi.',
         ]);
     }
@@ -65,9 +69,10 @@ class ServiceCategoryController extends Controller
         $this->authorize('services.categories.update');
 
         $featureForm = $features->form('Services', 'category');
-        $featureFields = $values->fields($featureForm['fields'], $category->extra_fields ?? []);
+        $options = $this->languageOptions($category);
+        $featureFields = $values->fields($featureForm['fields'], $options['translation']?->extra_fields ?? []);
 
-        return view('services::categories.edit', compact('category', 'featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
+        return view('services::categories.edit', compact('category', 'featureForm', 'featureFields') + $options + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function update(UpdateServiceCategoryRequest $request, ServiceCategory $category, ServiceCategoryService $service, NotifyService $notifications): RedirectResponse
@@ -77,10 +82,10 @@ class ServiceCategoryController extends Controller
             $request->user('admin'),
             'Hizmet kategorisi güncellendi',
             'Bir hizmet kategorisi güncellendi.',
-            route('admin.services.categories.edit', ['category' => $category->id], absolute: false),
+            route('admin.services.categories.edit', ['category' => $category->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code], absolute: false),
         );
 
-        return redirect()->route('admin.services.categories.index')->with('notification', [
+        return redirect()->route('admin.services.categories.edit', ['category' => $category->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code])->with('notification', [
             'type' => 'success', 'message' => 'Hizmet kategorisi başarıyla güncellendi.',
         ]);
     }
@@ -99,5 +104,22 @@ class ServiceCategoryController extends Controller
         return redirect()->route('admin.services.categories.index')->with('notification', [
             'type' => 'success', 'message' => 'Hizmet kategorisi başarıyla silindi.',
         ]);
+    }
+
+    public function translationEdit(ServiceCategoryTranslation $translation): RedirectResponse
+    {
+        $this->authorize('services.categories.update');
+
+        return redirect()->route('admin.services.categories.edit', ['category' => $translation->service_category_id, 'lang' => $translation->language->code]);
+    }
+
+    private function languageOptions(?ServiceCategory $category = null): array
+    {
+        $languages = app(ServicesLanguageService::class)->active();
+        $selectedLanguage = app(ServicesLanguageService::class)->forAdmin(request()->query('lang'));
+        $translation = $selectedLanguage ? $category?->translations()->where('lang_id', $selectedLanguage->id)->first() : null;
+        $translatedLanguageIds = $category?->translations()->pluck('lang_id')->all() ?? [];
+
+        return compact('languages', 'selectedLanguage', 'translation', 'translatedLanguageIds');
     }
 }

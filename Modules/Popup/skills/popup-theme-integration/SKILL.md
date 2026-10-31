@@ -1,6 +1,6 @@
 ---
 name: popup-theme-integration
-description: EkAgent Popup modülünün zamanlanmış duyuru kayıtlarını ve ziyaretçi durumuna göre gösterim uygunluğu servisini gelecekteki tema entegrasyonunda kullan.
+description: EkAgent Popup modülünün zamanlanmış ve dile göre çevrilen duyurularını, ziyaretçi durumuna göre gösterim uygunluğu servisini kullan.
 ---
 
 # Popup okuma ve gösterim uygunluğu
@@ -9,35 +9,35 @@ description: EkAgent Popup modülünün zamanlanmış duyuru kayıtlarını ve z
 
 ## Keşif ve kullanım
 
-Sınıf: `Modules\Popup\Services\PopupFrontendService`, dosya: `app/Services/PopupFrontendService.php`. Model: `Modules\Popup\Models\Popup`. Servis bağımsız somut sınıftır; container çözebilir, facade/helper gerektirmez.
+Sınıf `Modules\Popup\Services\PopupFrontendService`, model `Modules\Popup\Models\Popup`'tır. Servis bağımsız somut sınıftır; container çözebilir, facade/helper gerektirmez.
 
-- `published(?DateTimeInterface $at = null): Illuminate\Database\Eloquent\Collection<int, Popup>`: aktif ve yayın aralığında olan tüm kayıtları getirir. Ziyaretçi durumu dikkate alınmaz. `imageMedia` eager load edilir.
-- `eligible(array $visitorStates = [], ?DateTimeInterface $at = null): Collection<int, Popup>`: yayınlanan kayıtları ziyaretçi durumuyla filtreler. Dizi kayıt ID'siyle anahtarlanır; her değer `array{closed_at?: ?DateTimeInterface, last_shown_at?: ?DateTimeInterface}` biçimindedir. Eksik kayıt/alan, bilinen olay bulunmadığı anlamına gelir. JSON/string zamanlarını bu metoda vermeden önce entegrasyon sınırında doğrula ve saat dilimi açık tarih nesnelerine çevir.
-- `shouldShow(Popup $popup, ?DateTimeInterface $closedAt = null, ?DateTimeInterface $lastShownAt = null, ?DateTimeInterface $at = null): bool`: eldeki modelin aktifliğini, yayın zamanını ve ziyaretçi durumunu değerlendirir. Modeli yeniden sorgulamaz; güncel model için `published`/`eligible` kullan. Model parametresi kayıt seçimi veya ziyaretçi olayını kaydetme işlemi değildir.
+- `published(?DateTimeInterface $at = null, Language|string|null $language = null): Collection<int, Popup>` aktif ve yayın aralığındaki kayıtları döndürür. `imageMedia` ve dil çevirileri yüklenir.
+- `eligible(array $visitorStates = [], ?DateTimeInterface $at = null, Language|string|null $language = null): Collection<int, Popup>` yayınlanan kayıtları ziyaretçi durumuna göre filtreler. Dizi Popup ID'siyle anahtarlanır; her değer `array{closed_at?: ?DateTimeInterface, last_shown_at?: ?DateTimeInterface}` biçimindedir. JSON/string zamanlarını doğrulayıp saat dilimi açık tarih nesnelerine dönüştür.
+- `shouldShow(Popup $popup, ?DateTimeInterface $closedAt = null, ?DateTimeInterface $lastShownAt = null, ?DateTimeInterface $at = null, Language|string|null $language = null): bool` aktiflik, yayın aralığı, çeviri varlığı ve ziyaretçi durumunu değerlendirir. Modeli yeniden sorgulamaz; güncel seçim için `published`/`eligible` kullan.
 
-`$at` verilmezse güncel an kullanılır; açık tarih parametresi test veya belirli bir anı değerlendirmek içindir. Tarihler uygulamanın `config('app.timezone')` saat diliminde değerlendirilir; admin formundaki datetime-local değerleri de bu saat dilimine aittir. Başlangıç dahil (`starts_at <= at`), bitiş hariçtir (`ends_at > at`). Çakışan kayıtların sırası `starts_at DESC, id DESC` olur; filtreleme bu sırayı korur. Servis limit, tek kayıt seçimi veya eşzamanlı gösterim sayısı belirlemez.
+`$language` aktif dil kodu veya `App\Models\Settings\Language` modelidir. Verilmezse `popup_language` request niteliği, yoksa `tr` kullanılır. İstenen dil aktif değilse veya çevirisi yoksa aktif Türkçe çevirisine dönülür; ikisi de yoksa kayıt döndürülmez/gösterilmez. Servis `selectedTranslation` relation'ını ayarlar; `title`, `content`, `extra_fields` bu seçili çeviriden okunur. Görsel, aktiflik, tarihler ve tekrar politikası ortaktır. Visitor-state, Popup ID'siyle anahtarlanır ve diller arasında paylaşılır.
 
-Kod kurulu ama modül bulunamıyorsa/devre dışıysa veya `popups` tablosu henüz yoksa çoklu metotlar boş koleksiyon, `shouldShow` false döndürür. Modülün kodu hiç kurulu değilken sınıfı container'a zorunlu constructor bağımlılığı olarak ekleme. Çağıran çekirdek akışta sınıf varlığını çözümlemeden önce kontrol et:
+`$at` verilmezse güncel an kullanılır; tarihler uygulama saat diliminde değerlendirilir. Başlangıç dahil, bitiş hariçtir. Sıralama `starts_at DESC, id DESC` olur. Servis limit veya aynı anda gösterilecek kayıt sayısını belirlemez.
+
+Modül etkin değilse/kod bulunmuyorsa veya `popups`/`popup_translations` tabloları yoksa çoklu metotlar boş koleksiyon, `shouldShow` false döndürür. Modül kodu kurulu değilken sınıfı zorunlu constructor bağımlılığı yapma; çağıran çekirdek akışta sınıfı çözümlemeden önce kontrol et:
 
 ```php
 $class = \Modules\Popup\Services\PopupFrontendService::class;
 $popups = class_exists($class)
-    ? app($class)->eligible($visitorStates)
+    ? app($class)->eligible($visitorStates, language: 'en')
     : collect();
 ```
 
-Bu örnekte `$visitorStates` çağıranın doğruladığı olay durumudur. Hazırlanan `$popups` ilgili view'a açık veri olarak aktarılır. Bu yönerge frontend render entegrasyonu yapma talimatı değildir.
-
 ## Tekrar gösterim sözleşmesi
 
-- `never_after_close`: `closedAt` null ise uygun, herhangi bir kapatma zamanı varsa uygun değildir. Son gösterim tek başına engellemez. Kapatma geçmişi aynı kayıt ID'si için içerik düzenlenince otomatik sıfırlanmaz.
-- `interval`: admin `repeat_interval` pozitif tam sayısını ve `repeat_unit` (`hours`/`days`) değerini belirler. Referans, `lastShownAt` ve `closedAt` zamanlarından daha yenisidir. İkisi de yoksa ilk gösterim uygundur. Referans + aralık tam olarak dolduğunda tekrar uygundur. Saat 3600, gün 86400 saniyedir; gün takvim/gece yarısı anlamına gelmez. Gelecek tarihli olay süre dolana kadar gösterimi engeller.
-- Bilinmeyen politika veya geçersiz aralık güvenli biçimde uygun değildir. Yayın penceresi ve aktiflik her politikada önceliklidir; aralık dolsa bile süresi bitmiş kayıt gösterilmez.
+- `never_after_close`: `closedAt` null ise uygun, kapatma zamanı varsa uygun değildir. Son gösterim tek başına engellemez.
+- `interval`: `repeat_interval` pozitif tam sayıdır; `repeat_unit` `hours` veya `days` olur. Referans son gösterim ve kapatmadan daha yenisidir. İkisi de yoksa ilk gösterim uygundur. Aralık tam dolduğunda tekrar uygundur; gün 86400 saniyedir.
+- Bilinmeyen politika veya geçersiz aralık uygun değildir. Aktiflik ve yayın aralığı her politikada önceliklidir.
 
 ## Entegrasyon sınırı
 
-Servis salt okur ve hesaplar. PHP tarayıcıda kapatma veya görünür olma olayını kendiliğinden algılamaz. Gelecekteki entegrasyon hangi anı “gösterildi” sayacağını belirlemeli, bu olayı ve kapatmayı kaydetmeli, sonraki istekte kayıt ID'siyle durumu servise aktarmalıdır. Kalıcılık yöntemi (örneğin cookie/session veya istemci depolaması), süresi ve doğrulaması bu sürümde uygulanmamıştır. Durum kaybolur/aktarılmazsa yeni ziyaretçi gibi değerlendirilir; tarayıcılar veya cihazlar arasında kalıcı engelleme iddiasında bulunma. Listeyi okumak veya uygunluk hesaplamak bir gösterim/kapatma kaydı oluşturmaz. Frontend görünümü, tetikleme ve aynı anda gösterilecek kayıt adedi sonraki entegrasyonun kararlarıdır.
+Servis salt okur; tarayıcıda kapatma/görünür olma olayını algılamaz veya kaydetmez. Entegrasyon bu olayları Popup ID'siyle saklayıp sonraki istekte servise aktarmalıdır. Kalıcılık yöntemi, süresi ve doğrulaması bu modülde uygulanmaz. Olay aktarılmazsa ziyaretçi yeni kabul edilir. Listeyi okumak veya uygunluk hesaplamak gösterim/kapatma kaydı oluşturmaz. Frontend görünümü ve tetikleme bu sürümde yoktur.
 
 ## Admin ve dinamik alan akışı
 
-`SavePopupRequest` çekirdek alanları ve `ModuleFeatures::form('Popup', 'popup')` tanımlarını doğrular; `PopupController` ayrı create/edit ekranları için `FeatureValues::fields` hazırlar. Form `admin.features.fields` bileşenini kullanır. `PopupService::save` ortak `FieldFiles`, `FeatureValues::prepare` ve medya kullanım senkronizasyonuyla `extra_fields` değerlerini saklar; `delete` ilgili kullanımları temizler. `features.json` başlangıçta boş alan listesi sunar. Şemayı burada çoğaltma; genişletirken ortak modül kurallarına başvur.
+`SavePopupRequest` aktif `lang_id`, çeviri alanlarını ve `ModuleFeatures::form('Popup', 'popup')` tanımlarını doğrular. `PopupController` yalnız aktif dilleri listeler; formdaki başlık, içerik ve feature değerleri seçili `PopupTranslation` kaydından gelir. `PopupService::save` tarih, aktiflik, tekrar ve görseli ortak Popup kaydına; içerik alanlarını çeviriye yazar. Dinamik dosyalar dil başına saklanır, medya kullanımı translation sahibine bağlanır ve Popup silinirken her çevirinin kullanımları temizlenir. `features.json` şemasını tekrarlama; genişletirken ortak modül kurallarına başvur.

@@ -16,15 +16,17 @@ Sınıf: `Modules\Products\Services\ProductsFrontendService`, dosya: `app/Servic
 | Metot | Parametreler | Dönüş ve davranış |
 |---|---|---|
 | `available()` | Yok | `bool`; Products kurulu ve etkinse true. Sınıfın hiç bulunmadığı durumda çağırmadan önce `class_exists` kontrolü gerekir. |
-| `products(?int $categoryId = null, ?int $limit = null)` | Kategori ID'si null ise tüm kategoriler ve kategorisizler; limit null ise tüm uygun kayıtlar | `Illuminate\Database\Eloquent\Collection<int, Product>`. Yalnız yayındaki ürünler; kategorisiz veya aktif kategoriye bağlı olanlar. Artan `sort_order`, ardından artan `id`. Olmayan/pasif kategori boş sonuç; limit <= 0 boş koleksiyon. `category`, `imageMedia`, `images` önceden yüklenir. |
-| `categories()` | Yok | `Collection<int, ProductCategory>`; yalnız aktif kategoriler, artan `sort_order`, ardından `id`. Boş kategoriler de listelenir. |
-| `findBySlug(string $slug)` | Tam ürün slug'ı | `?Product`; listedeki görünürlük kuralları aynıdır. Bulunamazsa null. Aynı ilişkiler yüklenir. Detayda rastgele ilk kaydı seçme. |
+| `products(?int $categoryId = null, ?int $limit = null, ?string $languageCode = null)` | Kategori ID'si null ise tüm kategoriler ve kategorisizler; limit null ise tüm uygun kayıtlar | `Illuminate\Database\Eloquent\Collection<int, Product>`. Yalnız yayındaki ve seçilen dilde çevirisi bulunan ürünler; kategorisiz veya aktif, aynı dil çevirisi olan kategoriye bağlı olanlar. Artan `sort_order`, ardından artan `id`. Olmayan/pasif kategori boş sonuç; limit <= 0 veya geçersiz dil boş koleksiyon. `translations`, `category.translations`, `imageMedia`, `images` önceden yüklenir. |
+| `categories(?string $languageCode = null)` | Dil null ise aktif frontend dili veya Türkçe | `Collection<int, ProductCategory>`; yalnız aktif kategoriler ve seçilen dil çevirisi, artan `sort_order`, ardından `id`. Boş kategoriler de listelenir. |
+| `findBySlug(string $slug, ?string $languageCode = null)` | Tam ürün slug'ı ve isteğe bağlı dil kodu | `?Product`; yalnız bu dildeki slug ve listedeki görünürlük kuralları. Bulunamazsa null. Aynı ilişkiler yüklenir. |
 | `formFor(Product $product)` | Servisten okunan ürün | `?array{key: string, context: string}`. Ürün veritabanından yeniden okunur. Seçilmiş, aktif ve alanı bulunan form yoksa null; varsayılan forma düşmez. |
 | `formContext(int $id, SiteForm $form)` | Ürün ID'si ve çekirdek form modeli | `?array{type: string, id: int, title: string, slug: string}`. Çekirdek `FormContext` için doğrulama callback'i; temadan doğrudan çağırmak yerine `formFor` kullan. Yayın, aktif kategori ve güncel ürün/form bağlantısını kilitli sorguyla doğrular. |
 
+Üç okuma metoduna `languageCode` aktararak aktif dil kodunu açıkça seç. Parametre verilmezse `ProductsLanguageService` request'teki `products_language` kodunu, yoksa aktif Türkçe kaydını kullanır. Aktif olmayan veya bulunmayan dil boş sonuç/null üretir. Kategoriye bağlı ürün, seçili dilde kategori çevirisi bulunmuyorsa gösterilmez.
+
 Kapalı modülde liste/kategori metotları boş koleksiyon, tekli/form metotları null döndürür. Servis sıralamayı zaten uygular; tüketici yeni bir öncelik kuralı uydurmaz. Limit sayfalama değildir. Büyük katalog için sayfalama ancak açık ihtiyaçla eklenir.
 
-`Product`: `title`, `slug`, `short_description`, `content`, `image_url`, `images`, `category`, `site_form_id`, `is_active`, `sort_order`, `extra_fields`. Galeri `MediaFile` modelleridir ve pivot `sort_order` ile sıralıdır; kapağın galeriye dahil olması zorunlu değildir. `content`, admin kayıt servisinde ortak HTML temizleyicisinden geçer. Diğer metinleri Blade'in escaping davranışıyla göster. Fiyat/stok/ödeme alanları mevcut değildir.
+`Product`: `title`, `slug`, `short_description`, `content` ve `extra_fields` seçili dil çevirisinden gelir; `image_url`, `images`, `category`, `site_form_id`, `is_active`, `sort_order` ortaktır. Çevirisi olmayan dilde Türkçe fallback yapılmaz. Galeri `MediaFile` modelleridir ve pivot `sort_order` ile sıralıdır; kapağın galeriye dahil olması zorunlu değildir. `content`, admin kayıt servisinde ortak HTML temizleyicisinden geçer. Diğer metinleri Blade'in escaping davranışıyla göster. Fiyat/stok/ödeme alanları mevcut değildir.
 
 ## Controller'da veri hazırlama
 

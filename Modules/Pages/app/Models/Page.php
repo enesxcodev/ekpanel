@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Modules\Pages\Database\Factories\PageFactory;
 
@@ -29,9 +30,25 @@ class Page extends Model
         return $this->belongsTo(PageCategory::class, 'page_category_id');
     }
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(PageTranslation::class);
+    }
+
     public function getUrlPathAttribute(): string
     {
-        return $this->category === null ? $this->slug : trim($this->category->url_path.'/'.$this->slug, '/');
+        $languageCode = request()->attributes->get('pages_language');
+        if (! is_string($languageCode) || $languageCode === '') {
+            return $this->category === null ? $this->slug : trim($this->category->url_path.'/'.$this->slug, '/');
+        }
+
+        $languageId = $this->translations()->whereHas('language', fn ($query) => $query->where('code', $languageCode))->value('lang_id');
+        $slug = $languageId ? $this->translations()->where('lang_id', $languageId)->value('slug') : null;
+        if (! is_string($slug) || $slug === '') {
+            return '';
+        }
+
+        return $this->category === null ? $slug : trim($this->category->url_path.'/'.$slug, '/');
     }
 
     public function imageMedia(): BelongsTo

@@ -4,7 +4,7 @@
     "version": "0.1.2",
     "description": "Satılabilir ürün, stok ve yerel sipariş yönetimi",
     "keywords": [],
-    "priority": 0,
+    "priority": -1,
     "providers": [
         "Modules\\Store\\Providers\\StoreServiceProvider"
     ],

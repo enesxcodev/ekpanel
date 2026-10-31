@@ -27,4 +27,9 @@ class BranchCategory extends Model
     {
         return $this->hasMany(Branch::class);
     }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(BranchCategoryTranslation::class);
+    }
 }

@@ -6,6 +6,7 @@ use App\Enums\Fields\FieldValueType;
 use App\Models\Admin\Admin;
 use App\Models\Media\MediaFile;
 use App\Models\Media\MediaUsage;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldFiles;
 use App\Services\Fields\ModuleFeatures;
@@ -27,24 +28,30 @@ class PopupService
                 abort_unless($actor->can('media.view'), 403, 'Medya kütüphanesinden seçim yapma izniniz bulunmuyor.');
             }
             $image = $mediaId === null ? null : MediaFile::query()->where('kind', 'image')->lockForUpdate()->findOrFail($mediaId);
+            $language = Language::query()->where('is_active', true)->findOrFail($data['lang_id']);
             $definitions = $this->features->form('Popup', 'popup')['fields'];
-            $extraFields = $this->values->prepare($definitions, $data, $popup->extra_fields ?? [], 'popup/features', $files, $actor);
             $popup->fill([
                 'is_active' => $data['is_active'] ?? $popup->is_active ?? true,
-                'title' => $data['title'], 'content' => $this->sanitizer->sanitize($data['content']),
                 'starts_at' => $data['starts_at'], 'ends_at' => $data['ends_at'],
                 'repeat_policy' => $data['repeat_policy'],
                 'repeat_interval' => $data['repeat_policy'] === 'interval' ? $data['repeat_interval'] : null,
                 'repeat_unit' => $data['repeat_policy'] === 'interval' ? $data['repeat_unit'] : null,
                 'image_media_id' => $image?->id,
+            ])->save();
+            $translation = $popup->translations()->firstOrNew(['lang_id' => $language->id]);
+            $extraFields = $this->values->prepare($definitions, $data, $translation->extra_fields ?? [], 'popup/'.$popup->id.'/translations/'.$language->id.'/features', $files, $actor);
+            $translation->fill([
+                'title' => $data['title'],
+                'content' => $this->sanitizer->sanitize($data['content']),
                 'extra_fields' => $extraFields,
             ])->save();
             if ($image !== null) {
-                $this->media->attachUsage($image, $popup, 'image', 'Popup / '.$popup->title, 'admin.popup.edit');
+                $this->media->attachUsage($image, $popup, 'image', 'Popup / '.$translation->title, 'admin.popup.edit');
             } else {
                 MediaUsage::query()->where('owner_type', $popup->getMorphClass())->where('owner_id', $popup->getKey())->where('field', 'image')->delete();
             }
-            $this->values->syncMediaUsages($definitions, $popup, $this->media, 'Popup / '.$popup->title, 'admin.popup.edit');
+            $this->values->syncMediaUsages($definitions, $translation, $this->media, 'Popup / '.$translation->title, 'admin.popup.edit');
+            $popup->setRelation('selectedTranslation', $translation);
 
             return $popup;
         });
@@ -54,12 +61,15 @@ class PopupService
     {
         $this->files->transaction(function (FieldFiles $files) use ($popup): void {
             $popup = Popup::query()->lockForUpdate()->findOrFail($popup->id);
-            $this->media->detachUsages($popup);
-            foreach ($this->features->form('Popup', 'popup')['fields'] as $key => $definition) {
-                if ($definition->input_type->isFile() && $definition->value_type !== FieldValueType::Media) {
-                    $files->replace(null, $popup->extra_fields[$key] ?? null, 'popup/features', true);
+            foreach ($popup->translations()->get() as $translation) {
+                foreach ($this->features->form('Popup', 'popup')['fields'] as $key => $definition) {
+                    if ($definition->input_type->isFile() && $definition->value_type !== FieldValueType::Media) {
+                        $files->replace(null, $translation->extra_fields[$key] ?? null, 'popup/'.$popup->id.'/translations/'.$translation->lang_id.'/features', true);
+                    }
                 }
+                $this->media->detachUsages($translation);
             }
+            $this->media->detachUsages($popup);
             $popup->delete();
         });
     }

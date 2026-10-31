@@ -2,6 +2,7 @@
 
 namespace Modules\Popup\Database\Factories;
 
+use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Popup\Models\Popup;
 
@@ -17,6 +18,14 @@ class PopupFactory extends Factory
      */
     public function definition(): array
     {
-        return ['title' => fake()->sentence(3), 'content' => 'Duyuru içeriği', 'is_active' => true, 'starts_at' => now()->subDay(), 'ends_at' => now()->addDay(), 'repeat_policy' => 'never_after_close', 'extra_fields' => []];
+        return ['is_active' => true, 'starts_at' => now()->subDay(), 'ends_at' => now()->addDay(), 'repeat_policy' => 'never_after_close'];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Popup $popup): void {
+            $language = Language::query()->firstOrCreate(['code' => 'tr'], ['is_active' => true]);
+            $popup->translations()->create(['lang_id' => $language->id, 'title' => fake()->sentence(3), 'content' => 'Duyuru içeriği', 'extra_fields' => []]);
+        });
     }
 }

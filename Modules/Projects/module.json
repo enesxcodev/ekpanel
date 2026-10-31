@@ -10,6 +10,10 @@
     ],
     "files": [],
     "panel": {
+        "assets": {
+            "routes": ["admin.projects.create", "admin.projects.edit"],
+            "js": ["resources/dist/panel.js"]
+        },
         "permissions": [
             "projects.menu",
             "projects.view",

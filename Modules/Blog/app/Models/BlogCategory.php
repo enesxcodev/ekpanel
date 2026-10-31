@@ -12,11 +12,36 @@ class BlogCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['parent_id', 'name', 'slug', 'sort_order', 'extra_fields'];
+    protected $with = ['translations.language'];
+
+    public function getAttribute($key): mixed
+    {
+        if (in_array($key, ['name', 'slug', 'extra_fields'], true) && ! array_key_exists($key, $this->attributes)) {
+            if ($this->relationLoaded('selectedTranslation')) {
+                return $this->getRelation('selectedTranslation')?->getAttribute($key);
+            }
+            if (! $this->relationLoaded('translations')) {
+                return null;
+            }
+            $code = request()->attributes->get('blog_language', 'tr');
+            $translation = $this->getRelation('translations')->first(fn ($item): bool => $item->relationLoaded('language') && $item->language?->code === $code);
+
+            return $translation?->getAttribute($key);
+        }
+
+        return parent::getAttribute($key);
+    }
+
+    protected $fillable = ['parent_id', 'sort_order'];
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(BlogCategoryTranslation::class);
+    }
 
     protected function casts(): array
     {
-        return ['parent_id' => 'integer', 'sort_order' => 'integer', 'extra_fields' => 'array'];
+        return ['parent_id' => 'integer', 'sort_order' => 'integer'];
     }
 
     public function parent(): BelongsTo
@@ -26,7 +51,7 @@ class BlogCategory extends Model
 
     public function children(): HasMany
     {
-        return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order')->orderBy('name');
+        return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order')->orderBy('id');
     }
 
     public function contents(): HasMany

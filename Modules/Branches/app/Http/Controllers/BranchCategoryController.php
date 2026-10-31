@@ -3,6 +3,7 @@
 namespace Modules\Branches\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Settings\Language;
 use App\Services\NotifyService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -12,14 +13,19 @@ use Illuminate\Validation\ValidationException;
 use Modules\Branches\DataTables\BranchCategoriesDataTable;
 use Modules\Branches\Http\Requests\SaveBranchCategoryRequest;
 use Modules\Branches\Models\BranchCategory;
+use Modules\Branches\Services\BranchesLanguageService;
+use Modules\Branches\Services\BranchService;
 
 class BranchCategoryController extends Controller
 {
-    public function index(): View
+    public function index(BranchesLanguageService $languages, Request $request): View
     {
         $this->authorize('branches.categories.view');
 
-        return view('branches::categories.index');
+        $activeLanguages = $languages->active();
+        $selectedLanguage = $languages->selectedAdmin($request);
+
+        return view('branches::categories.index', compact('activeLanguages', 'selectedLanguage'));
     }
 
     public function data(BranchCategoriesDataTable $dataTable): JsonResponse
@@ -29,42 +35,54 @@ class BranchCategoryController extends Controller
         return $dataTable->handle();
     }
 
-    public function create(): View
+    public function create(BranchesLanguageService $languages, Request $request): View
     {
         $this->authorize('branches.categories.create');
 
-        return view('branches::categories.create');
+        $activeLanguages = $languages->active();
+        $selectedLanguage = $languages->selectedAdmin($request);
+        $translatedLanguageIds = [];
+        $translation = null;
+
+        return view('branches::categories.create', compact('activeLanguages', 'selectedLanguage', 'translatedLanguageIds', 'translation'));
     }
 
-    public function store(SaveBranchCategoryRequest $request, NotifyService $notifications): RedirectResponse
+    public function store(SaveBranchCategoryRequest $request, BranchService $service, NotifyService $notifications): RedirectResponse
     {
-        $category = BranchCategory::query()->create($request->validated());
+        $category = $service->saveCategory($request->validated());
+        $language = app(BranchesLanguageService::class)->forAdmin(Language::query()->findOrFail($request->validated('lang_id'))->code);
         $notifications->sendToAdminsForActor(
             $request->user('admin'), 'Şube / bayi kategorisi eklendi', 'Bir şube / bayi kategorisi eklendi.',
-            route('admin.branches.categories.edit', $category, absolute: false),
+            route('admin.branches.categories.edit', ['category' => $category->id, 'lang' => $language?->code], absolute: false),
         );
 
-        return redirect()->route('admin.branches.categories.index')->with('notification', [
+        return redirect()->route('admin.branches.categories.edit', ['category' => $category->id, 'lang' => $language?->code])->with('notification', [
             'type' => 'success', 'message' => 'Kategori başarıyla eklendi.',
         ]);
     }
 
-    public function edit(BranchCategory $category): View
+    public function edit(BranchCategory $category, BranchesLanguageService $languages, Request $request): View
     {
         $this->authorize('branches.categories.update');
 
-        return view('branches::categories.edit', compact('category'));
+        $activeLanguages = $languages->active();
+        $selectedLanguage = $languages->selectedAdmin($request);
+        $translation = $selectedLanguage ? $category->translations()->where('lang_id', $selectedLanguage->id)->first() : null;
+        $translatedLanguageIds = $languages->translatedLanguageIds($category);
+
+        return view('branches::categories.edit', compact('category', 'activeLanguages', 'selectedLanguage', 'translation', 'translatedLanguageIds'));
     }
 
-    public function update(SaveBranchCategoryRequest $request, BranchCategory $category, NotifyService $notifications): RedirectResponse
+    public function update(SaveBranchCategoryRequest $request, BranchCategory $category, BranchService $service, NotifyService $notifications): RedirectResponse
     {
-        $category->update($request->validated());
+        $category = $service->saveCategory($request->validated(), $category);
+        $language = app(BranchesLanguageService::class)->forAdmin(Language::query()->findOrFail($request->validated('lang_id'))->code);
         $notifications->sendToAdminsForActor(
             $request->user('admin'), 'Şube / bayi kategorisi güncellendi', 'Bir şube / bayi kategorisi güncellendi.',
-            route('admin.branches.categories.edit', $category, absolute: false),
+            route('admin.branches.categories.edit', ['category' => $category->id, 'lang' => $language?->code], absolute: false),
         );
 
-        return redirect()->route('admin.branches.categories.index')->with('notification', [
+        return redirect()->route('admin.branches.categories.edit', ['category' => $category->id, 'lang' => $language?->code])->with('notification', [
             'type' => 'success', 'message' => 'Kategori başarıyla güncellendi.',
         ]);
     }

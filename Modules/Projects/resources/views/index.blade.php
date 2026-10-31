@@ -5,7 +5,7 @@
             :columns="[
                 ['title' => 'ID', 'data' => 'id', 'name' => 'projects.id'],
                 ['title' => 'Kapak', 'data' => 'cover', 'orderable' => false, 'searchable' => false],
-                ['title' => 'Başlık', 'data' => 'title', 'name' => 'projects.title'],
+                ['title' => 'Başlık', 'data' => 'title', 'name' => 'project_translation.title'],
                 ['title' => 'Kategori', 'data' => 'category_name', 'name' => 'category.name', 'orderable' => false],
                 ['title' => 'Proje tarihi', 'data' => 'project_date', 'name' => 'projects.project_date'],
                 ['title' => 'Yayın durumu', 'data' => 'is_active', 'name' => 'projects.is_active', 'searchable' => false],

@@ -4,6 +4,7 @@ namespace Modules\Store\Services;
 
 use App\Models\Admin\Admin;
 use App\Models\Media\MediaUsage;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldFiles;
 use App\Services\Fields\ModuleFeatures;
@@ -28,6 +29,25 @@ class StoreProductService
     {
         return Cache::lock('store.catalog-write', 120)->block(10, fn (): StoreProduct => $this->files->transaction(function (FieldFiles $files) use ($data, $product, $actor): StoreProduct {
             $product = $product ? StoreProduct::query()->lockForUpdate()->findOrFail($product->id) : new StoreProduct;
+            $language = Language::query()->where('is_active', true)->findOrFail($data['lang_id'] ?? app(StoreLanguageService::class)->forAdmin()?->id);
+            request()->attributes->set('store_language_id', $language->id);
+            request()->attributes->set('store_language', $language->code);
+            if (! $product->exists && $language->code !== StoreLanguageService::PrimaryCode) {
+                throw ValidationException::withMessages(['lang_id' => 'Yeni mağaza ürünleri önce Türkçe oluşturulmalıdır.']);
+            }
+            if ($product->exists && $language->code !== StoreLanguageService::PrimaryCode) {
+                foreach (['sku', 'store_category_id', 'price', 'compare_at_price', 'currency', 'tracks_stock', 'stock_quantity', 'low_stock_threshold', 'allow_backorders', 'is_active', 'sort_order', 'has_variants', 'option_groups', 'image_media_id', 'share_image_media_id', 'weight_grams', 'width_cm', 'height_cm', 'length_cm', 'preparation_days'] as $field) {
+                    $data[$field] = match ($field) {
+                        'price' => StoreMoney::decimal((int) $product->price_minor),
+                        'compare_at_price' => $product->compare_at_price_minor === null ? null : StoreMoney::decimal((int) $product->compare_at_price_minor),
+                        default => $product->{$field},
+                    };
+                }
+                $data['remove_image'] = false;
+                $data['remove_share_image'] = false;
+                $data['image_media_ids'] = $product->images()->pluck('media_files.id')->all();
+                $data['variants'] = $product->variants()->where('is_archived', false)->get()->map(fn (StoreVariant $variant): array => ['id' => $variant->id, 'sku' => $variant->sku, 'option_values' => $variant->option_values, 'price' => $variant->price_minor === null ? null : StoreMoney::decimal($variant->price_minor), 'stock_quantity' => $variant->stock_quantity, 'is_active' => (int) $variant->is_active, 'image_media_id' => $variant->image_media_id])->all();
+            }
             $oldStock = (int) ($product->stock_quantity ?? 0);
             if ($product->exists && ! $actor->can('store.stock.update') && ($oldStock !== (int) $data['stock_quantity'] || (bool) $product->has_variants !== (bool) $data['has_variants'])) {
                 abort(403);
@@ -58,13 +78,16 @@ class StoreProductService
                 $source = $data['source_product_id'];
             }
             $product->fill([
-                ...Arr::only($data, ['title', 'slug', 'sku', 'store_category_id', 'short_description', 'currency', 'tracks_stock', 'stock_quantity', 'low_stock_threshold', 'allow_backorders', 'is_active', 'sort_order', 'has_variants', 'option_groups', 'meta_title', 'meta_description', 'weight_grams', 'width_cm', 'height_cm', 'length_cm', 'preparation_days', 'delivery_description']),
+                ...Arr::only($data, ['sku', 'store_category_id', 'currency', 'tracks_stock', 'stock_quantity', 'low_stock_threshold', 'allow_backorders', 'is_active', 'sort_order', 'has_variants', 'option_groups', 'weight_grams', 'width_cm', 'height_cm', 'length_cm', 'preparation_days']),
                 'source_product_id' => $source, 'price_minor' => $price, 'compare_at_price_minor' => $compare,
-                'content' => isset($data['content']) ? $this->sanitizer->sanitize($data['content']) : null,
                 ...$this->contentMedia->prepare($product, $data, $this->contentMedia->definition(), $actor),
                 ...$this->contentMedia->prepare($product, $data, $this->contentMedia->definition('share_image'), $actor),
-                'extra_fields' => $this->values->prepare($this->features->form('Store', 'product')['fields'], $data, $product->extra_fields ?? [], 'store/features', $files, $actor),
             ])->save();
+            $translation = $product->translations()->firstOrNew(['lang_id' => $language->id]);
+            $translation->fill(Arr::only($data, ['title', 'slug', 'short_description', 'meta_title', 'meta_description', 'delivery_description']));
+            $translation->content = isset($data['content']) ? $this->sanitizer->sanitize($data['content']) : null;
+            $translation->extra_fields = $this->values->prepare($this->features->form('Store', 'product')['fields'], $data, $translation->extra_fields ?? [], 'store/'.$product->id.'/translations/'.$language->id.'/features', $files, $actor);
+            $translation->save();
             if ((int) $product->stock_quantity !== $oldStock) {
                 $this->movement($product, null, $oldStock, (int) $product->stock_quantity, $data['stock_reason'] ?? null, $actor);
             }
@@ -73,12 +96,12 @@ class StoreProductService
             $product->images()->sync(collect($ids)->mapWithKeys(fn (int $id, int $index): array => [$id => ['sort_order' => $index]])->all());
             MediaUsage::query()->where('owner_type', $product->getMorphClass())->where('owner_id', $product->id)->where('field', 'like', 'gallery.%')->delete();
             foreach ($images as $image) {
-                $this->media->attachUsage($image, $product, 'gallery.'.$image->id, 'Mağaza / '.$product->title, 'admin.store.edit');
+                $this->media->attachUsage($image, $product, 'gallery.'.$image->id, 'Mağaza / '.$translation->title, 'admin.store.edit');
             }
             foreach (['image', 'share_image'] as $field) {
-                $this->contentMedia->syncUsage($product, $field, 'Mağaza / '.$product->title, 'admin.store.edit');
+                $this->contentMedia->syncUsage($product, $field, 'Mağaza / '.$translation->title, 'admin.store.edit');
             }
-            $this->values->syncMediaUsages($this->features->form('Store', 'product')['fields'], $product, $this->media, 'Mağaza / '.$product->title, 'admin.store.edit');
+            $this->values->syncMediaUsages($this->features->form('Store', 'product')['fields'], $translation, $this->media, 'Mağaza / '.$translation->title, 'admin.store.edit');
             $kept = [];
             $combinations = [];
             $active = 0;
@@ -124,7 +147,7 @@ class StoreProductService
                 throw ValidationException::withMessages(['variants' => 'Yayınlamak için en az bir aktif varyant ekleyin.']);
             }
 
-            return $product;
+            return $product->setRelation('translation', $translation);
         }));
     }
 

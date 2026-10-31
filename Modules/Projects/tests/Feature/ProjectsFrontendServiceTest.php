@@ -1,10 +1,13 @@
 <?php
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Modules\Projects\Models\Project;
 use Modules\Projects\Models\ProjectCategory;
+use Modules\Projects\Models\ProjectCategoryTranslation;
+use Modules\Projects\Models\ProjectTranslation;
 use Modules\Projects\Services\ProjectsFrontendService;
 use Nwidart\Modules\Contracts\ActivatorInterface;
 
@@ -86,4 +89,28 @@ test('uses the configured content order', function () {
     $result = app(ProjectsFrontendService::class)->getAll();
 
     expect($result->modelKeys())->toBe([$earlier->id, $later->id]);
+});
+
+test('returns only translated published projects with a category translation in the requested language', function () {
+    $english = Language::factory()->create(['code' => 'en', 'is_active' => true]);
+    $translatedCategory = ProjectCategory::factory()->create();
+    ProjectCategoryTranslation::query()->create(['project_category_id' => $translatedCategory->id, 'lang_id' => $english->id, 'name' => 'Completed work', 'slug' => 'completed-work']);
+    $translatedProject = Project::factory()->for($translatedCategory, 'category')->create(['is_active' => true]);
+    ProjectTranslation::query()->create(['project_id' => $translatedProject->id, 'lang_id' => $english->id, 'title' => 'English project', 'slug' => 'english-project', 'content' => '<p>English copy</p>']);
+    $missingCategoryTranslation = Project::factory()->create(['is_active' => true]);
+    ProjectTranslation::query()->create(['project_id' => $missingCategoryTranslation->id, 'lang_id' => $english->id, 'title' => 'Should stay hidden', 'slug' => 'hidden-project']);
+    Project::factory()->create(['is_active' => true]);
+
+    $result = app(ProjectsFrontendService::class)->getAll(null, 'en');
+
+    expect($result->modelKeys())->toBe([$translatedProject->id])
+        ->and($result->first()->selectedTranslation->title)->toBe('English project')
+        ->and($result->first()->category->selectedTranslation->name)->toBe('Completed work');
+});
+
+test('returns empty results for an inactive frontend language', function () {
+    Language::factory()->inactive()->create(['code' => 'en']);
+    Project::factory()->create(['is_active' => true]);
+
+    expect(app(ProjectsFrontendService::class)->getAll(null, 'en'))->toBeEmpty();
 });

@@ -6,6 +6,7 @@ use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SaveFaqRequest extends FormRequest
 {
@@ -18,12 +19,14 @@ class SaveFaqRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values): array
     {
         $faq = $this->route('faq');
+        $translation = $faq?->translations()->where('lang_id', $this->input('lang_id'))->first();
 
         return [
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'name' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string', 'max:65535'],
             'category_id' => ['nullable', 'integer', 'exists:faq_categories,id'],
-            ...$values->rules($features->form('Faqs', 'faq')['fields'], $this->all(), $faq?->extra_fields ?? []),
+            ...$values->rules($features->form('Faqs', 'faq')['fields'], $this->all(), $translation?->extra_fields ?? []),
         ];
     }
 

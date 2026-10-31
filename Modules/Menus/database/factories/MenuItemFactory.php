@@ -2,6 +2,7 @@
 
 namespace Modules\Menus\Database\Factories;
 
+use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Menus\Models\Menu;
 use Modules\Menus\Models\MenuItem;
@@ -13,7 +14,7 @@ class MenuItemFactory extends Factory
 
     public function definition(): array
     {
-        return ['menu_id' => Menu::factory(), 'label' => fake()->words(2, true), 'target_type' => 'url', 'url' => '/iletisim', 'is_active' => true, 'new_tab' => false, 'dynamic_children' => false, 'sort_order' => 0];
+        return ['menu_id' => Menu::factory(), 'lang_id' => Language::query()->where('code', 'tr')->value('id') ?? Language::factory()->state(['code' => 'tr', 'is_active' => true]), 'label' => fake()->words(2, true), 'target_type' => 'url', 'url' => '/iletisim', 'is_active' => true, 'new_tab' => false, 'dynamic_children' => false, 'sort_order' => 0];
     }
 
     public function group(): static

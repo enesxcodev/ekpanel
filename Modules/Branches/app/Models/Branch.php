@@ -5,6 +5,7 @@ namespace Modules\Branches\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Branches\Database\Factories\BranchFactory;
 use Modules\Konum\Models\City;
 use Modules\Konum\Models\District;
@@ -39,6 +40,16 @@ class Branch extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(BranchCategory::class, 'branch_category_id');
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(BranchTranslation::class);
+    }
+
+    public function translation(): HasMany
+    {
+        return $this->translations();
     }
 
     public function city(): BelongsTo

@@ -10,30 +10,39 @@ use Nwidart\Modules\Facades\Module;
 
 class ProjectsFrontendService
 {
+    public function __construct(private ProjectsLanguageService $languages) {}
+
     /** @return Collection<int, Project> */
-    public function getAll(?int $categoryId = null): Collection
+    public function getAll(?int $categoryId = null, ?string $languageCode = null): Collection
     {
-        return $this->visibleQuery($categoryId)?->get() ?? new Collection;
+        return $this->visibleQuery($categoryId, $languageCode)?->get() ?? new Collection;
     }
 
-    public function getFirst(?int $categoryId = null): ?Project
+    public function getFirst(?int $categoryId = null, ?string $languageCode = null): ?Project
     {
-        return $this->visibleQuery($categoryId)?->first();
+        return $this->visibleQuery($categoryId, $languageCode)?->first();
     }
 
-    public function find(int $id): ?Project
+    public function find(int $id, ?string $languageCode = null): ?Project
     {
-        return $this->visibleQuery()?->whereKey($id)->first();
+        return $this->visibleQuery(null, $languageCode)?->whereKey($id)->first();
     }
 
     /** @return Builder<Project>|null */
-    private function visibleQuery(?int $categoryId = null): ?Builder
+    private function visibleQuery(?int $categoryId = null, ?string $languageCode = null): ?Builder
     {
-        if (! Module::find('Projects')?->isEnabled() || ! Schema::hasTable('projects') || ! Schema::hasTable('project_categories') || ! Schema::hasTable('project_images')) {
+        if (! Module::find('Projects')?->isEnabled() || ! Schema::hasTable('projects') || ! Schema::hasTable('project_categories') || ! Schema::hasTable('project_images') || ! Schema::hasTable('project_translations') || ! Schema::hasTable('project_category_translations') || ! Schema::hasTable('languages')) {
+            return null;
+        }
+        $language = $this->languages->forFrontend($languageCode);
+        if ($language === null) {
             return null;
         }
 
-        $query = Project::query()->with(['category', 'coverMedia', 'images'])->published();
+        $query = Project::query()->with(['selectedTranslation', 'category.selectedTranslation', 'coverMedia', 'images'])
+            ->whereHas('translations', fn (Builder $translation): Builder => $translation->where('lang_id', $language->id))
+            ->whereHas('category.translations', fn (Builder $translation): Builder => $translation->where('lang_id', $language->id))
+            ->published();
 
         if ($categoryId !== null) {
             $query->where('project_category_id', $categoryId);

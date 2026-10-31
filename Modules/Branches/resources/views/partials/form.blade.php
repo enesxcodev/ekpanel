@@ -1,5 +1,12 @@
 @csrf
 @isset($branch) @method('PUT') @endisset
+<input type="hidden" name="lang_id" value="{{ $selectedLanguage?->id }}">
+@if (! $selectedLanguage)
+    <div class="alert alert-warning" role="status">Önce Ayarlar üzerinden aktif dil ekleyin.</div>
+@endif
+<fieldset @disabled(! $selectedLanguage)>
+<div class="row g-4">
+<div class="col-lg-8">
 
 @if (! $locationReady)
     <div class="alert alert-warning" role="status">Türkiye Konum verisi hazır değil. Konum seçimi kullanılamıyor; bu alanlar boş bırakılabilir.</div>
@@ -7,8 +14,8 @@
 
 <h3 class="h4">Genel</h3>
 <div class="row">
-    <div class="col-md-6"><x-admin.form.input name="name" label="Şube / bayi adı" :value="$branch->name ?? null" required maxlength="255" /></div>
-    <div class="col-md-6"><x-admin.form.select name="branch_category_id" label="Kategori" :options="$categories" :value="old('branch_category_id', $branch->branch_category_id ?? null)" required placeholder="Kategori seçiniz" class="js-select2" data-placeholder="Kategori seçiniz" /></div>
+<div class="col-md-6"><x-admin.form.input name="name" label="Şube / bayi adı" :value="$selection['name'] ?? null" required maxlength="255" /></div>
+    <div class="col-md-6"><x-admin.form.select name="branch_category_id" label="Kategori" :options="$categories" :value="old('branch_category_id', $branch?->branch_category_id)" required placeholder="Kategori seçiniz" class="js-select2" data-placeholder="Kategori seçiniz" /></div>
     <div class="col-md-6"><x-admin.form.input name="sort_order" label="Sıralama" type="number" :value="$branch->sort_order ?? 0" min="0" max="65535" /></div>
     <div class="col-md-6"><x-admin.form.boolean name="is_active" label="Durum" :value="$branch->is_active ?? true" /></div>
 </div>
@@ -35,29 +42,44 @@
                 <select id="{{ $field }}" name="{{ $field }}" class="form-select" data-location-select data-entity="{{ $entity }}" data-parents="{{ implode(',', $parents) }}" data-placeholder="{{ $label }} seçiniz" @disabled(! $locationReady || ! $parentsAvailable)>
                     <option value="">{{ $label }} seçiniz</option>
                     @foreach ($locationOptions[$field] as $option)
-                        <option value="{{ $option['id'] }}" @selected((string) old($field, $branch->$field ?? '') === (string) $option['id'])>{{ $option['name'] }}</option>
+                        <option value="{{ $option['id'] }}" @selected((string) old($field, $branch?->{$field} ?? '') === (string) $option['id'])>{{ $option['name'] }}</option>
                     @endforeach
                 </select>
                 @error($field)<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
             </div>
         </div>
     @endforeach
-    <div class="col-md-6"><x-admin.form.textarea name="address_detail" label="Adres detayı" :value="$branch->address_detail ?? null" rows="3" maxlength="5000" /></div>
+    <div class="col-md-6"><x-admin.form.textarea name="address_detail" label="Adres detayı" :value="$selection['address_detail'] ?? null" rows="3" maxlength="5000" /></div>
 </div>
 
 <hr>
 <h3 class="h4">İletişim</h3>
 <div class="row">
-    <div class="col-md-6"><x-admin.form.input name="phone" label="Telefon" :value="$branch->phone ?? null" maxlength="50" /></div>
-    <div class="col-md-6"><x-admin.form.input name="email" label="E-posta" type="email" :value="$branch->email ?? null" maxlength="255" /></div>
-    <div class="col-md-6"><x-admin.form.input name="website" label="Web sitesi" type="url" :value="$branch->website ?? null" maxlength="2048" /></div>
-    <div class="col-md-6"><x-admin.form.input name="working_hours" label="Çalışma saatleri" :value="$branch->working_hours ?? null" maxlength="255" help="Örnek: Hafta içi 09.00–18.00, Cumartesi 10.00–14.00" /></div>
-    <div class="col-md-6"><x-admin.form.input name="map_url" label="Harita bağlantısı (HTTPS)" type="url" :value="$branch->map_url ?? null" maxlength="2048" /></div>
-    <div class="col-md-6"><x-admin.form.input name="latitude" label="Enlem" type="number" :value="$branch->latitude ?? null" step="any" min="-90" max="90" /></div>
-    <div class="col-md-6"><x-admin.form.input name="longitude" label="Boylam" type="number" :value="$branch->longitude ?? null" step="any" min="-180" max="180" /></div>
+    <div class="col-md-6"><x-admin.form.input name="phone" label="Telefon" :value="$selection['phone'] ?? null" maxlength="50" /></div>
+    <div class="col-md-6"><x-admin.form.input name="email" label="E-posta" type="email" :value="$selection['email'] ?? null" maxlength="255" /></div>
+    <div class="col-md-6"><x-admin.form.input name="website" label="Web sitesi" type="url" :value="$selection['website'] ?? null" maxlength="2048" /></div>
+    <div class="col-md-6"><x-admin.form.input name="working_hours" label="Çalışma saatleri" :value="$selection['working_hours'] ?? null" maxlength="255" help="Örnek: Hafta içi 09.00–18.00, Cumartesi 10.00–14.00" /></div>
+    <div class="col-md-6"><x-admin.form.input name="map_url" label="Harita bağlantısı (HTTPS)" type="url" :value="$selection['map_url'] ?? null" maxlength="2048" /></div>
+    <div class="col-md-6"><x-admin.form.input name="latitude" label="Enlem" type="number" :value="$branch?->latitude" step="any" min="-90" max="90" /></div>
+    <div class="col-md-6"><x-admin.form.input name="longitude" label="Boylam" type="number" :value="$branch?->longitude" step="any" min="-180" max="180" /></div>
+</div>
+
+</div>
+<div class="col-lg-4">
+    <div class="card"><div class="card-header"><h3 class="card-title">Diller</h3></div><div class="list-group list-group-flush">
+        @foreach ($activeLanguages as $language)
+            @php($details = config('languages.catalog.'.$language->code))
+            <a href="{{ request()->fullUrlWithQuery(['lang' => $language->code]) }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2 {{ $selectedLanguage?->id === $language->id ? 'active' : '' }}" data-branches-language-link>
+                <span class="flag flag-country-{{ $details['flag'] ?? '' }}" aria-hidden="true"></span><span>{{ $details['name'] ?? $language->code }}<small class="d-block">{{ in_array($language->id, $translatedLanguageIds, true) ? 'Çeviri mevcut' : 'Henüz eklenmedi' }}</small></span>
+            </a>
+        @endforeach
+    </div></div>
+    <div class="alert alert-info mt-3">Kategori, konum, koordinatlar, durum ve sıralama tüm dillerde ortaktır.</div>
+</div>
 </div>
 
 <div class="d-flex gap-2 mt-3">
     <button type="submit" class="btn btn-primary">{{ isset($branch) ? 'Değişiklikleri kaydet' : 'Şube / bayi ekle' }}</button>
     <a href="{{ route('admin.branches.index') }}" class="btn btn-link">Vazgeç</a>
 </div>
+ </fieldset>

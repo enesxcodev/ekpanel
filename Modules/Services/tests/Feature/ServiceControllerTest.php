@@ -2,6 +2,7 @@
 
 use App\Models\Admin\Admin;
 use App\Models\Media\MediaFile;
+use App\Models\Settings\Language;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -46,11 +47,12 @@ test('services can be created with category image and icon independently absent'
     $admin = Admin::factory()->superAdmin()->create();
 
     $this->actingAs($admin, 'admin')->post(route('admin.services.store'), [
-        'title' => 'Danışmanlık', 'is_active' => '1', 'id' => 999,
+        'lang_id' => Language::query()->where('code', 'tr')->value('id'), 'title' => 'Danışmanlık', 'is_active' => '1', 'id' => 999,
         ...$optional,
-    ])->assertRedirectToRoute('admin.services.index')->assertSessionHas('notification.message', 'Hizmet başarıyla eklendi.');
+    ])->assertRedirect()->assertSessionHas('notification.message', 'Hizmet başarıyla eklendi.');
 
-    $this->assertDatabaseHas('services', ['title' => 'Danışmanlık', 'service_category_id' => null, 'image' => null, 'icon' => ($optional['icon'] ?? null) ?: null, 'is_active' => true]);
+    $this->assertDatabaseHas('service_translations', ['title' => 'Danışmanlık']);
+    $this->assertDatabaseHas('services', ['service_category_id' => null, 'image' => null, 'icon' => ($optional['icon'] ?? null) ?: null, 'is_active' => true]);
     expect(Service::query()->sole()->id)->not->toBe(999);
     Storage::disk('public')->assertDirectoryEmpty('services');
 })->with([
@@ -66,8 +68,8 @@ test('one category can contain multiple services and category deletion preserves
     $this->actingAs($admin, 'admin');
 
     foreach (['Birinci', 'İkinci'] as $title) {
-        $this->post(route('admin.services.store'), ['title' => $title, 'is_active' => '1', 'service_category_id' => $category->id])
-            ->assertRedirectToRoute('admin.services.index');
+        $this->post(route('admin.services.store'), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'title' => $title, 'is_active' => '1', 'service_category_id' => $category->id])
+            ->assertRedirect();
     }
 
     expect($category->services)->toHaveCount(2);
@@ -82,7 +84,7 @@ test('service creation rejects invalid categories icons titles and file uploads'
     $admin = Admin::factory()->superAdmin()->create();
 
     $response = $this->actingAs($admin, 'admin')->post(route('admin.services.store'), [
-        'title' => 'Başlık', 'is_active' => '1', ...$invalid,
+        'lang_id' => Language::query()->where('code', 'tr')->value('id'), 'title' => 'Başlık', 'is_active' => '1', ...$invalid,
     ]);
 
     $response->assertSessionHasErrors($message === null ? [$field] : [$field => $message]);
@@ -105,10 +107,11 @@ test('service creation stores all reference content with an image and an icon to
     $data = ['title' => 'Teknik destek', 'short_description' => 'Kısa açıklama', 'content' => 'Detaylı içerik', 'meta_title' => 'SEO başlık', 'meta_keywords' => 'destek, teknik', 'meta_description' => 'SEO açıklama', 'is_active' => '0', 'icon' => 'settings'];
     $image = serviceTestImage('service.png');
 
-    $this->actingAs($admin, 'admin')->post(route('admin.services.store'), [...$data, 'image_media_id' => $image->id])
-        ->assertRedirectToRoute('admin.services.index');
+    $this->actingAs($admin, 'admin')->post(route('admin.services.store'), [...$data, 'lang_id' => Language::query()->where('code', 'tr')->value('id'), 'image_media_id' => $image->id])
+        ->assertRedirect();
 
-    $this->assertDatabaseHas('services', $data);
+    $this->assertDatabaseHas('service_translations', array_diff_key($data, array_flip(['is_active', 'icon'])));
+    $this->assertDatabaseHas('services', ['is_active' => false, 'icon' => 'settings']);
     Storage::disk('public')->assertExists(Service::query()->sole()->image);
 });
 
@@ -120,10 +123,10 @@ test('service endpoints require the corresponding operation permission', functio
     $this->{$method}(route('admin.services.'.$action), ['title' => 'Denied', 'is_active' => '1'])->assertForbidden();
     $this->assertDatabaseCount('services', 0);
     $admin->givePermissionTo($permission);
-    $response = $this->{$method}(route('admin.services.'.$action), ['title' => 'Allowed', 'is_active' => '1']);
+    $response = $this->{$method}(route('admin.services.'.$action), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'title' => 'Allowed', 'is_active' => '1']);
     if ($action === 'store') {
-        $response->assertRedirectToRoute('admin.services.index');
-        $this->assertDatabaseHas('services', ['title' => 'Allowed']);
+        $response->assertRedirect();
+        $this->assertDatabaseHas('service_translations', ['title' => 'Allowed']);
     } else {
         $response->assertOk();
     }
@@ -162,8 +165,8 @@ test('service table searches categories escapes titles and renders icons without
     $this->actingAs($admin, 'admin')->getJson(route('admin.services.data', [
         'draw' => 1, 'start' => 0, 'length' => 10, 'search' => ['value' => 'Teknik'],
         'columns' => [
-            ['data' => 'title', 'name' => 'services.title', 'searchable' => 'true', 'orderable' => 'true'],
-            ['data' => 'category_name', 'name' => 'category.name', 'searchable' => 'true', 'orderable' => 'true'],
+            ['data' => 'title', 'name' => 'title', 'searchable' => 'true', 'orderable' => 'true'],
+            ['data' => 'category_name', 'name' => 'category_name', 'searchable' => 'true', 'orderable' => 'true'],
         ],
     ]))->assertOk()->assertJsonPath('recordsFiltered', 1)->assertJsonPath('data.0.id', $service->id)
         ->assertJsonPath('data.0.title', e($service->title))
@@ -213,10 +216,10 @@ test('service feature definitions render validate and persist through the shared
     $this->actingAs($admin, 'admin');
 
     $this->get(route('admin.services.create'))->assertOk()->assertSee('name="extra_fields[caption]"', false);
-    $this->post(route('admin.services.store'), ['title' => 'Eksik etiket', 'is_active' => '1'])
+    $this->post(route('admin.services.store'), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'title' => 'Eksik etiket', 'is_active' => '1'])
         ->assertSessionHasErrors(['extra_fields.caption' => 'Hizmet etiketi alanını doldurun.']);
     $this->assertDatabaseCount('services', 0);
-    $this->post(route('admin.services.store'), ['title' => 'Etiketli hizmet', 'is_active' => '1', 'extra_fields' => ['caption' => 'Uzman destek']])
-        ->assertRedirectToRoute('admin.services.index');
+    $this->post(route('admin.services.store'), ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'title' => 'Etiketli hizmet', 'is_active' => '1', 'extra_fields' => ['caption' => 'Uzman destek']])
+        ->assertRedirect();
     expect(Service::query()->sole()->extra_fields)->toBe(['caption' => 'Uzman destek']);
 });

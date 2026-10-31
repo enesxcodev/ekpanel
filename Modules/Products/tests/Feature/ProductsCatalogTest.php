@@ -4,6 +4,7 @@ use App\Models\Admin\Admin;
 use App\Models\Forms\FormField;
 use App\Models\Forms\SiteForm;
 use App\Models\Media\MediaFile;
+use App\Models\Settings\Language;
 use App\Services\Forms\FormContext;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -35,6 +36,11 @@ function productForm(): SiteForm
     return SiteForm::factory()->has(FormField::factory(), 'fields')->create(['is_active' => true]);
 }
 
+function productLanguageId(): int
+{
+    return Language::query()->firstOrCreate(['code' => 'tr'], ['is_active' => true])->id;
+}
+
 function disableProducts(): void
 {
     $disk = Storage::fake('products-status');
@@ -45,13 +51,16 @@ function disableProducts(): void
 
 test('products default to published with generated editable slug and optional fields absent', function () {
     $admin = Admin::factory()->superAdmin()->create();
+    $languageId = productLanguageId();
 
-    $this->actingAs($admin, 'admin')->post(route('admin.products.store'), ['title' => 'Çelik Kapı', 'id' => 999])->assertRedirectToRoute('admin.products.index');
+    $this->actingAs($admin, 'admin')->post(route('admin.products.store'), ['lang_id' => $languageId, 'title' => 'Çelik Kapı', 'id' => 999])->assertRedirectToRoute('admin.products.index');
 
-    $this->assertDatabaseHas('products', ['title' => 'Çelik Kapı', 'slug' => 'celik-kapi', 'sort_order' => 0, 'is_active' => true, 'site_form_id' => null, 'product_category_id' => null]);
+    $product = Product::query()->sole();
+    $this->assertDatabaseHas('product_translations', ['product_id' => $product->id, 'lang_id' => $languageId, 'title' => 'Çelik Kapı', 'slug' => 'celik-kapi']);
+    $this->assertDatabaseHas('products', ['id' => $product->id, 'sort_order' => 0, 'is_active' => true, 'site_form_id' => null, 'product_category_id' => null]);
     $this->assertDatabaseCount('notifications', 0);
-    expect(Product::query()->sole()->id)->not->toBe(999);
-    $this->get(route('admin.products.edit', Product::query()->sole()))->assertOk()->assertSee('Form gösterme')->assertSee('Taslak');
+    expect($product->id)->not->toBe(999);
+    $this->get(route('admin.products.edit', $product))->assertOk()->assertSee('Form gösterme')->assertSee('Taslak');
 });
 
 test('product and category forms and tables follow the common admin flow', function () {
@@ -66,6 +75,25 @@ test('product and category forms and tables follow the common admin flow', funct
     $this->get(route('admin.products.categories.create'))->assertOk();
 });
 
+test('category language selectors stay on category create and edit routes', function () {
+    $admin = Admin::factory()->superAdmin()->create();
+    $turkish = Language::query()->firstOrCreate(['code' => 'tr'], ['is_active' => true]);
+    $english = Language::query()->firstOrCreate(['code' => 'en'], ['is_active' => true]);
+    $category = ProductCategory::factory()->create();
+    $this->actingAs($admin, 'admin');
+
+    $this->get(route('admin.products.categories.create', ['lang' => $turkish->code]))
+        ->assertOk()
+        ->assertSee('href="'.route('admin.products.categories.create', ['lang' => 'tr']).'"', false)
+        ->assertSee('href="'.route('admin.products.categories.create', ['lang' => 'en']).'"', false)
+        ->assertDontSee('href="'.route('admin.products.create', ['lang' => 'en']).'"', false);
+
+    $this->get(route('admin.products.categories.edit', ['category' => $category, 'lang' => $turkish->code]))
+        ->assertOk()
+        ->assertSee('href="'.route('admin.products.categories.edit', ['category' => $category, 'lang' => 'tr']).'"', false)
+        ->assertSee('href="'.route('admin.products.categories.edit', ['category' => $category, 'lang' => 'en']).'"', false);
+});
+
 test('products save reordered gallery cover category and optional shared form', function () {
     Storage::fake('public');
     $admin = Admin::factory()->superAdmin()->create();
@@ -73,17 +101,19 @@ test('products save reordered gallery cover category and optional shared form', 
     $form = productForm();
     $first = productImage('one.png');
     $second = productImage('two.png');
+    $languageId = productLanguageId();
     $this->actingAs($admin, 'admin');
 
-    $this->post(route('admin.products.store'), ['title' => 'Kapı', 'slug' => 'ozel-kapi', 'product_category_id' => $category->id, 'site_form_id' => $form->id, 'image_media_id' => $first->id, 'image_media_ids' => json_encode([$first->id, $second->id]), 'content' => '<p>Detay</p><script>alert(1)</script>'])->assertRedirectToRoute('admin.products.index');
+    $this->post(route('admin.products.store'), ['lang_id' => $languageId, 'title' => 'Kapı', 'slug' => 'ozel-kapi', 'product_category_id' => $category->id, 'site_form_id' => $form->id, 'image_media_id' => $first->id, 'image_media_ids' => json_encode([$first->id, $second->id]), 'content' => '<p>Detay</p><script>alert(1)</script>'])->assertRedirectToRoute('admin.products.index');
     $product = Product::query()->sole();
     expect($product->images->modelKeys())->toBe([$first->id, $second->id]);
-    expect($product->content)->not->toContain('<script>');
+    expect($product->translations()->where('lang_id', $languageId)->value('content'))->not->toContain('<script>');
     $this->assertDatabaseHas('media_usages', ['owner_id' => $product->id, 'owner_type' => Product::class, 'field' => 'product_image.'.$second->id]);
 
-    $this->put(route('admin.products.update', $product), ['title' => 'Yeni kapı', 'slug' => 'duzenlenen-kapi', 'image_media_ids' => [$second->id, $first->id], 'is_active' => 0, 'sort_order' => 8, 'site_form_id' => $form->id])->assertRedirectToRoute('admin.products.index');
+    $this->put(route('admin.products.update', $product), ['lang_id' => $languageId, 'title' => 'Yeni kapı', 'slug' => 'duzenlenen-kapi', 'image_media_ids' => [$second->id, $first->id], 'is_active' => 0, 'sort_order' => 8, 'site_form_id' => $form->id])->assertRedirectToRoute('admin.products.index');
     expect($product->fresh()->images->modelKeys())->toBe([$second->id, $first->id]);
-    $this->assertDatabaseHas('products', ['id' => $product->id, 'slug' => 'duzenlenen-kapi', 'sort_order' => 8, 'is_active' => false]);
+    $this->assertDatabaseHas('product_translations', ['product_id' => $product->id, 'lang_id' => $languageId, 'slug' => 'duzenlenen-kapi']);
+    $this->assertDatabaseHas('products', ['id' => $product->id, 'sort_order' => 8, 'is_active' => false]);
     $this->delete(route('admin.products.destroy', $product))->assertRedirectToRoute('admin.products.index');
     $this->assertDatabaseCount('product_images', 0);
     $this->assertDatabaseCount('media_usages', 0);
@@ -93,7 +123,7 @@ test('products save reordered gallery cover category and optional shared form', 
 test('product rejects invalid payload without writing records', function (array $payload, string $field) {
     $admin = Admin::factory()->superAdmin()->create();
 
-    $this->actingAs($admin, 'admin')->post(route('admin.products.store'), ['title' => 'Kapı', ...$payload])->assertSessionHasErrors($field);
+    $this->actingAs($admin, 'admin')->post(route('admin.products.store'), ['lang_id' => productLanguageId(), 'title' => 'Kapı', ...$payload])->assertSessionHasErrors($field);
 
     $this->assertDatabaseCount('products', 0);
     $this->assertDatabaseCount('notifications', 0);
@@ -110,11 +140,12 @@ test('product rejects invalid payload without writing records', function (array 
 
 test('duplicate slugs are rejected while existing product can keep its own slug', function () {
     $admin = Admin::factory()->superAdmin()->create();
+    $languageId = productLanguageId();
     $product = Product::factory()->create(['slug' => 'kapi']);
     $this->actingAs($admin, 'admin');
 
-    $this->post(route('admin.products.store'), ['title' => 'Kapı', 'slug' => 'kapi'])->assertSessionHasErrors('slug');
-    $this->put(route('admin.products.update', $product), ['title' => 'Kapı', 'slug' => 'kapi'])->assertRedirectToRoute('admin.products.index');
+    $this->post(route('admin.products.store'), ['lang_id' => $languageId, 'title' => 'Kapı', 'slug' => 'kapi'])->assertSessionHasErrors('slug');
+    $this->put(route('admin.products.update', $product), ['lang_id' => $languageId, 'title' => 'Kapı', 'slug' => 'kapi'])->assertRedirectToRoute('admin.products.index');
 
     $this->assertDatabaseCount('products', 1);
 });
@@ -123,14 +154,16 @@ test('category CRUD preserves products on category removal and sends actor notif
     $this->seed(AdminPermissionSeeder::class);
     $admin = Admin::factory()->create();
     $admin->givePermissionTo(['products.categories.create', 'products.categories.update', 'products.categories.delete']);
+    $languageId = productLanguageId();
     $this->actingAs($admin, 'admin');
 
-    $this->post(route('admin.products.categories.store'), ['name' => 'Kapılar'])->assertRedirectToRoute('admin.products.categories.index');
+    $this->post(route('admin.products.categories.store'), ['lang_id' => $languageId, 'name' => 'Kapılar'])->assertRedirectToRoute('admin.products.categories.index');
     $category = ProductCategory::query()->sole();
     $product = Product::factory()->for($category, 'category')->create();
     expect($admin->notifications()->latest()->first()->data['link'])->toBe(route('admin.products.categories.edit', $category, absolute: false));
-    $this->put(route('admin.products.categories.update', $category), ['name' => 'İç kapılar', 'is_active' => 0, 'sort_order' => 3])->assertRedirectToRoute('admin.products.categories.index');
-    $this->assertDatabaseHas('product_categories', ['id' => $category->id, 'name' => 'İç kapılar', 'is_active' => false, 'sort_order' => 3]);
+    $this->put(route('admin.products.categories.update', $category), ['lang_id' => $languageId, 'name' => 'İç kapılar', 'is_active' => 0, 'sort_order' => 3])->assertRedirectToRoute('admin.products.categories.index');
+    $this->assertDatabaseHas('product_category_translations', ['product_category_id' => $category->id, 'lang_id' => $languageId, 'name' => 'İç kapılar']);
+    $this->assertDatabaseHas('product_categories', ['id' => $category->id, 'is_active' => false, 'sort_order' => 3]);
     $this->delete(route('admin.products.categories.destroy', $category))->assertRedirectToRoute('admin.products.categories.index');
     expect($product->fresh()->product_category_id)->toBeNull();
     expect($admin->notifications()->count())->toBe(3);
@@ -141,12 +174,13 @@ test('product CRUD notifies every admin with edit and list destinations', functi
     $admin = Admin::factory()->create();
     $other = Admin::factory()->superAdmin()->create();
     $admin->givePermissionTo(['products.create', 'products.update', 'products.delete']);
+    $languageId = productLanguageId();
     $this->actingAs($admin, 'admin');
 
-    $this->post(route('admin.products.store'), ['title' => 'Kapı'])->assertRedirectToRoute('admin.products.index');
+    $this->post(route('admin.products.store'), ['lang_id' => $languageId, 'title' => 'Kapı'])->assertRedirectToRoute('admin.products.index');
     $product = Product::query()->sole();
     expect($admin->notifications()->first()->data['link'])->toBe(route('admin.products.edit', $product, absolute: false));
-    $this->put(route('admin.products.update', $product), ['title' => 'İç kapı'])->assertRedirectToRoute('admin.products.index');
+    $this->put(route('admin.products.update', $product), ['lang_id' => $languageId, 'title' => 'İç kapı'])->assertRedirectToRoute('admin.products.index');
     $this->delete(route('admin.products.destroy', $product))->assertRedirectToRoute('admin.products.index');
 
     expect($other->notifications()->count())->toBe(3);
@@ -170,7 +204,7 @@ test('category and publication filters combine with table search', function () {
     Product::factory()->for($category, 'category')->create(['title' => 'Kapı', 'is_active' => true]);
     Product::factory()->create(['title' => 'Kapı', 'is_active' => false]);
 
-    $this->actingAs($admin, 'admin')->getJson(route('admin.products.data', ['category_id' => $category->id, 'is_active' => '0', 'search' => ['value' => 'Kapı'], 'columns' => [['data' => 'title', 'name' => 'products.title', 'searchable' => 'true', 'orderable' => 'true']]]))->assertOk()->assertJsonPath('recordsFiltered', 1)->assertJsonPath('data.0.id', $wanted->id)->assertJsonPath('data.0.title', e($wanted->title));
+    $this->actingAs($admin, 'admin')->getJson(route('admin.products.data', ['category_id' => $category->id, 'is_active' => '0', 'search' => ['value' => 'Kapı'], 'columns' => [['data' => 'title', 'name' => 'selected_translation.title', 'searchable' => 'true', 'orderable' => 'true']]]))->assertOk()->assertJsonPath('recordsFiltered', 1)->assertJsonPath('data.0.id', $wanted->id)->assertJsonPath('data.0.title', e($wanted->title));
 });
 
 test('public reads exclude drafts and hidden categories and use deterministic ordering', function () {
@@ -186,8 +220,10 @@ test('public reads exclude drafts and hidden categories and use deterministic or
     expect($service->products($category->id)->modelKeys())->toBe([$first->id]);
     expect($service->products(limit: 1)->modelKeys())->toBe([$first->id]);
     expect($service->categories()->modelKeys())->toBe([$category->id]);
-    expect($service->findBySlug($draft->slug))->toBeNull();
-    expect($service->findBySlug($first->slug)?->id)->toBe($first->id);
+    $draftSlug = $draft->translations->firstWhere('lang_id', productLanguageId())->slug;
+    $firstSlug = $first->translations->firstWhere('lang_id', productLanguageId())->slug;
+    expect($service->findBySlug($draftSlug))->toBeNull();
+    expect($service->findBySlug($firstSlug)?->id)->toBe($first->id);
     expect($service->products(999999))->toBeEmpty();
     expect($service->products(limit: 0))->toBeEmpty();
 });
@@ -195,6 +231,7 @@ test('public reads exclude drafts and hidden categories and use deterministic or
 test('disabled module blocks admin public reads and product form contexts', function () {
     $admin = Admin::factory()->superAdmin()->create();
     $product = Product::factory()->create();
+    $productSlug = $product->translations->firstWhere('lang_id', productLanguageId())->slug;
     disableProducts();
     $service = app(ProductsFrontendService::class);
 
@@ -202,7 +239,7 @@ test('disabled module blocks admin public reads and product form contexts', func
     $this->post(route('admin.products.store'), ['title' => 'Denied'])->assertNotFound();
     expect($service->products())->toBeEmpty();
     expect($service->categories())->toBeEmpty();
-    expect($service->findBySlug($product->slug))->toBeNull();
+    expect($service->findBySlug($productSlug))->toBeNull();
     expect($service->formFor($product))->toBeNull();
 });
 
@@ -264,10 +301,13 @@ test('module feature definitions render validate and persist through shared fiel
     $this->actingAs($admin, 'admin');
 
     $this->get(route('admin.products.create'))->assertOk()->assertSee('name="extra_fields[caption]"', false);
-    $this->post(route('admin.products.store'), ['title' => 'Eksik'])->assertSessionHasErrors(['extra_fields.caption' => 'Ürün etiketi alanını doldurun.']);
+    $languageId = productLanguageId();
+    $this->post(route('admin.products.store'), ['lang_id' => $languageId, 'title' => 'Eksik'])->assertSessionHasErrors(['extra_fields.caption' => 'Ürün etiketi alanını doldurun.']);
     $this->assertDatabaseCount('products', 0);
-    $this->post(route('admin.products.store'), ['title' => 'Tam', 'extra_fields' => ['caption' => 'Dayanıklı']])->assertRedirectToRoute('admin.products.index');
-    expect(Product::query()->sole()->extra_fields)->toBe(['caption' => 'Dayanıklı']);
+    $this->post(route('admin.products.store'), ['lang_id' => $languageId, 'title' => 'Tam', 'extra_fields' => ['caption' => 'Dayanıklı']])->assertRedirectToRoute('admin.products.index');
+    $product = Product::query()->sole();
+    $extraFields = $product->translations()->where('lang_id', $languageId)->value('extra_fields');
+    expect(is_string($extraFields) ? json_decode($extraFields, true) : $extraFields)->toBe(['caption' => 'Dayanıklı']);
 });
 
 test('gallery selection rejects duplicate images and new selection without media permission', function () {
@@ -278,8 +318,8 @@ test('gallery selection rejects duplicate images and new selection without media
     $image = productImage('image.png');
     $this->actingAs($admin, 'admin');
 
-    $this->post(route('admin.products.store'), ['title' => 'Kapı', 'image_media_ids' => [$image->id, $image->id]])->assertSessionHasErrors('image_media_ids.0');
-    $this->post(route('admin.products.store'), ['title' => 'Kapı', 'image_media_ids' => [$image->id]])->assertForbidden();
+    $this->post(route('admin.products.store'), ['lang_id' => productLanguageId(), 'title' => 'Kapı', 'image_media_ids' => [$image->id, $image->id]])->assertSessionHasErrors('image_media_ids.0');
+    $this->post(route('admin.products.store'), ['lang_id' => productLanguageId(), 'title' => 'Kapı', 'image_media_ids' => [$image->id]])->assertForbidden();
     $this->assertDatabaseCount('products', 0);
     $this->assertDatabaseCount('media_usages', 0);
 });

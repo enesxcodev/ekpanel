@@ -1,9 +1,11 @@
 <?php
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Modules\Testimonials\Models\Testimonial;
+use Modules\Testimonials\Models\TestimonialTranslation;
 use Modules\Testimonials\Services\TestimonialsFrontendService;
 use Nwidart\Modules\Contracts\ActivatorInterface;
 
@@ -74,4 +76,18 @@ test('uses the configured content order', function () {
     $result = app(TestimonialsFrontendService::class)->getAll();
 
     expect($result->modelKeys())->toBe([$earlier->id, $later->id]);
+});
+
+test('returns only records translated in the requested active language', function () {
+    $language = Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $translated = Testimonial::factory()->create(['is_active' => true, 'sort_order' => 1]);
+    $missing = Testimonial::factory()->create(['is_active' => true, 'sort_order' => 2]);
+    TestimonialTranslation::query()->create(['testimonial_id' => $translated->id, 'lang_id' => $language->id, 'customer_name' => 'Customer', 'company' => null, 'job_title' => null, 'content' => 'Translated', 'extra_fields' => []]);
+
+    $records = app(TestimonialsFrontendService::class)->getAll('en');
+
+    expect($records->modelKeys())->toBe([$translated->id])
+        ->and($records->first()->selectedTranslation->customer_name)->toBe('Customer')
+        ->and(app(TestimonialsFrontendService::class)->find($missing->id, 'en'))->toBeNull()
+        ->and(app(TestimonialsFrontendService::class)->getAll('inactive'))->toBeEmpty();
 });

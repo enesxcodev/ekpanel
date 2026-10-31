@@ -10,6 +10,10 @@
     ],
     "files": [],
     "panel": {
+        "assets": {
+            "routes": ["admin.pages.*"],
+            "js": ["resources/dist/panel.js"]
+        },
         "permissions": [
             "pages.menu",
             "pages.view",

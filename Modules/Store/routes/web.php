@@ -7,6 +7,7 @@ use Modules\Store\Http\Controllers\StoreCartController;
 use Modules\Store\Http\Controllers\StoreCategoryController;
 use Modules\Store\Http\Controllers\StoreOrderController;
 use Modules\Store\Http\Controllers\StoreProductController;
+use Modules\Store\Http\Middleware\SetStoreLocale;
 
 Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Store'])->prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')->name('admin.store.')->group(function (): void {
     Route::get('store', [StoreProductController::class, 'index'])->middleware('can:store.view')->name('index');
@@ -31,7 +32,7 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Sto
     Route::get('store-stock', [StoreOrderController::class, 'stock'])->middleware('can:store.stock.view')->name('stock.index');
     Route::get('store-stock/data', [StoreOrderController::class, 'stockData'])->middleware('can:store.stock.view')->name('stock.data');
 });
-Route::middleware('module.enabled:Store')->prefix('magaza')->name('store.')->group(function (): void {
+Route::middleware(['module.enabled:Store', SetStoreLocale::class])->prefix('magaza')->name('store.')->group(function (): void {
     Route::get('/', [PublicStoreController::class, 'index'])->name('index');
     Route::get('urun/{slug}', [PublicStoreController::class, 'show'])->name('show');
     Route::get('sepet', [StoreCartController::class, 'index'])->name('cart');
@@ -41,5 +42,9 @@ Route::middleware('module.enabled:Store')->prefix('magaza')->name('store.')->gro
     Route::post('checkout', [StoreCartController::class, 'checkout'])->middleware('throttle:20,1')->name('checkout');
     Route::get('siparis/{number}/tamamlandi/{token}', [StoreCartController::class, 'complete'])->name('order.complete');
     Route::get('siparislerim', [StoreCartController::class, 'account'])->name('account');
-    Route::get('siparislerim/{number}',[StoreCartController::class, 'accountOrder'])->name('account.order');
+    Route::get('siparislerim/{number}', [StoreCartController::class, 'accountOrder'])->name('account.order');
+});
+Route::middleware(['module.enabled:Store', SetStoreLocale::class])->prefix('{lang}/magaza')->where(['lang' => '[a-z]{2}'])->name('store.localized.')->group(function (): void {
+    Route::get('/', [PublicStoreController::class, 'index'])->name('index');
+    Route::get('urun/{slug}', [PublicStoreController::class, 'show'])->name('show');
 });

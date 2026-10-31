@@ -1,3 +1,11 @@
+export function languageMenuHref(href, menuId) {
+    const url = new URL(href, 'http://localhost');
+    if (Number(menuId) > 0) url.searchParams.set('menu', String(menuId));
+    else url.searchParams.delete('menu');
+
+    return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export function initializeMenuWorkspace({ notify, confirm }) {
     const root = document.querySelector('[data-menu-workspace]');
     if (!root || root.dataset.initialized) return;
@@ -110,19 +118,34 @@ export function initializeMenuWorkspace({ notify, confirm }) {
             else menus[index] = summary;
         }
         selector.replaceChildren(new Option(menus.length ? 'Menü seçin' : 'Henüz menü yok', ''));
-        menus.forEach((menu) => selector.add(new Option(`${menu.name} · ${menu.key}`, String(menu.id))));
+        menus.forEach((menu) => selector.add(new Option(`${menu.name}${menu.translation_exists ? '' : ' · Çeviri eklenmedi'} · ${menu.key}`, String(menu.id))));
         selector.value = String(state?.menu.id ?? '');
+    }
+
+    function updateLanguageLinks(menuId) {
+        root.querySelectorAll('[data-menu-language]').forEach((link) => {
+            link.href = languageMenuHref(link.href, menuId);
+        });
     }
 
     function status(active) { return element('span', `menu-status${active ? ' is-active' : ''}`, active ? 'Aktif' : 'Pasif'); }
 
     function syncSummary() {
-        find('[data-menu-builder]').hidden = !state;
+        const translated = Boolean(state?.menu.translation_exists);
+        find('[data-menu-builder]').hidden = !state || !translated;
         find('[data-menu-empty]').hidden = Boolean(state);
         find('[data-menu-key]').textContent = state?.menu.key ?? '—';
         find('[data-menu-count]').textContent = String(state?.items.length ?? 0);
         find('[data-menu-status]').replaceChildren(state ? status(state.menu.is_active) : document.createTextNode('—'));
         if (find('[data-menu-edit]')) find('[data-menu-edit]').hidden = !state;
+        if (state && !translated) {
+            find('[data-menu-empty]').hidden = false;
+            find('[data-menu-empty] .empty-title').textContent = 'Bu menünün seçili dilde çevirisi yok';
+            find('[data-menu-empty] .empty-subtitle').textContent = 'Menü bilgilerini açıp bu dildeki adını kaydedin. Bu dil için yeni bir öğe ağacı oluşturulur.';
+        } else if (!state) {
+            find('[data-menu-empty] .empty-title').textContent = 'Bir menü seçin';
+            find('[data-menu-empty] .empty-subtitle').textContent = 'Mevcut bir menüyü seçerek başlayın veya yeni menü oluşturun.';
+        }
     }
 
     async function loadMenu(summary, itemId = null) {
@@ -139,9 +162,11 @@ export function initializeMenuWorkspace({ notify, confirm }) {
         if (itemId && state.items.some((item) => item.id === itemId)) selectItem(itemId, false);
         const url = new URL(window.location.href);
         url.searchParams.set('menu', data.menu.id);
+        if (config.language?.code) url.searchParams.set('lang', config.language.code);
         url.searchParams.delete('new');
         url.searchParams.delete('item');
         window.history.replaceState(null, '', url);
+        updateLanguageLinks(data.menu.id);
         announce(`${data.menu.name} yüklendi. ${data.items.length} öğe.`);
     }
 
@@ -286,7 +311,7 @@ export function initializeMenuWorkspace({ notify, confirm }) {
         if (editor) editor.hidden = true;
         find('[data-menu-form-title]').textContent = isNew ? 'Yeni menü oluştur' : 'Menü bilgileri';
         if (!isNew && state) {
-            for (const name of ['name', 'key', 'icon']) menuForm.elements.namedItem(name).value = state.menu[name] ?? '';
+            for (const name of ['name', 'key', 'icon']) menuForm.elements.namedItem(name).value = name === 'name' && !state.menu.translation_exists ? '' : (state.menu[name] ?? '');
             menuForm.elements.namedItem('is_active').checked = state.menu.is_active;
         }
         if (find('[data-menu-delete]')) find('[data-menu-delete]').hidden = isNew;
@@ -315,6 +340,7 @@ export function initializeMenuWorkspace({ notify, confirm }) {
     menuForm.addEventListener('submit', (event) => {
         event.preventDefault();
         const data = Object.fromEntries(new FormData(menuForm));
+        data.lang_id = config.language?.id;
         data.is_active = menuForm.elements.namedItem('is_active').checked;
         perform(async () => {
             const response = await request(creatingMenu ? config.storeUrl : state.urls.update, creatingMenu ? 'POST' : 'PUT', data);
@@ -351,6 +377,7 @@ export function initializeMenuWorkspace({ notify, confirm }) {
         event.preventDefault();
         if (!state || !discardChanges()) return;
         const data = Object.fromEntries(new FormData(form));
+        data.lang_id = config.language?.id;
         data.target_type = form.dataset.type;
         data.is_active = form.elements.namedItem('is_active')?.checked ?? true;
         data.new_tab = false;
@@ -375,6 +402,7 @@ export function initializeMenuWorkspace({ notify, confirm }) {
         event.preventDefault();
         const item = state.items.find((node) => node.id === selectedId);
         const data = Object.fromEntries(new FormData(itemForm));
+        data.lang_id = config.language?.id;
         data.is_active = itemForm.elements.namedItem('is_active').checked;
         data.new_tab = itemForm.elements.namedItem('new_tab').checked;
         data.dynamic_children = itemForm.querySelector('[name="dynamic_children"]').checked && !itemForm.querySelector('[name="dynamic_children"]').disabled;
@@ -396,7 +424,7 @@ export function initializeMenuWorkspace({ notify, confirm }) {
         const item = state.items.find((node) => node.id === id);
         if (!item || !discardChanges() || !await confirm({ title: 'Menü öğesini sil', message: `“${item.label}” öğesi silinsin mi?`, confirmLabel: 'Sil' })) return;
         perform(async () => {
-            const response = await request(item.delete_url, 'DELETE');
+            const response = await request(item.delete_url, 'DELETE', { lang_id: config.language?.id });
             notify({ type: 'success', message: response.message });
             await refreshSaved(state.menu, selectedId === id ? null : selectedId);
         });
@@ -436,7 +464,7 @@ export function initializeMenuWorkspace({ notify, confirm }) {
         renderTree();
         perform(async () => {
             try {
-                await request(state.urls.reorder, 'PUT', { items: state.items.map((item) => ({ id: item.id, parent_id: item.parent_id, sort_order: item.sort_order })) });
+            await request(state.urls.reorder, 'PUT', { lang_id: config.language?.id, items: state.items.map((item) => ({ id: item.id, parent_id: item.parent_id, sort_order: item.sort_order })) });
             } catch (error) { state.items = snapshot; renderTree(); throw error; }
             await refreshSaved(state.menu, selectedId);
             announce('Yeni sıra ve üst öğe ilişkisi kaydedildi.');
@@ -529,8 +557,12 @@ export function initializeMenuWorkspace({ notify, confirm }) {
     document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && drag) endDrag({}, true); });
     window.addEventListener('beforeunload', (event) => { if (itemDirty || menuDirty) { event.preventDefault(); event.returnValue = ''; } });
 
+    root.querySelectorAll('[data-menu-language]').forEach((link) => link.addEventListener('click', (event) => {
+        if (busy || !discardChanges()) { event.preventDefault(); return; }
+    }));
+
     selector.replaceChildren(new Option(menus.length ? 'Menü seçin' : 'Henüz menü yok', ''));
-    menus.forEach((menu) => selector.add(new Option(`${menu.name} · ${menu.key}`, String(menu.id))));
+    menus.forEach((menu) => selector.add(new Option(`${menu.name}${menu.translation_exists ? '' : ' · Çeviri eklenmedi'} · ${menu.key}`, String(menu.id))));
     syncSummary();
     const initial = menus.find((menu) => menu.id === config.initialMenu) ?? menus[0];
     if (initial) perform(async () => { await loadMenu(initial, config.initialItem); if (config.newMenu && config.permissions.create) openMenuForm(true); });

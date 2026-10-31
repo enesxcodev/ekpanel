@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdateSettingsRequest;
+use App\Models\Settings\Language;
 use App\Models\Settings\SettingDefinition;
 use App\Models\Settings\SettingSection;
 use App\Services\Media\MediaService;
@@ -58,7 +59,11 @@ class SettingController extends Controller
             }
         }
 
-        return view('admin.settings.index', ['sections' => $sections, 'sectionGroups' => $sectionGroups, 'fields' => $fields, 'mediaConfig' => $mediaService->configuration($admin)]);
+        $languages = Language::query()->orderByDesc('is_active')->orderBy('code')->get();
+        $languageCatalog = config('languages.catalog');
+        $availableLanguages = array_diff_key($languageCatalog, array_flip($languages->pluck('code')->all()));
+
+        return view('admin.settings.index', ['sections' => $sections, 'sectionGroups' => $sectionGroups, 'fields' => $fields, 'mediaConfig' => $mediaService->configuration($admin), 'languages' => $languages, 'languageCatalog' => $languageCatalog, 'availableLanguages' => $availableLanguages]);
     }
 
     public function update(UpdateSettingsRequest $request, SettingSection $section, SettingsService $settings): RedirectResponse

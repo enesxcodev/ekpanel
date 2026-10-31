@@ -10,10 +10,10 @@
         <div class="alert alert-danger" role="alert">{{ $errors->first() }}</div>
     @endif
     @php
-        $activeSectionId = (int) old('_section', request('section', $sections->first()?->id));
-        $activeSectionId = $sections->contains('id', $activeSectionId) ? $activeSectionId : $sections->first()?->id;
+        $requestedSection = old('_section', request('section', $sections->first()?->id ?? 'languages'));
+        $activeSectionId = $requestedSection === 'languages' ? 'languages' : (int) $requestedSection;
+        $activeSectionId = $activeSectionId === 'languages' || $sections->contains('id', $activeSectionId) ? $activeSectionId : ($sections->first()?->id ?? 'languages');
     @endphp
-    @if ($sections->isNotEmpty())
     <div class="card">
       <div class="row g-0">
         <div class="col-12 col-md-3 border-end">
@@ -38,11 +38,17 @@
                         {{ $section->label }}
                     </button>
             @endforeach
+            <button class="nav-link justify-content-start gap-2 {{ $activeSectionId === 'languages' ? 'active' : '' }}" id="settings-tab-languages" data-bs-toggle="tab" data-bs-target="#settings-panel-languages" type="button" role="tab" aria-controls="settings-panel-languages" aria-selected="{{ $activeSectionId === 'languages' ? 'true' : 'false' }}">
+                <x-admin.icon name="settings-cog" class="flex-shrink-0" />Diller
+            </button>
         </div>
         </div>
         </div>
         <div class="col-12 col-md-9">
         <div class="tab-content" id="settings-tab-content">
+            <div class="tab-pane fade {{ $activeSectionId === 'languages' ? 'show active' : '' }}" id="settings-panel-languages" role="tabpanel" aria-labelledby="settings-tab-languages" tabindex="0">
+                @include('admin.settings.languages', ['languages' => $languages, 'languageCatalog' => $languageCatalog, 'availableLanguages' => $availableLanguages])
+            </div>
         @foreach ($sections as $section)
             @php
                 $active = $activeSectionId === $section->id;
@@ -85,7 +91,4 @@
         </div>
       </div>
     </div>
-    @else
-        <div class="card"><div class="card-body text-secondary">Görüntüleyebileceğiniz bir ayar bölümü bulunmuyor.</div></div>
-    @endif
 </x-admin.layout>

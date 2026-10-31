@@ -37,7 +37,7 @@ class StoreCartController extends Controller
     {
         $cart->add($request->session(), $request->integer('product_id'), $request->filled('variant_id') ? $request->integer('variant_id') : null, $request->integer('quantity'));
 
-        return redirect()->route('store.cart');
+        return redirect()->route('store.cart', ['lang' => $request->query('lang', 'tr')]);
     }
 
     public function update(Request $request, StoreCartService $cart, int $index): RedirectResponse
@@ -45,7 +45,7 @@ class StoreCartController extends Controller
         $data = $request->validate(['quantity' => ['required', 'integer', 'min:0', 'max:100']]);
         $cart->update($request->session(), $index, (int) $data['quantity']);
 
-        return redirect()->route('store.cart');
+        return redirect()->route('store.cart', ['lang' => $request->query('lang', 'tr')]);
     }
 
     public function form(Request $request, StoreCartService $cart, SettingsService $settings): View
@@ -88,7 +88,7 @@ class StoreCartController extends Controller
         $request->session()->put('store.completed.'.$result->id, $result->access_token);
         $cart->clear($request->session());
 
-        return redirect()->route('store.order.complete', ['number' => $result->number, 'token' => $result->access_token]);
+        return redirect()->route('store.order.complete', ['number' => $result->number, 'token' => $result->access_token, 'lang' => $request->query('lang', 'tr')]);
     }
 
     public function complete(Request $request, string $number, string $token): Response

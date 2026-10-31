@@ -1,4 +1,8 @@
 @csrf
+<input type="hidden" name="lang_id" value="{{ $selectedLanguage?->id }}">
+@if (! $selectedLanguage)<div class="alert alert-warning">&Ouml;nce <a href="{{ route('admin.settings.index', ['section' => 'languages']) }}">Ayarlar &uuml;zerinden aktif dil ekleyin.</a></div>@endif
+<fieldset @disabled(! $selectedLanguage)>
+<p class="form-hint mb-3">Kategori, etiketler, yayın durumu, yayın tarihi, kapak görseli ve yazar tüm diller için geçerlidir.</p>
 @isset($blog) @method('PUT') @endisset
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <p class="text-secondary mb-0">İçeriğinizi hazırlayın, yayın ve SEO ayarlarını düzenleyin.</p>
@@ -19,10 +23,10 @@
                         </div>
                         <x-admin.form.category-tree-select :tree="$categoryTree" name="blog_category_id" id="blog-category-search" label="Kategori" :selected="old('blog_category_id', $blog->blog_category_id ?? '')" required tree-label="İçerik kategorileri" />
                         <div class="row">
-                            <div class="col-xl-6"><x-admin.form.input name="title" label="Başlık" :value="$blog->title ?? null" required maxlength="255" data-slug-title /></div>
-                            <div class="col-xl-6"><x-admin.form.input name="slug" label="Kısa bağlantı" :value="$blog->slug ?? null" required maxlength="255" data-slug-field /></div>
+                            <div class="col-xl-6"><x-admin.form.input name="title" label="Başlık" :value="$translation?->title" required maxlength="255" data-slug-title /></div>
+                            <div class="col-xl-6"><x-admin.form.input name="slug" label="Kısa bağlantı" :value="$translation?->slug" required maxlength="255" data-slug-field /></div>
                         </div>
-                        <x-admin.form.textarea name="short_description" label="Kısa açıklama" :value="$blog->short_description ?? null" rows="3" maxlength="500" />
+                        <x-admin.form.textarea name="short_description" label="Kısa açıklama" :value="$translation?->short_description" rows="3" maxlength="500" />
                         <div class="mb-3">
                             <label class="form-label" for="blog-tags">Etiketler</label>
                             <select id="blog-tags" name="tags[]" class="form-select js-select2 @error('tags') is-invalid @enderror" multiple data-placeholder="Etiket arayın">
@@ -32,13 +36,13 @@
                             </select>
                             @error('tags')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
-                        <x-admin.form.textarea name="content" label="İçerik" :value="$blog->content ?? null" rows="16" maxlength="65535" data-hugerte />
+                        <x-admin.form.textarea name="content" label="İçerik" :value="$translation?->content" rows="16" maxlength="65535" data-hugerte />
                         <x-admin.features.fields :form="$featureForm" :fields="$featureFields" :media-config="$mediaConfig" />
                     </div>
                     <x-slot:seo>
                         <div class="border rounded-3 p-3 p-xl-4">
-                            <x-admin.form.input name="meta_title" label="Meta başlık" :value="$blog->meta_title ?? null" maxlength="255" />
-                            <x-admin.form.textarea name="meta_description" label="Meta açıklama" :value="$blog->meta_description ?? null" maxlength="1000" />
+                            <x-admin.form.input name="meta_title" label="Meta başlık" :value="$translation?->meta_title" maxlength="255" />
+                            <x-admin.form.textarea name="meta_description" label="Meta açıklama" :value="$translation?->meta_description" maxlength="1000" />
                         </div>
                     </x-slot:seo>
                 </x-admin.form.content-seo-tabs>
@@ -46,6 +50,7 @@
         </div>
     </div>
     <div class="col-lg-4">
+        @include('blog::partials.languages')
         <div class="card mb-4">
             <div class="card-body">
                 <div class="blog-form-section-title">
@@ -76,3 +81,5 @@
         </div>
     </div>
 </div>
+
+</fieldset>

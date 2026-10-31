@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Modules\Blog\Database\Factories\BlogContentFactory;
 
@@ -16,13 +17,38 @@ class BlogContent extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['blog_category_id', 'author_id', 'title', 'slug', 'meta_title', 'meta_description', 'short_description', 'content', 'image', 'image_media_id', 'status', 'published_at', 'extra_fields'];
+    protected $with = ['translations.language'];
+
+    public function getAttribute($key): mixed
+    {
+        if (in_array($key, ['title', 'slug', 'short_description', 'content', 'meta_title', 'meta_description', 'extra_fields'], true) && ! array_key_exists($key, $this->attributes)) {
+            if ($this->relationLoaded('selectedTranslation')) {
+                return $this->getRelation('selectedTranslation')?->getAttribute($key);
+            }
+            if (! $this->relationLoaded('translations')) {
+                return null;
+            }
+            $code = request()->attributes->get('blog_language', 'tr');
+            $translation = $this->getRelation('translations')->first(fn ($item): bool => $item->relationLoaded('language') && $item->language?->code === $code);
+
+            return $translation?->getAttribute($key);
+        }
+
+        return parent::getAttribute($key);
+    }
+
+    protected $fillable = ['blog_category_id', 'author_id', 'image', 'image_media_id', 'status', 'published_at'];
 
     protected $attributes = ['status' => 'draft'];
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(BlogContentTranslation::class);
+    }
+
     protected function casts(): array
     {
-        return ['blog_category_id' => 'integer', 'author_id' => 'integer', 'image_media_id' => 'integer', 'published_at' => 'datetime', 'extra_fields' => 'array'];
+        return ['blog_category_id' => 'integer', 'author_id' => 'integer', 'image_media_id' => 'integer', 'published_at' => 'datetime'];
     }
 
     public function category(): BelongsTo

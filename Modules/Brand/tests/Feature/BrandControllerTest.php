@@ -2,6 +2,7 @@
 
 use App\Models\Admin\Admin;
 use App\Models\Media\MediaFile;
+use App\Models\Settings\Language;
 use App\Services\Admin\Modules\ModulePanelService;
 use Database\Seeders\MediaPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -45,7 +46,7 @@ test('brands lists records and links to its separate create form', function () {
     $this->get(route('admin.brand.create'))->assertOk()
         ->assertSee('action="'.route('admin.brand.store').'"', false)
         ->assertSee('enctype="multipart/form-data"', false)
-        ->assertSeeInOrder(['name="name"', 'name="image_media_id"', 'name="short_description"', 'name="link"'], false)
+        ->assertSeeInOrder(['name="lang_id"', 'name="image_media_id"', 'name="link"', 'name="name"', 'name="short_description"'], false)
         ->assertSee('Marka ekle')
         ->assertSee('href="'.route('admin.brand.index').'"', false);
 });
@@ -55,12 +56,13 @@ test('brands persists required fields and accepts missing optional content', fun
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
 
     $image = brandTestImage('logo.png');
-    $this->post(route('admin.brand.store'), ['name' => 'Acme', 'image_media_id' => $image->id])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.brand.index');
+    $language = Language::query()->where('code', 'tr')->sole();
+    $this->post(route('admin.brand.store'), ['lang_id' => $language->id, 'name' => 'Acme', 'image_media_id' => $image->id])
+        ->assertSessionHasNoErrors()->assertRedirect(route('admin.brand.edit', ['brand' => 1, 'lang' => 'tr']));
 
     $brand = Brand::query()->sole();
-    expect($brand->name)->toBe('Acme');
-    expect($brand->short_description)->toBeNull();
+    expect($brand->translations()->where('lang_id', $language->id)->value('name'))->toBe('Acme');
+    expect($brand->translations()->where('lang_id', $language->id)->value('short_description'))->toBeNull();
     expect($brand->link)->toBeNull();
     Storage::disk('public')->assertExists($brand->image);
 });
@@ -69,24 +71,27 @@ test('brands preserves its required image on update and cleans replaced and dele
     Storage::fake('public');
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
     $first = brandTestImage('first.png');
-    $this->post(route('admin.brand.store'), ['name' => 'Original', 'image_media_id' => $first->id])->assertSessionHasNoErrors();
-    $brand = Brand::query()->sole();
+    $language = Language::query()->where('code', 'tr')->sole();
+    $brand = Brand::factory()->create();
+    $this->put(route('admin.brand.update', $brand), ['lang_id' => $language->id, 'name' => 'Original', 'image_media_id' => $first->id])->assertSessionHasNoErrors();
+    $brand->refresh();
     $firstImage = $brand->image;
 
-    $this->put(route('admin.brand.update', $brand), ['name' => 'Updated', 'image_media_id' => $first->id, 'short_description' => 'Partner brand', 'link' => 'https://example.com'])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.brand.index');
+    $this->put(route('admin.brand.update', $brand), ['lang_id' => $language->id, 'name' => 'Updated', 'image_media_id' => $first->id, 'short_description' => 'Partner brand', 'link' => 'https://example.com'])
+        ->assertSessionHasNoErrors()->assertRedirect(route('admin.brand.edit', ['brand' => $brand->id, 'lang' => 'tr']));
     expect($brand->fresh()->image)->toBe($firstImage);
-    $this->assertDatabaseHas('brands', ['id' => $brand->id, 'name' => 'Updated', 'short_description' => 'Partner brand', 'link' => 'https://example.com']);
+    $this->assertDatabaseHas('brand_translations', ['brand_id' => $brand->id, 'lang_id' => $language->id, 'name' => 'Updated', 'short_description' => 'Partner brand']);
+    expect($brand->fresh()->link)->toBe('https://example.com');
     Storage::disk('public')->assertExists($firstImage);
 
     $second = brandTestImage('second.png');
-    $this->put(route('admin.brand.update', $brand), ['name' => 'Updated', 'image_media_id' => $second->id])
+    $this->put(route('admin.brand.update', $brand), ['lang_id' => $language->id, 'name' => 'Updated', 'image_media_id' => $second->id])
         ->assertSessionHasNoErrors();
     $secondImage = $brand->fresh()->image;
     Storage::disk('public')->assertExists($secondImage);
     Storage::disk('public')->assertExists($firstImage);
     $this->assertDatabaseMissing('media_usages', ['owner_type' => Brand::class, 'owner_id' => $brand->id, 'media_id' => $first->id]);
-    expect($brand->fresh()->short_description)->toBeNull();
+    expect($brand->fresh()->translations()->where('lang_id', $language->id)->value('short_description'))->toBeNull();
     expect($brand->fresh()->link)->toBeNull();
 
     $this->delete(route('admin.brand.destroy', $brand))->assertRedirectToRoute('admin.brand.index');
@@ -97,14 +102,14 @@ test('brands preserves its required image on update and cleans replaced and dele
 
 test('brands rejects missing required fields', function () {
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
-        ->post(route('admin.brand.store'), [])->assertSessionHasErrors(['name', 'image_media_id']);
+        ->post(route('admin.brand.store'), [])->assertSessionHasErrors(['lang_id', 'name', 'image_media_id']);
 
     $this->assertDatabaseCount('brands', 0);
 });
 
 test('brands rejects invalid content without persisting files or rows', function (string $field, mixed $value) {
     Storage::fake('public');
-    $payload = ['name' => 'Acme', 'image_media_id' => brandTestImage('valid.png')->id];
+    $payload = ['lang_id' => Language::query()->where('code', 'tr')->sole()->id, 'name' => 'Acme', 'image_media_id' => brandTestImage('valid.png')->id];
     $payload[$field] = $value;
 
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
@@ -129,7 +134,7 @@ test('brands rejects invalid image content and oversized uploads', function (boo
     $image = $oversized ? brandTestImage('large.png', 4097) : brandTestDocument();
 
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
-        ->post(route('admin.brand.store'), ['name' => 'Acme', 'image_media_id' => $image->id])->assertSessionHasErrors('image_media_id');
+        ->post(route('admin.brand.store'), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id, 'name' => 'Acme', 'image_media_id' => $image->id])->assertSessionHasErrors('image_media_id');
 
     $this->assertDatabaseCount('brands', 0);
     Storage::disk('public')->assertCount('_media', 1);
@@ -138,13 +143,15 @@ test('brands rejects invalid image content and oversized uploads', function (boo
 test('brands rejects an invalid update and retains the existing content and image', function () {
     Storage::fake('public');
     Storage::disk('public')->put('brand/images/original.png', 'original');
-    $brand = Brand::factory()->create(['name' => 'Original', 'image' => 'brand/images/original.png']);
+    $language = Language::query()->where('code', 'tr')->sole();
+    $brand = Brand::factory()->create(['image' => 'brand/images/original.png']);
+    $brand->translations()->where('lang_id', $language->id)->update(['name' => 'Original']);
 
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
-        ->put(route('admin.brand.update', $brand), ['name' => ''])
+        ->put(route('admin.brand.update', $brand), ['lang_id' => $language->id, 'name' => ''])
         ->assertSessionHasErrors('name');
 
-    expect($brand->fresh()->name)->toBe('Original');
+    expect($brand->fresh()->translations()->where('lang_id', $language->id)->value('name'))->toBe('Original');
     Storage::disk('public')->assertExists('brand/images/original.png');
     Storage::disk('public')->assertCount('brand/images', 1);
 });
@@ -153,7 +160,9 @@ test('brands escapes editable content and only offers permitted actions', functi
     app(ModulePanelService::class)->syncPermissions();
     $admin = Admin::factory()->create();
     $admin->givePermissionTo(['brand.view', 'brand.update']);
-    $brand = Brand::factory()->create(['name' => '<script>name</script>', 'short_description' => '<script>description</script>']);
+    $language = Language::query()->where('code', 'tr')->sole();
+    $brand = Brand::factory()->create();
+    $brand->translations()->where('lang_id', $language->id)->update(['name' => '<script>name</script>', 'short_description' => '<script>description</script>']);
     $this->actingAs($admin, 'admin');
 
     $this->get(route('admin.brand.index'))->assertOk()->assertDontSee('action="'.route('admin.brand.store').'"', false);
@@ -179,10 +188,12 @@ test('brands enforces operation permissions', function (string $method, string $
             $admin->givePermissionTo('media.view');
         }
     }
-    $brand = Brand::factory()->create(['name' => 'Original']);
+    $language = Language::query()->where('code', 'tr')->sole();
+    $brand = Brand::factory()->create();
+    $brand->translations()->where('lang_id', $language->id)->update(['name' => 'Original']);
     $parameters = in_array($action, ['edit', 'update', 'destroy'], true) ? $brand : [];
 
-    $payload = ['name' => 'Updated'];
+    $payload = ['lang_id' => $language->id, 'name' => 'Updated'];
     if ($granted && in_array($action, ['store', 'update'], true)) {
         $payload['image_media_id'] = brandTestImage('logo.png')->id;
     }
@@ -190,16 +201,17 @@ test('brands enforces operation permissions', function (string $method, string $
 
     if (! $granted) {
         $response->assertForbidden();
-        expect($brand->fresh()->name)->toBe('Original');
+        expect($brand->fresh()->translations()->where('lang_id', $language->id)->value('name'))->toBe('Original');
         $this->assertDatabaseCount('brands', 1);
         Storage::disk('public')->assertEmpty();
     } elseif ($action === 'destroy') {
         $response->assertRedirectToRoute('admin.brand.index');
         $this->assertModelMissing($brand);
     } elseif (in_array($action, ['store', 'update'], true)) {
-        $response->assertRedirectToRoute('admin.brand.index');
-        $this->assertDatabaseHas('brands', ['name' => 'Updated']);
-        $this->assertDatabaseHas('media_usages', ['owner_type' => Brand::class, 'owner_id' => Brand::query()->where('name', 'Updated')->value('id')]);
+        $savedBrand = Brand::query()->latest('id')->firstOrFail();
+        $response->assertRedirect(route('admin.brand.edit', ['brand' => $savedBrand->id, 'lang' => 'tr']));
+        $this->assertDatabaseHas('brand_translations', ['brand_id' => $savedBrand->id, 'lang_id' => $language->id, 'name' => 'Updated']);
+        $this->assertDatabaseHas('media_usages', ['owner_type' => Brand::class, 'owner_id' => $savedBrand->id]);
     } else {
         $response->assertOk();
     }
@@ -259,7 +271,7 @@ test('disabled brands rejects every endpoint even for super admins', function (s
     $parameters = in_array($action, ['edit', 'update', 'destroy'], true) ? $brand : [];
 
     $this->get(route('admin.dashboard'))->assertOk()->assertDontSee('href="'.route('admin.brand.index').'"', false);
-    $this->{$method}(route('admin.brand.'.$action, $parameters), ['name' => 'Forbidden'])->assertNotFound();
+    $this->{$method}(route('admin.brand.'.$action, $parameters), ['lang_id' => Language::query()->where('code', 'tr')->sole()->id, 'name' => 'Forbidden'])->assertNotFound();
 
     $this->assertModelExists($brand);
     $this->assertDatabaseCount('brands', 1);
@@ -282,13 +294,16 @@ test('brands renders validates and persists configured extra fields', function (
 
     $this->get(route('admin.brand.create'))->assertOk()->assertSee('name="extra_fields[tagline]"', false);
     $image = brandTestImage('logo.png');
-    $this->post(route('admin.brand.store'), ['name' => 'Acme', 'image_media_id' => $image->id, 'extra_fields' => ['tagline' => '<b>Brand</b>']])
+    $language = Language::query()->where('code', 'tr')->sole();
+    $brand = Brand::factory()->create();
+    $this->put(route('admin.brand.update', $brand), ['lang_id' => $language->id, 'name' => 'Acme', 'image_media_id' => $image->id, 'extra_fields' => ['tagline' => '<b>Brand</b>']])
         ->assertSessionHasNoErrors();
-    $brand = Brand::query()->sole();
-    expect($brand->extra_fields)->toBe(['tagline' => '<b>Brand</b>']);
+    $brand->refresh();
+    expect($brand->translations()->where('lang_id', $language->id)->value('extra_fields'))->toBe(['tagline' => '<b>Brand</b>']);
     $this->get(route('admin.brand.edit', $brand))->assertOk()->assertSee('&lt;b&gt;Brand&lt;/b&gt;', false);
-    $this->put(route('admin.brand.update', $brand), ['name' => 'Acme', 'extra_fields' => ['tagline' => str_repeat('a', 21)]])
+    $brandImage = $brand->fresh()->image;
+    $this->put(route('admin.brand.update', $brand), ['lang_id' => $language->id, 'name' => 'Acme', 'extra_fields' => ['tagline' => str_repeat('a', 21)]])
         ->assertSessionHasErrors('extra_fields.tagline');
-    expect($brand->fresh()->extra_fields)->toBe(['tagline' => '<b>Brand</b>']);
-    Storage::disk('public')->assertExists($brand->image);
+    expect($brand->fresh()->translations()->where('lang_id', $language->id)->value('extra_fields'))->toBe(['tagline' => '<b>Brand</b>']);
+    expect($brand->fresh()->image)->toBe($brandImage);
 });

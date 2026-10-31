@@ -2,7 +2,9 @@
 
 namespace Modules\Brand\Database\Factories;
 
+use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Schema;
 use Modules\Brand\Models\Brand;
 
 /** @extends Factory<Brand> */
@@ -12,6 +14,16 @@ class BrandFactory extends Factory
 
     public function definition(): array
     {
-        return ['name' => fake()->company(), 'image' => 'brand/images/example.png', 'short_description' => null, 'link' => null, 'extra_fields' => []];
+        return ['image' => 'brand/images/example.png', 'link' => null, 'sort_order' => null, 'is_active' => true];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Brand $brand): void {
+            $language = Language::query()->where('code', 'tr')->first();
+            if ($language && Schema::hasTable('brand_translations')) {
+                $brand->translations()->firstOrCreate(['lang_id' => $language->id], ['name' => fake()->company(), 'short_description' => null, 'extra_fields' => []]);
+            }
+        });
     }
 }

@@ -1,4 +1,5 @@
 @import '@tabler/core/dist/css/tabler.min.css';
+@import '@tabler/core/dist/css/tabler-flags.min.css';
 @import 'select2/dist/css/select2.min.css';
 @import './media.css';
 @import './admin-panel-refresh.css';

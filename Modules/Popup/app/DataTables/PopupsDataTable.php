@@ -10,8 +10,18 @@ class PopupsDataTable
 {
     public function handle(): JsonResponse
     {
-        return DataTables::eloquent(Popup::query()->with('imageMedia')->select(['id', 'title', 'starts_at', 'ends_at', 'repeat_policy', 'repeat_interval', 'repeat_unit', 'is_active', 'image_media_id']))
-            ->addColumn('image', fn (Popup $popup): string => view('popup::partials.image', compact('popup'))->render())
+        return DataTables::eloquent(Popup::query()->with(['imageMedia', 'translations' => fn ($query) => $query->whereHas('language', fn ($language) => $language->where('code', 'tr'))])->select(['id', 'starts_at', 'ends_at', 'repeat_policy', 'repeat_interval', 'repeat_unit', 'is_active', 'image_media_id']))
+            ->addColumn('title', function (Popup $popup): string {
+                $translation = $popup->translations->first();
+                $popup->setRelation('selectedTranslation', $translation);
+
+                return $translation?->title ?? '';
+            })
+            ->addColumn('image', function (Popup $popup): string {
+                $popup->setRelation('selectedTranslation', $popup->translations->first());
+
+                return view('popup::partials.image', compact('popup'))->render();
+            })
             ->editColumn('is_active', fn (Popup $popup): string => $popup->is_active ? 'Aktif' : 'Pasif')
             ->editColumn('starts_at', fn (Popup $popup): ?string => $popup->starts_at?->format('d.m.Y H:i'))
             ->editColumn('ends_at', fn (Popup $popup): ?string => $popup->ends_at?->format('d.m.Y H:i'))

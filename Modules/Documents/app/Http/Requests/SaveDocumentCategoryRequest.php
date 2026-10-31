@@ -19,11 +19,16 @@ class SaveDocumentCategoryRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values): array
     {
         $category = $this->route('category');
+        $languageId = $this->input('lang_id');
+        $translation = $category && is_numeric($languageId)
+            ? $category->translations()->where('lang_id', $languageId)->first()
+            : null;
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('document_categories', 'name')->ignore($category?->id)],
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('document_category_translations', 'name')->where(fn ($query) => $query->where('lang_id', $languageId))->ignore($translation?->id)],
             'icon' => ['nullable', 'string', 'max:100', 'regex:/^[a-z0-9-]+$/'],
-            ...$values->rules($features->form('Documents', 'category')['fields'], $this->all(), $category?->extra_fields ?? []),
+            ...$values->rules($features->form('Documents', 'category')['fields'], $this->all(), $translation?->extra_fields ?? []),
         ];
     }
 
@@ -32,7 +37,7 @@ class SaveDocumentCategoryRequest extends FormRequest
     {
         return [
             'name.required' => 'Kategori adını girin.',
-            'name.unique' => 'Bu kategori adı zaten kullanılıyor.',
+            'name.unique' => 'Bu kategori adı bu dilde zaten kullanılıyor.',
         ] + (new FieldRuleBuilder)->messages();
     }
 

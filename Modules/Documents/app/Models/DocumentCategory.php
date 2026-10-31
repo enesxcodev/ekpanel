@@ -14,16 +14,16 @@ class DocumentCategory extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ['name', 'icon', 'extra_fields'];
-
-    protected function casts(): array
-    {
-        return ['extra_fields' => 'array'];
-    }
+    protected $fillable = ['icon'];
 
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class, 'category_id');
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(DocumentCategoryTranslation::class);
     }
 
     protected static function newFactory(): DocumentCategoryFactory

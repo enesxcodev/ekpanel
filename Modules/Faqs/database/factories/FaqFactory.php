@@ -2,6 +2,7 @@
 
 namespace Modules\Faqs\Database\Factories;
 
+use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Faqs\Models\Faq;
 use Modules\Faqs\Models\FaqCategory;
@@ -20,10 +21,19 @@ class FaqFactory extends Factory
     {
         return [
             'category_id' => FaqCategory::factory(),
-            'name' => fake()->sentence(),
-            'content' => fake()->paragraphs(2, true),
-            'extra_fields' => [],
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Faq $faq): void {
+            $faq->translations()->create([
+                'lang_id' => Language::query()->where('code', 'tr')->firstOrFail()->id,
+                'name' => fake()->sentence(),
+                'content' => fake()->paragraphs(2, true),
+                'extra_fields' => [],
+            ]);
+        });
     }
 
     public function uncategorized(): static

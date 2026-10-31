@@ -4,6 +4,7 @@ namespace Modules\Products\Services;
 
 use App\Enums\Fields\FieldValueType;
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldFiles;
 use App\Services\Fields\ModuleFeatures;
@@ -21,20 +22,26 @@ class ProductCategoryService
             $category = $category === null
                 ? new ProductCategory
                 : ProductCategory::query()->lockForUpdate()->findOrFail($category->id);
-            $category->fill(['name' => $data['name'], 'sort_order' => $data['sort_order'] ?? 0, 'is_active' => $data['is_active'] ?? $category->is_active ?? true]);
+            $language = Language::query()->where('is_active', true)->findOrFail($data['lang_id']);
+            $category->fill(['sort_order' => $data['sort_order'] ?? 0, 'is_active' => $data['is_active'] ?? $category->is_active ?? true]);
             $category->save();
-
-            $category->extra_fields = $this->values->prepare(
+            $translation = $category->translations()->firstOrNew(['lang_id' => $language->id]);
+            $translation->name = $data['name'];
+            $existingExtraFields = $translation->extra_fields ?? [];
+            if (is_string($existingExtraFields)) {
+                $existingExtraFields = json_decode($existingExtraFields, true) ?? [];
+            }
+            $translation->extra_fields = $this->values->prepare(
                 $this->features->form('Products', 'category')['fields'],
                 $data,
-                $category->extra_fields ?? [],
-                'products/categories/'.$category->id.'/features',
+                is_array($existingExtraFields) ? $existingExtraFields : [],
+                'products/categories/'.$category->id.'/translations/'.$language->id.'/features',
                 $files,
                 $actor,
             );
-            $category->save();
+            $translation->save();
 
-            $this->values->syncMediaUsages($this->features->form('Products', 'category')['fields'], $category, $this->media, 'Ürün kategorisi / '.$category->name, 'admin.products.categories.edit');
+            $this->values->syncMediaUsages($this->features->form('Products', 'category')['fields'], $translation, $this->media, 'Ürün kategorisi / '.$translation->name, 'admin.products.categories.edit');
 
             return $category;
         });
@@ -44,10 +51,13 @@ class ProductCategoryService
     {
         $this->files->transaction(function (FieldFiles $files) use ($category): void {
             $category = ProductCategory::query()->lockForUpdate()->findOrFail($category->id);
-            foreach ($this->features->form('Products', 'category')['fields'] as $key => $definition) {
-                if ($definition->input_type->isFile() && $definition->value_type !== FieldValueType::Media) {
-                    $files->replace(null, $category->extra_fields[$key] ?? null, 'products/categories/'.$category->id.'/features', true);
+            foreach ($category->translations as $translation) {
+                foreach ($this->features->form('Products', 'category')['fields'] as $key => $definition) {
+                    if ($definition->input_type->isFile() && $definition->value_type !== FieldValueType::Media) {
+                        $files->replace(null, $translation->extra_fields[$key] ?? null, 'products/categories/'.$category->id.'/translations/'.$translation->lang_id.'/features', true);
+                    }
                 }
+                $this->media->detachUsages($translation);
             }
             $this->media->detachUsages($category);
             $category->delete();

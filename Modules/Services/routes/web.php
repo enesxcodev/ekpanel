@@ -9,6 +9,8 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Ser
     ->prefix((trim((string) config('app.route_files.admin_prefix')) ?: 'admin').'/services')
     ->name('admin.services.')
     ->group(function (): void {
+        Route::get('categories/translations/{translation}/edit', [ServiceCategoryController::class, 'translationEdit'])->name('categories.translations.edit');
+        Route::get('translations/{translation}/edit', [ServiceController::class, 'translationEdit'])->name('translations.edit');
         Route::get('categories/data', [ServiceCategoryController::class, 'data'])->name('categories.data');
         Route::resource('categories', ServiceCategoryController::class)->except('show');
         Route::get('data', [ServiceController::class, 'data'])->name('data');

@@ -7,23 +7,34 @@ use App\Services\HtmlSanitizer;
 use App\Services\Settings\SeoMetadata;
 use App\Services\Settings\SettingsService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Modules\Store\Services\StoreFrontendService;
+use Modules\Store\Services\StoreLanguageService;
 use Modules\Store\Services\StoreMoney;
 
 class PublicStoreController extends Controller
 {
-    public function index(Request $request, StoreFrontendService $frontend): View
+    public function index(Request $request, StoreFrontendService $frontend): View|RedirectResponse
     {
+        if ($request->route('lang') === StoreLanguageService::PrimaryCode) {
+            return redirect()->route('store.index', $request->query(), 301);
+        }
         $data = $request->validate(['category_id' => ['nullable', 'integer', 'min:1'], 'q' => ['nullable', 'string', 'max:100']]);
 
-        return view('store::public.index', ['products' => $frontend->products(isset($data['category_id']) ? (int) $data['category_id'] : null, $data['q'] ?? null), 'categories' => $frontend->categories(), 'taxIncluded' => (bool) app(SettingsService::class)->get('store.tax_included', true)]);
+        $language = app(StoreLanguageService::class)->forPublic((string) ($request->route('lang') ?? $request->query('lang', 'tr')));
+
+        return view('store::public.index', ['products' => $frontend->products(isset($data['category_id']) ? (int) $data['category_id'] : null, $data['q'] ?? null, 12, $language?->code), 'categories' => $frontend->categories($language?->code), 'taxIncluded' => (bool) app(SettingsService::class)->get('store.tax_included', true), 'languageCode' => $language?->code ?? 'tr']);
     }
 
-    public function show(string $slug, StoreFrontendService $frontend, HtmlSanitizer $sanitizer, SeoMetadata $seo): View
+    public function show(Request $request, string $slug, StoreFrontendService $frontend, HtmlSanitizer $sanitizer, SeoMetadata $seo): View|RedirectResponse
     {
-        $product = $frontend->findBySlug($slug);
+        if ($request->route('lang') === StoreLanguageService::PrimaryCode) {
+            return redirect()->route('store.show', ['slug' => $slug, ...$request->query()], 301);
+        }
+        $language = app(StoreLanguageService::class)->forPublic((string) ($request->route('lang') ?? $request->query('lang', 'tr')));
+        $product = $frontend->findBySlug($slug, $language?->code);
         abort_unless($product, 404);
         $metadata = $seo->build(['page' => $product]);
         if ($image = $product->shareImageMedia) {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Menus\Models\Menu;
@@ -16,9 +17,10 @@ beforeEach(function () {
 
 test('menu workspace renders escaped menu choices and only supported content sources', function () {
     $admin = Admin::factory()->superAdmin()->create();
-    Menu::factory()->create(['name' => '<script>alert(1)</script>']);
-    $this->actingAs($admin, 'admin')->get(route('admin.menus.index'))->assertOk()
+    $menu = Menu::factory()->create(['name' => '<script>alert(1)</script>']);
+    $this->actingAs($admin, 'admin')->get(route('admin.menus.index', ['menu' => $menu->id]))->assertOk()
         ->assertViewIs('menus::workspace')->assertSee('Menü öğesi ekle')
+        ->assertSee(e(route('admin.menus.index', ['lang' => 'tr', 'menu' => $menu->id])), false)
         ->assertDontSee('<script>alert(1)</script>', false)
         ->assertDontSee('Blog Yazıları')->assertDontSee('name="target_type" class="form-select"', false);
 });
@@ -163,6 +165,29 @@ test('legacy form addresses enter the selected menu workspace', function () {
     $admin = Admin::factory()->superAdmin()->create();
     $item = MenuItem::factory()->create();
     $this->actingAs($admin, 'admin')->get(route('admin.menus.items.edit', [$item->menu, $item]))
-        ->assertRedirectToRoute('admin.menus.index', ['menu' => $item->menu_id, 'item' => $item->id]);
-    $this->get(route('admin.menus.edit', $item->menu))->assertRedirectToRoute('admin.menus.index', ['menu' => $item->menu_id]);
+        ->assertRedirectToRoute('admin.menus.index', ['menu' => $item->menu_id, 'item' => $item->id, 'lang' => 'tr']);
+    $this->get(route('admin.menus.edit', $item->menu))->assertRedirectToRoute('admin.menus.index', ['menu' => $item->menu_id, 'lang' => 'tr']);
+});
+
+test('translated menu trees remain language scoped during CRUD, reorder, and public rendering', function () {
+    $admin = Admin::factory()->superAdmin()->create();
+    $english = Language::factory()->create(['code' => 'en', 'is_active' => true]);
+    $menu = Menu::factory()->create(['key' => 'language-scope']);
+    $menu->translations()->create(['lang_id' => $english->id, 'name' => 'Main navigation']);
+    $turkishItem = MenuItem::factory()->for($menu)->create(['label' => 'Türkçe', 'url' => '/tr-link']);
+    $englishItem = MenuItem::factory()->for($menu)->create(['lang_id' => $english->id, 'label' => 'English', 'url' => '/en-link']);
+    $this->actingAs($admin, 'admin');
+
+    $this->getJson(route('admin.menus.workspace', ['menu' => $menu->id, 'lang' => 'en']))
+        ->assertOk()->assertJsonPath('menu.name', 'Main navigation')->assertJsonPath('items.0.id', $englishItem->id)
+        ->assertJsonCount(1, 'items')->assertJsonMissing(['label' => 'Türkçe']);
+    $this->putJson(route('admin.menus.reorder', ['menu' => $menu->id, 'lang' => 'en']), [
+        'lang_id' => $english->id,
+        'items' => [['id' => $englishItem->id, 'parent_id' => null, 'sort_order' => 4]],
+    ])->assertOk();
+    $this->deleteJson(route('admin.menus.items.destroy', ['menu' => $menu->id, 'item' => $englishItem->id, 'lang' => 'en']), ['lang_id' => $english->id])->assertOk();
+
+    expect($turkishItem->fresh())->not->toBeNull();
+    expect(app(NavigationService::class)->tree($menu->key, 'en'))->toBeEmpty();
+    expect(app(NavigationService::class)->tree($menu->key, 'tr')[0]['label'])->toBe('Türkçe');
 });

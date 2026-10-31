@@ -3,6 +3,7 @@
 namespace Modules\Brand\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Modules\Brand\DataTables\BrandsDataTable;
 use Modules\Brand\Http\Requests\SaveBrandRequest;
 use Modules\Brand\Models\Brand;
+use Modules\Brand\Services\BrandLanguageService;
 use Modules\Brand\Services\BrandService;
 
 class BrandController extends Controller
@@ -27,13 +29,21 @@ class BrandController extends Controller
         return view('brand::index');
     }
 
-    public function create(ModuleFeatures $features, FeatureValues $values): View
+    public function create(ModuleFeatures $features, FeatureValues $values, BrandLanguageService $languages, Request $request): View
     {
         $this->authorize('brand.create');
+        $activeLanguages = $languages->active();
+        $selectedLanguage = $languages->forAdmin($request->query('lang', 'tr'));
+        if ($selectedLanguage?->code !== 'tr') {
+            abort(404);
+        }
         $featureForm = $features->form('Brand', 'brand');
         $featureFields = $values->fields($featureForm['fields'], []);
 
-        return view('brand::create', compact('featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
+        $translation = null;
+        $translatedLanguageIds = [];
+
+        return view('brand::create', compact('featureForm', 'featureFields', 'activeLanguages', 'selectedLanguage', 'translation', 'translatedLanguageIds') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function data(BrandsDataTable $dataTable): JsonResponse
@@ -53,17 +63,21 @@ class BrandController extends Controller
             route('admin.brand.edit', ['brand' => $brand->id], absolute: false),
         );
 
-        return redirect()->route('admin.brand.index')->with('notification', ['type' => 'success', 'message' => 'Marka başarıyla eklendi.']);
+        return redirect()->route('admin.brand.edit', ['brand' => $brand->id, 'lang' => 'tr'])->with('notification', ['type' => 'success', 'message' => 'Marka başarıyla eklendi.']);
     }
 
-    public function edit(Brand $brand, ModuleFeatures $features, FeatureValues $values): View
+    public function edit(Brand $brand, ModuleFeatures $features, FeatureValues $values, BrandLanguageService $languages, Request $request): View
     {
         $this->authorize('brand.update');
         $featureForm = $features->form('Brand', 'brand');
-        $brand->load('imageMedia');
-        $featureFields = $values->fields($featureForm['fields'], $brand->extra_fields ?? []);
+        $activeLanguages = $languages->active();
+        $selectedLanguage = $languages->forAdmin($request->query('lang'));
+        $brand->load(['imageMedia', 'translations']);
+        $translation = $brand->translations->firstWhere('lang_id', $selectedLanguage?->id);
+        $translatedLanguageIds = $brand->translations->pluck('lang_id')->all();
+        $featureFields = $values->fields($featureForm['fields'], $translation?->extra_fields ?? []);
 
-        return view('brand::edit', compact('brand', 'featureForm', 'featureFields') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
+        return view('brand::edit', compact('brand', 'featureForm', 'featureFields', 'activeLanguages', 'selectedLanguage', 'translation', 'translatedLanguageIds') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 
     public function update(SaveBrandRequest $request, Brand $brand, BrandService $service, NotifyService $notifications): RedirectResponse
@@ -76,7 +90,9 @@ class BrandController extends Controller
             route('admin.brand.edit', ['brand' => $brand->id], absolute: false),
         );
 
-        return redirect()->route('admin.brand.index')->with('notification', ['type' => 'success', 'message' => 'Marka başarıyla güncellendi.']);
+        $code = Language::query()->findOrFail($request->validated('lang_id'))->code;
+
+        return redirect()->route('admin.brand.edit', ['brand' => $brand->id, 'lang' => $code])->with('notification', ['type' => 'success', 'message' => 'Marka başarıyla güncellendi.']);
     }
 
     public function destroy(Brand $brand, BrandService $service, Request $request, NotifyService $notifications): RedirectResponse

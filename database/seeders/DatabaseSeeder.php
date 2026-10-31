@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([AdminAuthSeeder::class, SettingsSeeder::class, AdminPermissionSeeder::class]);
+        $this->call([AdminAuthSeeder::class, SettingsSeeder::class, AdminPermissionSeeder::class, LanguageSeeder::class]);
         if (Schema::hasTable('blog_categories')) {
             $this->call(BlogDatabaseSeeder::class);
         }

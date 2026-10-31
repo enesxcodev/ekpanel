@@ -2,6 +2,7 @@
 
 namespace Modules\Menus\Http\Requests;
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -19,6 +20,10 @@ class SaveMenuItemRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        if (! $this->exists('lang_id')) {
+            $this->merge(['lang_id' => Language::query()->where('code', 'tr')->where('is_active', true)->value('id')]);
+        }
+
         $json = $this->input('route_parameters_json');
         if ($this->input('target_type') === 'route' && is_string($json)) {
             try {
@@ -35,9 +40,10 @@ class SaveMenuItemRequest extends FormRequest
         $type = $this->input('target_type');
 
         return [
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'icon' => ['nullable', 'string', 'max:100', 'regex:/^[a-z][a-z0-9-]*$/'],
             'label' => ['required', 'string', 'max:255'],
-            'parent_id' => ['nullable', 'integer', Rule::exists('menu_items', 'id')->where('menu_id', $this->route('menu')->id)],
+            'parent_id' => ['nullable', 'integer', Rule::exists('menu_items', 'id')->where('menu_id', $this->route('menu')->id)->where('lang_id', $this->input('lang_id'))],
             'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
             'is_active' => ['required', 'boolean'],
             'new_tab' => ['sometimes', 'boolean'],
@@ -65,13 +71,23 @@ class SaveMenuItemRequest extends FormRequest
             if ($validator->errors()->isNotEmpty()) {
                 return;
             }
+            $code = $this->query('lang');
+            if (is_string($code) && $code !== '') {
+                $language = Language::query()->where('code', $code)->where('is_active', true)->first();
+                if ($language === null || (int) $this->input('lang_id') !== $language->id) {
+                    $validator->errors()->add('lang_id', 'Form dili ile istek dili eşleşmiyor. Sayfayı yenileyip tekrar deneyin.');
+
+                    return;
+                }
+            }
             $navigation = app(NavigationService::class);
             $data = $validator->validated();
             if (! empty($data['url']) && $navigation->safeUrl($data['url']) === null) {
                 $validator->errors()->add('url', 'Geçerli bir http(s) adresi veya güvenli site içi yol girin.');
             }
             $candidate = new MenuItem($data);
-            $target = $navigation->target($candidate);
+            $languageCode = Language::query()->whereKey($data['lang_id'])->value('code');
+            $target = $navigation->target($candidate, is_string($languageCode) ? $languageCode : null);
             if ($this->boolean('is_active') && $target['error'] !== null) {
                 $validator->errors()->add('target_type', $target['error']);
             }

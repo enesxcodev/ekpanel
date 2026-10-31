@@ -14,7 +14,26 @@ class FaqCategory extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = ['name', 'extra_fields'];
+    protected $fillable = [];
+
+    public function getAttribute($key): mixed
+    {
+        if (in_array($key, ['name', 'extra_fields'], true) && ! array_key_exists($key, $this->attributes)) {
+            if ($this->relationLoaded('selectedTranslation')) {
+                return $this->getRelation('selectedTranslation')?->getAttribute($key);
+            }
+            if ($this->relationLoaded('translations')) {
+                return $this->getRelation('translations')->first()?->getAttribute($key);
+            }
+        }
+
+        return parent::getAttribute($key);
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(FaqCategoryTranslation::class);
+    }
 
     protected function casts(): array
     {

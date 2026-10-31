@@ -6,13 +6,18 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Blog\Models\BlogCategory;
 use Modules\Blog\Models\BlogContent;
+use Modules\Blog\Services\BlogLanguageService;
 use Yajra\DataTables\Facades\DataTables;
 
 class BlogContentsDataTable
 {
     public function handle(Request $request): JsonResponse
     {
-        $query = BlogContent::query()->with(['category.parent.parent', 'author'])->select(['id', 'blog_category_id', 'author_id', 'title', 'slug', 'status', 'published_at']);
+        $language = app(BlogLanguageService::class)->forAdmin(request()->query('lang'));
+        request()->attributes->set('blog_language', $language?->code ?? 'tr');
+        $query = BlogContent::query()->with(['category.parent.parent', 'author'])->leftJoin('blog_content_translations as localized', function ($join) use ($language): void {
+            $join->on('localized.blog_content_id', '=', 'blog_contents.id')->where('localized.lang_id', '=', $language?->id ?? 0);
+        })->select(['blog_contents.*', 'localized.title as title', 'localized.slug as slug']);
         if ($request->filled('category_id')) {
             $category = BlogCategory::query()->find($request->integer('category_id'));
             if ($category !== null) {
@@ -33,11 +38,17 @@ class BlogContentsDataTable
         }
 
         return DataTables::eloquent($query)
-            ->addColumn('category_path', fn (BlogContent $content): string => $content->category?->path ?? '—')
-            ->addColumn('author_name', fn (BlogContent $content): string => $content->author?->name ?? '—')
+            ->editColumn('title', fn ($record): string => $record->title ?? 'Çeviri eksik (#'.$record->id.')')
+            ->filterColumn('title', fn ($query, $keyword) => $query->where('localized.title', 'like', '%'.$keyword.'%'))
+            ->orderColumn('title', 'localized.title $1')
+            ->filterColumn('slug', fn ($query, $keyword) => $query->where('localized.slug', 'like', '%'.$keyword.'%'))
+            ->orderColumn('slug', 'localized.slug $1')
+            ->addColumn('category_path', fn (BlogContent $content): string => $content->category?->path ?? 'â€”')
+            ->addColumn('author_name', fn (BlogContent $content): string => $content->author?->name ?? 'â€”')
             ->editColumn('status', fn (BlogContent $content): string => view('blog::contents.partials.status', compact('content'))->render())
-            ->editColumn('published_at', fn (BlogContent $content): string => $content->published_at?->format('Y-m-d H:i') ?? '—')
+            ->editColumn('published_at', fn (BlogContent $content): string => $content->published_at?->format('Y-m-d H:i') ?? 'â€”')
             ->addColumn('actions', fn (BlogContent $content): string => view('blog::contents.partials.actions', compact('content'))->render())
+            ->removeColumn('translations')
             ->rawColumns(['status', 'actions'])
             ->toJson();
     }

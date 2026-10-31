@@ -11,5 +11,6 @@
 - Alan genişletme ve ortak form altyapısı için [modül kurallarını](../../../../.ai/rules/moduller.md#tema-için-yönetilebilir-alan-genişletme), geliştirme sınırları için [Menus geliştirme skill'ini](../../skills/menus-development/SKILL.md) oku.
 
 - `Menu` ve `MenuItem` nullable `icon` alanı taşır; ikon ham HTML değildir. Öğenin ikonu public ağaçta bulunur, dinamik çocuklarda tanımlanmamışsa null olur.
+- Menü anahtarı/icon/etkinlik ortaktır; görünen menü adı çevirisi `menu_translations` tablosunda, her dilin menü öğeleri ve sıralaması bağımsız `menu_items.lang_id` ağacındadır. `MenusFrontendService::getTree($key, $languageCode)` ile açık dili ver; dil verilmezse route/context ve TR varsayılanı kullanılır. Eksik çeviride başka dile fallback yapılmaz.
 
 - Tema okumasında `MenusFrontendService` kullan. Güncel metotlar, parametreler, dönüş türleri ve yayın/sıralama davranışı [modülün tema skill'inde](../../skills/menus-theme-integration/SKILL.md#frontend-okuma-servisi) tanımlıdır; önce bu sözleşmeyi oku.

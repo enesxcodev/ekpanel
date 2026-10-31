@@ -11,6 +11,8 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Doc
     ->group(function (): void {
         Route::get('documents/categories/data', [DocumentCategoryController::class, 'data'])->name('documents.categories.data');
         Route::get('documents/data', [DocumentController::class, 'data'])->name('documents.data');
+        Route::get('documents/categories/translations/{translation}/edit', [DocumentCategoryController::class, 'editTranslation'])->name('documents.categories.translations.edit');
+        Route::get('documents/translations/{translation}/edit', [DocumentController::class, 'editTranslation'])->name('documents.translations.edit');
         Route::resource('documents/categories', DocumentCategoryController::class)
             ->except('show')
             ->parameters(['categories' => 'category'])

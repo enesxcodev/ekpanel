@@ -2,6 +2,7 @@
 
 namespace Modules\Sector\Database\Factories;
 
+use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Sector\Models\Sector;
 
@@ -12,7 +13,24 @@ class SectorFactory extends Factory
 
     public function definition(): array
     {
-        return ['title' => fake()->words(3, true), 'short_description' => null, 'content' => null, 'meta_title' => null, 'meta_keywords' => null, 'meta_description' => null, 'image' => null, 'is_active' => true, 'extra_fields' => []];
+        return [
+            'image' => null,
+            'image_media_id' => null,
+            'sort_order' => null,
+            'is_active' => true,
+        ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Sector $sector): void {
+            $language = Language::query()->firstOrCreate(['code' => 'tr'], ['is_active' => true]);
+            $sector->translations()->create([
+                'lang_id' => $language->id,
+                'title' => fake()->words(3, true),
+                'extra_fields' => [],
+            ]);
+        });
     }
 
     public function inactive(): static

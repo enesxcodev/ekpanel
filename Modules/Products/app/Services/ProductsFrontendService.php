@@ -12,18 +12,23 @@ use Nwidart\Modules\Facades\Module;
 
 class ProductsFrontendService
 {
+    public function __construct(private ProductsLanguageService $languages) {}
+
     public function available(): bool
     {
         return Module::find('Products')?->isEnabled() ?? false;
     }
 
     /** @return Collection<int, Product> */
-    public function products(?int $categoryId = null, ?int $limit = null): Collection
+    public function products(?int $categoryId = null, ?int $limit = null, ?string $languageCode = null): Collection
     {
         if (! $this->available()) {
             return new Collection;
         }
-        $query = $this->visible()->with(['category', 'imageMedia', 'images'])->orderBy('sort_order')->orderBy('id');
+        if ($this->languages->forFrontend($languageCode) === null) {
+            return new Collection;
+        }
+        $query = $this->visible()->with(['translations', 'category.translations', 'imageMedia', 'images'])->whereHas('translations', fn (Builder $translation): Builder => $translation->where('lang_id', request()->attributes->get('products_language_id')))->orderBy('sort_order')->orderBy('id');
         if ($categoryId !== null) {
             $query->where('product_category_id', $categoryId);
         }
@@ -38,20 +43,28 @@ class ProductsFrontendService
     }
 
     /** @return Collection<int, ProductCategory> */
-    public function categories(): Collection
+    public function categories(?string $languageCode = null): Collection
     {
-        return $this->available() ? ProductCategory::query()->where('is_active', true)->orderBy('sort_order')->orderBy('id')->get() : new Collection;
+        if (! $this->available() || $this->languages->forFrontend($languageCode) === null) {
+            return new Collection;
+        }
+
+        return ProductCategory::query()->with(['translations'])->where('is_active', true)->whereHas('translations', fn (Builder $translation): Builder => $translation->where('lang_id', request()->attributes->get('products_language_id')))->orderBy('sort_order')->orderBy('id')->get();
     }
 
-    public function findBySlug(string $slug): ?Product
+    public function findBySlug(string $slug, ?string $languageCode = null): ?Product
     {
-        return $this->available() ? $this->visible()->with(['category', 'imageMedia', 'images'])->where('slug', $slug)->first() : null;
+        if (! $this->available() || $this->languages->forFrontend($languageCode) === null) {
+            return null;
+        }
+
+        return $this->visible()->with(['translations', 'category.translations', 'imageMedia', 'images'])->whereHas('translations', fn (Builder $translation): Builder => $translation->where('lang_id', request()->attributes->get('products_language_id'))->where('slug', $slug))->first();
     }
 
     /** @return array{key: string, context: string}|null */
     public function formFor(Product $product): ?array
     {
-        if (! $this->available()) {
+        if (! $this->available() || $this->languages->forFrontend() === null) {
             return null;
         }
         $current = $this->visible()->find($product->id);
@@ -69,10 +82,10 @@ class ProductsFrontendService
     /** @return array{type: string, id: int, title: string, slug: string}|null */
     public function formContext(int $id, SiteForm $form): ?array
     {
-        if (! $this->available() || ! $form->is_active) {
+        if (! $this->available() || ! $form->is_active || $this->languages->forFrontend() === null) {
             return null;
         }
-        $product = $this->visible()->where('site_form_id', $form->id)->lockForUpdate()->find($id);
+        $product = $this->visible()->where('site_form_id', $form->id)->whereHas('translations', fn (Builder $translation): Builder => $translation->where('lang_id', request()->attributes->get('products_language_id')))->with('translations')->lockForUpdate()->find($id);
 
         return $product ? ['type' => 'product', 'id' => $product->id, 'title' => $product->title, 'slug' => $product->slug] : null;
     }
@@ -80,8 +93,15 @@ class ProductsFrontendService
     /** @return Builder<Product> */
     private function visible(): Builder
     {
-        return Product::query()->where('is_active', true)->where(function (Builder $query): void {
-            $query->whereNull('product_category_id')->orWhereHas('category', fn (Builder $category): Builder => $category->where('is_active', true));
+        $languageId = request()->attributes->get('products_language_id');
+
+        return Product::query()->where('is_active', true)->where(function (Builder $query) use ($languageId): void {
+            $query->whereNull('product_category_id')->orWhereHas('category', function (Builder $category) use ($languageId): void {
+                $category->where('is_active', true);
+                if ($languageId !== null) {
+                    $category->whereHas('translations', fn (Builder $translation): Builder => $translation->where('lang_id', $languageId));
+                }
+            });
         });
     }
 }

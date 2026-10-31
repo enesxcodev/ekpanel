@@ -32,9 +32,12 @@ class StoreProductRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values, ContentMediaService $media): array
     {
         $product = $this->route('product');
+        $extraFields = $product?->translations()->where('lang_id', $this->input('lang_id'))->value('extra_fields');
+        $existingExtraFields = is_string($extraFields) ? json_decode($extraFields, true) : [];
 
         return [
-            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('products', 'slug')->ignore($product?->id)],
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
+            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('product_translations', 'slug')->where('lang_id', $this->input('lang_id'))->ignore($product?->translations()->where('lang_id', $this->input('lang_id'))->value('id'))],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'title' => ['required', 'string', 'max:255'],
             'product_category_id' => ['nullable', 'integer', 'exists:product_categories,id'],
@@ -45,7 +48,7 @@ class StoreProductRequest extends FormRequest
             'image_media_ids.*' => app(MediaSelection::class)->imageRules(),
             ...$media->rules($media->definition()),
             'is_active' => ['required', 'boolean'],
-            ...$values->rules($features->form('Products', 'product')['fields'], $this->all(), $product?->extra_fields ?? []),
+            ...$values->rules($features->form('Products', 'product')['fields'], $this->all(), is_array($existingExtraFields) ? $existingExtraFields : []),
         ];
     }
 

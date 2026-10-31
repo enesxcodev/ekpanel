@@ -2,10 +2,12 @@
 
 namespace Modules\Menus\Services;
 
+use App\Models\Settings\Language;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Modules\Menus\Models\Menu;
 use Modules\Menus\Models\MenuItem;
+use Modules\Menus\Models\MenuTranslation;
 
 class MenuService
 {
@@ -14,18 +16,39 @@ class MenuService
     /** @param array<string, mixed> $data */
     public function save(array $data, ?Menu $menu = null): Menu
     {
-        $menu ??= new Menu;
-        $menu->fill($data)->save();
+        $language = $this->activeLanguage($data['lang_id'] ?? null);
 
-        return $menu;
+        return DB::transaction(function () use ($data, $menu, $language): Menu {
+            $isNew = $menu === null;
+            $menu = $isNew ? new Menu : Menu::query()->lockForUpdate()->findOrFail($menu->id);
+            $translation = $menu->translations()->where('lang_id', $language->id)->first() ?? new MenuTranslation(['lang_id' => $language->id]);
+            $menuData = ['key' => $data['key'], 'icon' => $data['icon'] ?? null, 'is_active' => (bool) $data['is_active']];
+
+            if ($language->code === MenusLanguageService::PrimaryCode) {
+                $menuData['name'] = $data['name'];
+            } elseif ($isNew) {
+                $menuData['name'] = $data['key'];
+            }
+
+            $menu->fill($menuData)->save();
+            $translation->fill(['menu_id' => $menu->id, 'lang_id' => $language->id, 'name' => $data['name']])->save();
+
+            return $menu->load(['translations.language']);
+        });
     }
 
     /** @param array<string, mixed> $data */
     public function saveItem(Menu $menu, array $data, ?MenuItem $item = null): MenuItem
     {
-        return DB::transaction(function () use ($menu, $data, $item): MenuItem {
-            Menu::query()->lockForUpdate()->findOrFail($menu->id);
-            $items = $menu->items()->get()->keyBy('id');
+        $language = $this->activeLanguage($data['lang_id'] ?? null);
+
+        return DB::transaction(function () use ($menu, $data, $item, $language): MenuItem {
+            $menu = Menu::query()->lockForUpdate()->findOrFail($menu->id);
+            if (! $menu->translations()->where('lang_id', $language->id)->exists()) {
+                throw ValidationException::withMessages(['lang_id' => 'Önce bu dilde menü adını kaydedin.']);
+            }
+
+            $items = $menu->items()->where('lang_id', $language->id)->get()->keyBy('id');
             if ($item !== null) {
                 $item = $items->get($item->id);
                 abort_if($item === null, 404);
@@ -33,7 +56,7 @@ class MenuService
             $parentId = isset($data['parent_id']) ? (int) $data['parent_id'] : null;
             $parent = $parentId === null ? null : $items->get($parentId);
             if ($parentId !== null && $parent === null) {
-                throw ValidationException::withMessages(['parent_id' => 'Bu menüye ait bir üst öğe seçin.']);
+                throw ValidationException::withMessages(['parent_id' => 'Bu menü ve dildeki bir üst öğeyi seçin.']);
             }
             $cursor = $parent;
             $visited = [];
@@ -53,6 +76,7 @@ class MenuService
             $type = $data['target_type'];
             $item ??= $menu->items()->make();
             $item->fill([
+                'lang_id' => $language->id,
                 'parent_id' => $parentId,
                 'label' => $data['label'],
                 'icon' => $data['icon'] ?? null,
@@ -73,12 +97,14 @@ class MenuService
         });
     }
 
-    public function deleteItem(Menu $menu, MenuItem $item): bool
+    public function deleteItem(Menu $menu, MenuItem $item, ?int $languageId = null): bool
     {
-        return DB::transaction(function () use ($menu, $item): bool {
-            Menu::query()->lockForUpdate()->findOrFail($menu->id);
-            $item = $menu->items()->findOrFail($item->id);
-            if ($item->children()->exists()) {
+        $language = $this->activeLanguage($languageId);
+
+        return DB::transaction(function () use ($menu, $item, $language): bool {
+            $lockedMenu = Menu::query()->lockForUpdate()->findOrFail($menu->id);
+            $item = $lockedMenu->items()->where('lang_id', $language->id)->findOrFail($item->id);
+            if ($lockedMenu->items()->where('lang_id', $language->id)->where('parent_id', $item->id)->exists()) {
                 return false;
             }
             $item->delete();
@@ -88,20 +114,22 @@ class MenuService
     }
 
     /** @param list<array{id: int, parent_id: ?int, sort_order: int}> $positions */
-    public function reorder(Menu $menu, array $positions): void
+    public function reorder(Menu $menu, array $positions, ?int $languageId = null): void
     {
-        DB::transaction(function () use ($menu, $positions): void {
-            Menu::query()->lockForUpdate()->findOrFail($menu->id);
-            $items = $menu->items()->get()->keyBy('id');
+        $language = $this->activeLanguage($languageId);
+
+        DB::transaction(function () use ($menu, $positions, $language): void {
+            $menu = Menu::query()->lockForUpdate()->findOrFail($menu->id);
+            $items = $menu->items()->where('lang_id', $language->id)->get()->keyBy('id');
             $proposed = collect($positions)->keyBy('id');
             if ($proposed->count() !== $items->count() || $proposed->keys()->diff($items->keys())->isNotEmpty()) {
-                throw ValidationException::withMessages(['items' => 'Menü yapısı değişmiş olabilir. Güncel yapıyı yükleyip yeniden deneyin.']);
+                throw ValidationException::withMessages(['items' => 'Bu dilin menü yapısı değişmiş olabilir. Güncel yapıyı yükleyip yeniden deneyin.']);
             }
             foreach ($positions as $position) {
                 $parentId = isset($position['parent_id']) ? (int) $position['parent_id'] : null;
                 $parent = $parentId === null ? null : $items->get($parentId);
                 if (($parentId !== null && $parent === null) || $parent?->dynamic_children) {
-                    throw ValidationException::withMessages(['items' => 'Üst öğe bu menüye ait olmalı ve otomatik alt öğe üretmemelidir.']);
+                    throw ValidationException::withMessages(['items' => 'Üst öğe aynı menü ve dile ait olmalı, otomatik alt öğe üretmemelidir.']);
                 }
                 $visited = [(int) $position['id'] => true];
                 $cursor = $parentId;
@@ -123,10 +151,11 @@ class MenuService
     }
 
     /** @return list<array{item: MenuItem, target: array{url: ?string, error: ?string}, children: array}> */
-    public function adminTree(Menu $menu): array
+    public function adminTree(Menu $menu, ?int $languageId = null): array
     {
-        $byParent = $menu->items()->get()->groupBy(fn (MenuItem $item): string => (string) ($item->parent_id ?? 0));
-        $append = function (?int $parentId, array $visited = []) use (&$append, $byParent): array {
+        $language = $this->activeLanguage($languageId);
+        $byParent = $menu->items()->where('lang_id', $language->id)->get()->groupBy(fn (MenuItem $item): string => (string) ($item->parent_id ?? 0));
+        $append = function (?int $parentId, array $visited = []) use (&$append, $byParent, $language): array {
             $nodes = [];
             foreach ($byParent->get((string) ($parentId ?? 0), collect()) as $item) {
                 if (isset($visited[$item->id])) {
@@ -134,7 +163,7 @@ class MenuService
                 }
                 $nextVisited = $visited;
                 $nextVisited[$item->id] = true;
-                $nodes[] = ['item' => $item, 'target' => $this->navigation->target($item), 'children' => $append($item->id, $nextVisited)];
+                $nodes[] = ['item' => $item, 'target' => $this->navigation->target($item, $language->code), 'children' => $append($item->id, $nextVisited)];
             }
 
             return $nodes;
@@ -144,7 +173,7 @@ class MenuService
     }
 
     /** @return list<array{value: int, label: string}> */
-    public function parentOptions(Menu $menu, ?MenuItem $excluded = null): array
+    public function parentOptions(Menu $menu, ?MenuItem $excluded = null, ?int $languageId = null): array
     {
         $options = [];
         $append = function (array $nodes, int $depth = 0) use (&$append, &$options, $excluded): void {
@@ -157,8 +186,15 @@ class MenuService
                 $append($node['children'], $depth + 1);
             }
         };
-        $append($this->adminTree($menu));
+        $append($this->adminTree($menu, $languageId));
 
         return $options;
+    }
+
+    private function activeLanguage(mixed $languageId): Language
+    {
+        $languageId ??= Language::query()->where('code', MenusLanguageService::PrimaryCode)->where('is_active', true)->value('id');
+
+        return Language::query()->whereKey($languageId)->where('is_active', true)->firstOrFail();
     }
 }

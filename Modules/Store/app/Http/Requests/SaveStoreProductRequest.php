@@ -10,6 +10,7 @@ use App\Services\Settings\SettingsService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Modules\Store\Services\StoreLanguageService;
 use Modules\Store\Services\StoreMoney;
 
 class SaveStoreProductRequest extends FormRequest
@@ -18,6 +19,7 @@ class SaveStoreProductRequest extends FormRequest
     {
         $this->merge([
             'slug' => $this->input('slug') ?: Str::slug(is_string($this->input('title')) ? $this->input('title') : '', language: 'tr'),
+            'lang_id' => $this->input('lang_id') ?: app(StoreLanguageService::class)->forAdmin(request()->query('lang'))?->id,
             'currency' => app(SettingsService::class)->get('store.currency', 'TRY'),
             'image_media_ids' => MediaSelection::decode($this->input('image_media_ids')),
         ]);
@@ -27,13 +29,15 @@ class SaveStoreProductRequest extends FormRequest
     public function rules(ContentMediaService $media, ModuleFeatures $features, FeatureValues $values): array
     {
         $product = $this->route('product');
+        $languageId = $this->input('lang_id');
         $amount = ['nullable', 'regex:/^\d{1,9}([.,]\d{1,2})?$/D'];
 
         return [
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', Rule::unique('store_products', 'slug')->ignore($product?->id)],
+            'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', Rule::unique('store_product_translations', 'slug')->where('lang_id', $languageId)->ignore($product?->translations()->where('lang_id', $languageId)->value('id'))],
             'sku' => ['required', 'string', 'max:100', Rule::unique('store_products', 'sku')->ignore($product?->id)],
-            'store_category_id' => ['nullable', 'integer', 'exists:store_categories,id'],
+            'store_category_id' => ['nullable', 'integer', Rule::exists('store_category_translations', 'store_category_id')->where('lang_id', $languageId)],
             'source_product_id' => ['nullable', 'integer', 'min:1'],
             'short_description' => ['nullable', 'string', 'max:1000'],
             'content' => ['nullable', 'string', 'max:65535'],
@@ -69,7 +73,7 @@ class SaveStoreProductRequest extends FormRequest
             'length_cm' => ['nullable', 'integer', 'min:0', 'max:10000'],
             'preparation_days' => ['required', 'integer', 'min:0', 'max:365'],
             'delivery_description' => ['nullable', 'string', 'max:2000'],
-            ...$values->rules($features->form('Store', 'product')['fields'], $this->all(), $product?->extra_fields ?? []),
+            ...$values->rules($features->form('Store', 'product')['fields'], $this->all(), $product?->translations()->where('lang_id', $languageId)->value('extra_fields') ?? []),
         ];
     }
 

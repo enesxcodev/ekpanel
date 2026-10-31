@@ -21,6 +21,7 @@ class SaveBranchRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'branch_category_id' => ['required', 'integer', Rule::exists('branch_categories', 'id')->where(function (Builder $query): void {
                 $query->where('is_active', true);
                 $branch = $this->route('branch');

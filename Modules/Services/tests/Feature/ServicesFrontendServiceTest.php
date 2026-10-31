@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -96,4 +97,38 @@ test('inactive categories hide their services while uncategorized services remai
 
     expect($service->getAll()->modelKeys())->toBe([$uncategorized->id]);
     expect($service->find($hidden->id))->toBeNull();
+});
+
+test('all frontend readers use the explicitly requested translation without changing the default language', function () {
+    $english = Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $category = ServiceCategory::factory()->create(['name' => 'Türkçe kategori']);
+    $category->translations()->create(['lang_id' => $english->id, 'name' => 'English category', 'extra_fields' => ['badge_text' => 'English badge']]);
+    $record = Service::factory()->for($category, 'category')->create(['title' => 'Türkçe hizmet']);
+    $record->translations()->create(['lang_id' => $english->id, 'title' => 'English service', 'extra_fields' => ['label' => 'English label']]);
+    $frontend = app(ServicesFrontendService::class);
+
+    $all = $frontend->getAll(languageCode: 'en');
+    $first = $frontend->getFirst(languageCode: 'en');
+    $found = $frontend->find($record->id, 'en');
+
+    expect($all->sole()->title)->toBe('English service');
+    expect($first?->category?->name)->toBe('English category');
+    expect($found?->extra_fields)->toBe(['label' => 'English label']);
+    expect($found?->category?->extra_fields)->toBe(['badge_text' => 'English badge']);
+    expect($frontend->find($record->id)?->title)->toBe('Türkçe hizmet');
+});
+
+test('frontend readers use the Services request language and return empty results for unknown languages', function () {
+    $english = Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $record = Service::factory()->create(['title' => 'Türkçe']);
+    $record->translations()->create(['lang_id' => $english->id, 'title' => 'English']);
+    request()->attributes->set('services_language', 'en');
+    $frontend = app(ServicesFrontendService::class);
+
+    expect($frontend->getAll()->sole()->title)->toBe('English');
+    expect($frontend->getFirst()?->title)->toBe('English');
+    expect($frontend->find($record->id)?->title)->toBe('English');
+    expect($frontend->getAll(languageCode: 'xx'))->toBeEmpty();
+    expect($frontend->getFirst(languageCode: 'xx'))->toBeNull();
+    expect($frontend->find($record->id, 'xx'))->toBeNull();
 });

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Modules\Team\Database\Factories\TeamMemberFactory;
 
@@ -15,7 +16,31 @@ class TeamMember extends Model
     /** @use HasFactory<TeamMemberFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'title', 'image', 'image_media_id', 'is_active', 'extra_fields'];
+    protected $with = ['translations.language'];
+
+    protected $fillable = ['image', 'image_media_id', 'is_active'];
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(TeamMemberTranslation::class);
+    }
+
+    public function getAttribute($key): mixed
+    {
+        if (in_array($key, ['name', 'title', 'extra_fields'], true) && ! array_key_exists($key, $this->attributes)) {
+            if ($this->relationLoaded('selectedTranslation')) {
+                return $this->getRelation('selectedTranslation')?->getAttribute($key);
+            }
+            if ($this->relationLoaded('translations')) {
+                $code = request()->attributes->get('team_language', 'tr');
+                $translation = $this->getRelation('translations')->first(fn (TeamMemberTranslation $item): bool => $item->relationLoaded('language') && $item->language?->code === $code);
+
+                return $translation?->getAttribute($key);
+            }
+        }
+
+        return parent::getAttribute($key);
+    }
 
     protected function casts(): array
     {

@@ -2,6 +2,7 @@
     <div class="card">
         <div class="card-header d-flex gap-3 align-items-center">
             <h2 class="card-title me-auto">Şube / Bayi Kategorileri</h2>
+            <label class="mb-0">Dil <select class="form-select" data-branches-language>@foreach ($activeLanguages as $language)<option value="{{ $language->code }}" @selected($selectedLanguage?->id === $language->id)>{{ config('languages.catalog.'.$language->code.'.name', $language->code) }}</option>@endforeach</select></label>
             @can('branches.categories.create')
                 <a href="{{ route('admin.branches.categories.create') }}" class="btn btn-primary">Kategori ekle</a>
             @endcan
@@ -9,11 +10,11 @@
         @error('category')<div class="alert alert-danger m-3" role="alert">{{ $message }}</div>@enderror
         <x-admin.data-table
             id="branch-categories-table"
-            :source="route('admin.branches.categories.data')"
+            :source="route('admin.branches.categories.data', ['lang' => $selectedLanguage?->code])"
             :options="['order' => [[4, 'asc'], [0, 'asc']]]"
             :columns="[
                 ['title' => 'ID', 'data' => 'id', 'name' => 'id'],
-                ['title' => 'Kategori adı', 'data' => 'name', 'name' => 'name'],
+                ['title' => 'Kategori adı', 'data' => 'name', 'name' => 'localized.name'],
                 ['title' => 'Slug', 'data' => 'slug', 'name' => 'slug'],
                 ['title' => 'Kayıt sayısı', 'data' => 'branches_count', 'name' => 'branches_count', 'searchable' => false],
                 ['title' => 'Sıra', 'data' => 'sort_order', 'name' => 'sort_order'],

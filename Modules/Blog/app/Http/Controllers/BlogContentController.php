@@ -4,6 +4,7 @@ namespace Modules\Blog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
@@ -16,7 +17,9 @@ use Modules\Blog\DataTables\BlogContentsDataTable;
 use Modules\Blog\Http\Requests\SaveBlogContentRequest;
 use Modules\Blog\Models\BlogCategory;
 use Modules\Blog\Models\BlogContent;
+use Modules\Blog\Models\BlogContentTranslation;
 use Modules\Blog\Models\BlogTag;
+use Modules\Blog\Services\BlogLanguageService;
 use Modules\Blog\Services\BlogService;
 
 class BlogContentController extends Controller
@@ -43,7 +46,10 @@ class BlogContentController extends Controller
         $featureForm = $features->form('Blog', 'content');
         $featureFields = $values->fields($featureForm['fields'], []);
 
-        return view('blog::contents.create', compact('featureForm', 'featureFields') + $this->formOptions());
+        $options = $this->formOptions();
+        $featureFields = $values->fields($featureForm['fields'], $options['translation']?->extra_fields ?? []);
+
+        return view('blog::contents.create', compact('featureForm', 'featureFields') + $options);
     }
 
     public function store(SaveBlogContentRequest $request, BlogService $service): RedirectResponse
@@ -53,10 +59,10 @@ class BlogContentController extends Controller
             $request->user('admin'),
             'Blog yazısı eklendi',
             'Yeni bir blog yazısı eklendi.',
-            route('admin.blog.edit', ['blog' => $blog->id], absolute: false),
+            route('admin.blog.edit', ['blog' => $blog->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code], absolute: false),
         );
 
-        return redirect()->route('admin.blog.index')->with('notification', ['type' => 'success', 'message' => 'İçerik başarıyla eklendi.']);
+        return redirect()->route('admin.blog.edit', ['blog' => $blog->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code])->with('notification', ['type' => 'success', 'message' => 'İçerik başarıyla eklendi.']);
     }
 
     public function edit(BlogContent $blog, ModuleFeatures $features, FeatureValues $values): View
@@ -66,7 +72,10 @@ class BlogContentController extends Controller
         $featureForm = $features->form('Blog', 'content');
         $featureFields = $values->fields($featureForm['fields'], $blog->extra_fields ?? []);
 
-        return view('blog::contents.edit', compact('blog', 'featureForm', 'featureFields') + $this->formOptions());
+        $options = $this->formOptions($blog);
+        $featureFields = $values->fields($featureForm['fields'], $options['translation']?->extra_fields ?? []);
+
+        return view('blog::contents.edit', compact('blog', 'featureForm', 'featureFields') + $options);
     }
 
     public function update(SaveBlogContentRequest $request, BlogContent $blog, BlogService $service): RedirectResponse
@@ -76,10 +85,17 @@ class BlogContentController extends Controller
             $request->user('admin'),
             'Blog yazısı güncellendi',
             'Bir blog yazısı güncellendi.',
-            route('admin.blog.edit', ['blog' => $blog->id], absolute: false),
+            route('admin.blog.edit', ['blog' => $blog->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code], absolute: false),
         );
 
-        return redirect()->route('admin.blog.index')->with('notification', ['type' => 'success', 'message' => 'İçerik güncellendi.']);
+        return redirect()->route('admin.blog.edit', ['blog' => $blog->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code])->with('notification', ['type' => 'success', 'message' => 'İçerik güncellendi.']);
+    }
+
+    public function translationEdit(BlogContentTranslation $translation): RedirectResponse
+    {
+        $this->authorize('blog.update');
+
+        return redirect()->route('admin.blog.edit', ['blog' => $translation->blog_content_id, 'lang' => $translation->language->code]);
     }
 
     public function destroy(Request $request, BlogContent $blog, BlogService $service): RedirectResponse
@@ -97,9 +113,16 @@ class BlogContentController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function formOptions(): array
+    private function formOptions(?BlogContent $blog = null): array
     {
+        $languageService = app(BlogLanguageService::class);
+        $languages = $languageService->active();
+        $selectedLanguage = $languageService->forAdmin(request()->query('lang'));
+        $translation = $selectedLanguage ? $blog?->translations()->where('lang_id', $selectedLanguage->id)->first() : null;
+        $translatedLanguageIds = $blog?->translations()->pluck('lang_id')->all() ?? [];
+
         return [
+            'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'translation' => $translation, 'translatedLanguageIds' => $translatedLanguageIds,
             'categoryTree' => $this->categoryTree(),
             'tags' => BlogTag::query()->orderBy('name')->get(['id', 'name']),
             'authors' => Admin::query()->orderBy('name')->get(['id', 'name']),
@@ -110,13 +133,14 @@ class BlogContentController extends Controller
     /** @return list<array{id: int, name: string, path: string, depth: int, children: list<array>}> */
     private function categoryTree(): array
     {
-        $categories = BlogCategory::query()->orderBy('sort_order')->orderBy('name')->get();
+        $categories = BlogCategory::query()->orderBy('sort_order')->orderBy('id')->get();
         $byParent = $categories->groupBy(fn (BlogCategory $category): string => (string) ($category->parent_id ?? 0));
         $build = function (?int $parentId, int $depth, string $parentPath = '') use (&$build, $byParent): array {
             $nodes = [];
             foreach ($byParent->get((string) ($parentId ?? 0), collect()) as $category) {
-                $path = $parentPath === '' ? $category->name : $parentPath.' / '.$category->name;
-                $nodes[] = ['id' => $category->id, 'name' => $category->name, 'path' => $path, 'depth' => $depth, 'children' => $build($category->id, $depth + 1, $path)];
+                $name = $category->name ?? 'Çeviri eksik (#'.$category->id.')';
+                $path = $parentPath === '' ? $name : $parentPath.' / '.$name;
+                $nodes[] = ['id' => $category->id, 'name' => $name, 'path' => $path, 'depth' => $depth, 'children' => $build($category->id, $depth + 1, $path)];
             }
 
             return $nodes;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Modules\Pages\Models\Page;
@@ -34,4 +35,23 @@ test('draft pages are not accessible through the public page route', function ()
 
 test('unknown page paths return 404', function () {
     $this->get('/missing-category/missing-page')->assertNotFound();
+});
+
+test('published pages resolve through localized category and page slugs', function () {
+    $english = Language::factory()->create(['code' => 'en', 'is_active' => true]);
+    $category = PageCategory::factory()->create(['slug' => 'kurumsal']);
+    $category->translations()->create(['lang_id' => $english->id, 'scope_id' => 0, 'name' => 'Company', 'slug' => 'company']);
+    $page = Page::factory()->for($category, 'category')->create(['slug' => 'hakkimizda']);
+    $page->translations()->create(['lang_id' => $english->id, 'scope_id' => $category->id, 'title' => 'About us', 'slug' => 'about-us']);
+    expect($category->translations()->where('lang_id', $english->id)->exists())->toBeTrue()
+        ->and($page->translations()->where('lang_id', $english->id)->exists())->toBeTrue();
+    expect(PageCategory::query()->whereNull('parent_id')->whereHas('translations', fn ($query) => $query->where('lang_id', $english->id)->where('slug', 'company'))->exists())->toBeTrue()
+        ->and(Page::query()->whereHas('translations', fn ($query) => $query->where('lang_id', $english->id)->where('slug', 'about-us'))->exists())->toBeTrue();
+
+    $response = $this->get('/en/company/about-us');
+    expect(request()->route()?->getName())->toBe('pages.localized.show');
+
+    $response->assertOk()
+        ->assertViewIs('pages::pages.show')
+        ->assertViewHas('page', fn (Page $rendered): bool => $rendered->is($page) && $rendered->title === 'About us');
 });

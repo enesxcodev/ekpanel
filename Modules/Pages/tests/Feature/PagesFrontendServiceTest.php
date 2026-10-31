@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Settings\Language;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
@@ -88,4 +89,29 @@ test('uses the configured content order', function () {
     $result = app(PagesFrontendService::class)->getAll();
 
     expect($result->modelKeys())->toBe([$earlier->id, $later->id]);
+});
+
+test('returns translated page and category fields for the selected active language', function () {
+    $english = Language::factory()->create(['code' => 'en', 'is_active' => true]);
+    $category = PageCategory::factory()->create(['name' => 'Hakkımızda', 'slug' => 'hakkimizda']);
+    $category->translations()->create([
+        'lang_id' => $english->id,
+        'scope_id' => 0,
+        'name' => 'About us',
+        'slug' => 'about-us',
+    ]);
+    $page = Page::factory()->for($category, 'category')->create(['title' => 'Biz', 'slug' => 'biz']);
+    $page->translations()->create([
+        'lang_id' => $english->id,
+        'scope_id' => $category->id,
+        'title' => 'Our company',
+        'slug' => 'our-company',
+    ]);
+
+    $translated = app(PagesFrontendService::class)->find($page->id, 'en');
+
+    expect($translated?->title)->toBe('Our company')
+        ->and($translated?->slug)->toBe('our-company')
+        ->and($translated?->category?->name)->toBe('About us')
+        ->and($translated?->category?->slug)->toBe('about-us');
 });

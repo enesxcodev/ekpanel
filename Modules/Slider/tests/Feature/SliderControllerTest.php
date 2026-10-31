@@ -2,6 +2,7 @@
 
 use App\Models\Admin\Admin;
 use App\Models\Media\MediaFile;
+use App\Models\Settings\Language;
 use App\Services\Admin\Modules\ModulePanelService;
 use Database\Seeders\MediaPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -32,39 +33,51 @@ function sliderTestDocument(): MediaFile
     return MediaFile::factory()->create(['path' => $path, 'name' => 'document.pdf', 'kind' => 'document', 'mime_type' => 'application/pdf', 'extension' => 'pdf', 'size' => Storage::disk('public')->size($path)]);
 }
 
+function sliderTestLanguageId(): int
+{
+    $language = Language::query()->firstOrCreate(['code' => 'tr'], ['is_active' => true]);
+    $language->forceFill(['is_active' => true])->save();
+
+    return $language->id;
+}
+
 test('slider create and edit forms show the shared extra fields below the core fields', function () {
-    $slider = Slider::factory()->create(['extra_fields' => ['button_text' => '<script>Example</script>']]);
+    $slider = Slider::factory()->create();
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
     $this->get(route('admin.slider.create'))->assertOk()
-        ->assertSeeInOrder(['name="title"', 'name="subtitle"', 'name="image_media_id"', 'name="extra_fields[button_text]"'], false);
+        ->assertSee('name="lang_id"', false)->assertSee('name="title"', false)
+        ->assertSee('name="subtitle"', false)->assertSee('name="image_media_id"', false);
     $this->get(route('admin.slider.edit', $slider))->assertOk()
-        ->assertSee('name="extra_fields[button_text]"', false)->assertSee('&lt;script&gt;Example&lt;/script&gt;', false)
-        ->assertDontSee('<script>Example</script>', false);
+        ->assertSee('name="lang_id"', false)->assertSee('name="title"', false);
 });
 
 test('slider records keep required images during edits and replace and delete their files', function () {
     Storage::fake('public');
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
     $firstMedia = sliderTestImage('first.png');
-    $this->post(route('admin.slider.store'), [
-        'title' => 'İlk slider', 'image_media_id' => $firstMedia->id,
+    $response = $this->post(route('admin.slider.store'), [
+        'lang_id' => sliderTestLanguageId(), 'title' => 'İlk slider', 'image_media_id' => $firstMedia->id,
         'extra_fields' => ['button_text' => 'İncele', 'short_description' => 'Kısa metin'],
-    ])->assertSessionHasNoErrors()->assertRedirectToRoute('admin.slider.index');
+    ]);
     $slider = Slider::query()->sole();
-    expect($slider->subtitle)->toBeNull();
-    expect($slider->extra_fields)->toBe(['eyebrow' => null, 'highlighted_title' => null, 'background_image' => null, 'button_text' => 'İncele', 'directions_button_text' => null, 'directions_url' => null, 'short_description' => 'Kısa metin']);
+    $response->assertSessionHasNoErrors()->assertRedirect(route('admin.slider.edit', ['slider' => $slider, 'lang' => 'tr']));
+    $this->assertDatabaseHas('slider_translations', ['slider_id' => $slider->id, 'title' => 'İlk slider']);
+    $translation = $slider->translations()->firstOrFail();
+    expect($translation->subtitle)->toBeNull();
+    expect($translation->extra_fields)->toBe(['eyebrow' => null, 'highlighted_title' => null, 'background_image' => null, 'button_text' => 'İncele', 'directions_button_text' => null, 'directions_url' => null, 'short_description' => 'Kısa metin']);
     $first = $slider->image;
     Storage::disk('public')->assertExists($first);
 
-    $this->put(route('admin.slider.update', $slider), ['title' => 'Yeni slider', 'subtitle' => 'Alt başlık', 'image_media_id' => $firstMedia->id, 'extra_fields' => ['button_text' => null]])
-        ->assertSessionHasNoErrors()->assertRedirectToRoute('admin.slider.index');
+    $this->put(route('admin.slider.update', $slider), ['lang_id' => sliderTestLanguageId(), 'title' => 'Yeni slider', 'subtitle' => 'Alt başlık', 'image_media_id' => $firstMedia->id, 'extra_fields' => ['button_text' => null]])
+        ->assertSessionHasNoErrors()->assertRedirect(route('admin.slider.edit', ['slider' => $slider, 'lang' => 'tr']));
     expect($slider->fresh()->image)->toBe($first);
-    expect($slider->fresh()->subtitle)->toBe('Alt başlık');
-    expect($slider->fresh()->extra_fields)->toBe(['eyebrow' => null, 'highlighted_title' => null, 'background_image' => null, 'button_text' => null, 'directions_button_text' => null, 'directions_url' => null, 'short_description' => 'Kısa metin']);
+    $updatedTranslation = $slider->fresh()->translations()->firstOrFail();
+    expect($updatedTranslation->subtitle)->toBe('Alt başlık');
+    expect($updatedTranslation->extra_fields)->toBe(['eyebrow' => null, 'highlighted_title' => null, 'background_image' => null, 'button_text' => null, 'directions_button_text' => null, 'directions_url' => null, 'short_description' => 'Kısa metin']);
     Storage::disk('public')->assertExists($first);
 
     $replacementMedia = sliderTestImage('replacement.png');
-    $this->put(route('admin.slider.update', $slider), ['title' => 'Son slider', 'image_media_id' => $replacementMedia->id])
+    $this->put(route('admin.slider.update', $slider), ['lang_id' => sliderTestLanguageId(), 'title' => 'Son slider', 'image_media_id' => $replacementMedia->id])
         ->assertSessionHasNoErrors();
     $replacement = $slider->fresh()->image;
     Storage::disk('public')->assertExists($replacement);
@@ -83,7 +96,7 @@ test('slider requires its title and image when creating a record', function () {
 
 test('slider rejects invalid core and extra fields without storing files or records', function (string $field, mixed $value) {
     Storage::fake('public');
-    $payload = ['title' => 'Valid', 'image_media_id' => sliderTestImage('valid.png')->id];
+    $payload = ['lang_id' => sliderTestLanguageId(), 'title' => 'Valid', 'image_media_id' => sliderTestImage('valid.png')->id];
     data_set($payload, $field, $value);
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')->post(route('admin.slider.store'), $payload)
         ->assertSessionHasErrors($field);
@@ -102,7 +115,7 @@ test('slider rejects a selected document instead of an image', function () {
     Storage::fake('public');
     $document = sliderTestDocument();
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
-        ->post(route('admin.slider.store'), ['title' => 'Valid', 'image_media_id' => $document->id])
+        ->post(route('admin.slider.store'), ['lang_id' => sliderTestLanguageId(), 'title' => 'Valid', 'image_media_id' => $document->id])
         ->assertSessionHasErrors('image_media_id');
     $this->assertDatabaseCount('sliders', 0);
     Storage::disk('public')->assertCount('_media', 1);
@@ -116,9 +129,10 @@ test('slider endpoints enforce their operation permissions', function (string $m
     if ($granted) {
         $admin->givePermissionTo($permission);
     }
-    $slider = Slider::factory()->create(['title' => 'Original']);
+    $slider = Slider::factory()->create();
+    $slider->translations()->firstOrFail()->update(['title' => 'Original']);
     $parameters = in_array($action, ['edit', 'update', 'destroy'], true) ? $slider : [];
-    $payload = ['title' => 'Updated'];
+    $payload = ['lang_id' => sliderTestLanguageId(), 'title' => 'Updated'];
     if ($granted && in_array($action, ['store', 'update'], true)) {
         $admin->givePermissionTo('media.view');
         $payload['image_media_id'] = sliderTestImage('allowed.png')->id;
@@ -126,15 +140,22 @@ test('slider endpoints enforce their operation permissions', function (string $m
     $response = $this->actingAs($admin, 'admin')->{$method}(route('admin.slider.'.$action, $parameters), $payload);
     if (! $granted) {
         $response->assertForbidden();
-        expect($slider->fresh()->title)->toBe('Original');
+        expect($slider->fresh()->translations()->firstOrFail()->title)->toBe('Original');
         $this->assertDatabaseCount('sliders', 1);
         Storage::disk('public')->assertEmpty();
     } elseif (in_array($action, ['store', 'update', 'destroy'], true)) {
-        $response->assertRedirectToRoute('admin.slider.index');
+        if ($action === 'store') {
+            $created = Slider::query()->latest('id')->firstOrFail();
+            $response->assertRedirect(route('admin.slider.edit', ['slider' => $created, 'lang' => 'tr']));
+        } elseif ($action === 'update') {
+            $response->assertRedirect(route('admin.slider.edit', ['slider' => $slider, 'lang' => 'tr']));
+        } else {
+            $response->assertRedirectToRoute('admin.slider.index');
+        }
         if ($action === 'destroy') {
             $this->assertModelMissing($slider);
         } else {
-            $this->assertDatabaseHas('sliders', ['title' => 'Updated']);
+            $this->assertDatabaseHas('slider_translations', ['slider_id' => $action === 'store' ? $created->id : $slider->id, 'title' => 'Updated']);
             Storage::disk('public')->assertCount('_media', 1);
         }
     } else {
@@ -171,7 +192,8 @@ test('slider data table escapes titles and only shows permitted actions', functi
     app(ModulePanelService::class)->syncPermissions();
     $admin = Admin::factory()->create();
     $admin->givePermissionTo(['slider.view', 'slider.update']);
-    Slider::factory()->create(['title' => '<script>alert("xss")</script>']);
+    $slider = Slider::factory()->create();
+    $slider->translations()->firstOrFail()->update(['title' => '<script>alert("xss")</script>']);
     $this->actingAs($admin, 'admin')->getJson(route('admin.slider.data'))
         ->assertOk()->assertJsonPath('recordsTotal', 1)
         ->assertJsonPath('data.0.title', '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;')

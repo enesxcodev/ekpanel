@@ -7,14 +7,16 @@ description: Firmanın çalıştığı iş alanlarını anlatan sektör bölüml
 
 [Ortak tema skill'ini](../../../../.claude/skills/theme-integration/SKILL.md) ve [Sector rule'unu](../../.ai/rules/tema-entegrasyonu.md) oku.
 
-- Güncel `app/Models/Sector.php`, migration, `features.json` ve servis kodunu incele. Sektör içeriğini hizmet, marka ve müşteri/proje referanslarından bölümün amacı ve görsel yapısıyla ayır; eşleşme belirsizse kullanıcıya sor.
-- Mevcut alanları yeniden kullan: `title`, `slug`, `sort_order`, `short_description`, `content`, `image`, `is_active`, `extra_fields`. Nullable sıralamayı mevcut `sort_order` alanından al; detay sayfası veya başka modülle ilişki varmış gibi davranma.
-- Veriyi `SectorFrontendService` üzerinden al. Yönetilebilir yeni içerik gerekiyorsa [ortak alan genişletme kurallarına](../../../../.ai/rules/moduller.md#tema-için-yönetilebilir-alan-genişletme) uy.
+- Güncel `app/Models/Sector.php`, `app/Models/SectorTranslation.php`, migration, `features.json` ve servis kodunu incele. Sektör içeriğini hizmet, marka ve müşteri/proje referanslarından bölümün amacı ve görsel yapısıyla ayır.
+- Çevrilen alanlar `selectedTranslation` üzerindedir: `title`, `slug`, `short_description`, `content`, `meta_title`, `meta_keywords`, `meta_description`, `extra_fields`. `image`, `imageMedia`, `sort_order`, `is_active` ve kimlik Sector kaydında ortaktır.
+- Yalnız seçili aktif dilde çevirisi olan sektörler frontend sonucuna girer. Çeviri yoksa başka dilden metin kullanma. Public detay route'u tanımlı olmadığından slug'a bağlı URL veya detay sayfası uydurma.
+- Veriyi `SectorFrontendService` üzerinden al. Nullable sıralamayı mevcut `sort_order` alanından kullan; seçim ve filtre kurallarını kodda veya kullanıcı gereksiniminde yoksa uydurma.
 
 ## Frontend okuma servisi
 
 - Sınıf: `Modules\Sector\Services\SectorFrontendService`; dosya: `app/Services/SectorFrontendService.php`.
-- `getAll()` bir `Collection<int, Sector>`, `getFirst()` bir `Sector` veya `null`, `find(int $id)` yalnız görünür kaydı veya `null` döndürür. `getAll` kendiliğinden limit uygulamaz; sayfalama API'si değildir.
-- Yalnız aktif kayıtları döner. Sıra mevcut `sort_order`, `id` artan şeklindedir. Modül kayıtlı/etkin değilse veya gerekli modül tabloları yoksa koleksiyon metotları boş koleksiyon, tek kayıt metotları `null` döndürür.
-- İlişkiler önceden yüklenir: `imageMedia`. Görsel/dosya URL'si için mevcut model erişimcisini kullan; servis yeni route veya HTML üretmez.
-- Tek öğe tasarımında `getFirst`, tekrar eden listede `getAll`, bilinen kayıt kimliğinde `find` seç; metodu yalnız kayıt sayısına göre seçip arayüzü otomatik değiştirme. Görünürlük ve modül kontrollerini çağıran tarafta tekrarlama.
+- `getAll(?string $languageCode = null)` bir `Collection<int, Sector>`, `getFirst(?string $languageCode = null)` bir `Sector` veya `null`, `find(int $id, ?string $languageCode = null)` görünür kaydı veya `null` döndürür. İsteğe bağlı dil kodu yalnız etkin `Language` kaydı olmalıdır; verilmezse request `sector_language` bağlamı, o da yoksa `tr` kullanılır. Pasif veya geçersiz dil boş sonuç verir.
+- Yalnız aktif Sector ve seçilen dilde çevirisi olan kayıtlar döner; çevirisiz kayıtlarda metin fallback'i yoktur. Sıra `sort_order`, ardından `id` artandır.
+- `selectedTranslation`, `translations` (yalnız seçilen dil) ve `imageMedia` ilişkileri yüklenir. Çevrilen alanları `selectedTranslation` üzerinden, görsel/sıra/yayını Sector üzerinden oku.
+- Modül devre dışıysa veya `sectors`, `languages`, `sector_translations` tablolarından biri yoksa koleksiyon metodu boş koleksiyon, tek kayıt metotları `null` döndürür.
+- Tek öğe tasarımında `getFirst`, tekrar eden listede `getAll`, bilinen kayıt kimliğinde `find` seç; görünürlük ve modül kontrollerini çağıran tarafta tekrarlama.

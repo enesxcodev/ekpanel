@@ -2,12 +2,20 @@
     <div class="card">
         <div class="card-header d-flex gap-3 align-items-center">
             <h2 class="card-title me-auto">Sayfalar</h2>
+            <form method="GET" class="d-flex align-items-center gap-2">
+                <label for="pages-language-filter" class="form-label mb-0">Dil</label>
+                <select id="pages-language-filter" name="lang" class="form-select" onchange="this.form.submit()">
+                    @foreach ($activeLanguages as $language)
+                        <option value="{{ $language->code }}" @selected($selectedLanguage?->id === $language->id)>{{ config('languages.catalog.'.$language->code.'.name', $language->code) }}</option>
+                    @endforeach
+                </select>
+            </form>
             @can('pages.create')
-                <a href="{{ route('admin.pages.create') }}" class="btn btn-primary">Sayfa ekle</a>
+                <a href="{{ route('admin.pages.create', ['lang' => $selectedLanguage?->code]) }}" class="btn btn-primary">Sayfa ekle</a>
             @endcan
         </div>
         <x-admin.data-table
-            id="pages-table" :source="route('admin.pages.data')"
+            id="pages-table" :source="route('admin.pages.data', ['lang' => $selectedLanguage?->code])"
             :options="['order' => [[5, 'asc']]]"
             :columns="[
                 ['title' => 'ID', 'data' => 'id', 'name' => 'id'],

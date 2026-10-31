@@ -3,7 +3,7 @@
         <div class="card-header d-flex gap-3 align-items-center">
             <h2 class="card-title me-auto">Ürünler</h2>
             @can('products.create')
-                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">Ürün ekle</a>
+                <a href="{{ route('admin.products.create', ['lang' => $selectedLanguage?->code]) }}" class="btn btn-primary">Ürün ekle</a>
             @endcan
         </div>
         <div class="card-body d-flex gap-3">
@@ -12,14 +12,14 @@
         </div>
         <x-admin.data-table
             id="products-table"
-            :source="route('admin.products.data')"
+            :source="route('admin.products.data', ['lang' => $selectedLanguage?->code])"
             :options="['order' => [[5, 'asc'], [0, 'asc']]]"
             :columns="[
                 ['title' => 'ID', 'data' => 'id', 'name' => 'products.id'],
                 ['title' => 'Kapak', 'data' => 'visual', 'name' => 'visual', 'orderable' => false, 'searchable' => false],
-                ['title' => 'Ürün adı', 'data' => 'title', 'name' => 'products.title'],
-                ['title' => 'Kategori', 'data' => 'category_name', 'name' => 'category.name'],
-                ['title' => 'Kısa bağlantı', 'data' => 'slug', 'name' => 'products.slug'],
+                ['title' => 'Ürün adı', 'data' => 'title', 'name' => 'selected_translation.title'],
+                ['title' => 'Kategori', 'data' => 'category_name', 'name' => 'selected_category_translation.name'],
+                ['title' => 'Kısa bağlantı', 'data' => 'slug', 'name' => 'selected_translation.slug'],
                 ['title' => 'Sıra', 'data' => 'sort_order', 'name' => 'products.sort_order'],
                 ['title' => 'İşlemler', 'data' => 'actions', 'name' => 'actions', 'orderable' => false, 'searchable' => false],
                 ['title' => 'Durum', 'data' => 'is_active', 'name' => 'products.is_active', 'searchable' => false],

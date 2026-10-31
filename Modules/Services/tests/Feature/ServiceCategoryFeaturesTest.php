@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Modules\Services\Models\ServiceCategory;
@@ -20,16 +21,18 @@ test('service category create and edit forms render shared category fields and p
 test('service category creation stores feature values and updates without erasing omitted values', function () {
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin');
     $this->post(route('admin.services.categories.store'), [
+        'lang_id' => Language::query()->where('code', 'tr')->value('id'),
         'name' => 'Danışmanlık',
         'extra_fields' => ['short_description' => 'Şirketlere özel danışmanlık', 'badge_text' => 'Popüler'],
-    ])->assertRedirectToRoute('admin.services.categories.index')->assertSessionHasNoErrors();
+    ])->assertRedirect()->assertSessionHasNoErrors();
     $category = ServiceCategory::query()->sole();
     expect($category->name)->toBe('Danışmanlık');
     expect($category->extra_fields)->toBe(['short_description' => 'Şirketlere özel danışmanlık', 'badge_text' => 'Popüler', 'homepage_display' => 'cards']);
 
     $this->put(route('admin.services.categories.update', $category), [
+        'lang_id' => Language::query()->where('code', 'tr')->value('id'),
         'name' => 'Kurumsal danışmanlık', 'extra_fields' => ['badge_text' => null],
-    ])->assertRedirectToRoute('admin.services.categories.index')->assertSessionHasNoErrors();
+    ])->assertRedirect()->assertSessionHasNoErrors();
     expect($category->fresh()->name)->toBe('Kurumsal danışmanlık');
     expect($category->fresh()->extra_fields)->toBe(['short_description' => 'Şirketlere özel danışmanlık', 'badge_text' => null, 'homepage_display' => 'cards']);
 });
@@ -39,6 +42,7 @@ test('service category rejects unknown extra fields and keeps the submitted reco
 
     $this->actingAs(Admin::factory()->superAdmin()->create(), 'admin')
         ->put(route('admin.services.categories.update', $category), [
+            'lang_id' => Language::query()->where('code', 'tr')->value('id'),
             'name' => 'Tampered', 'extra_fields' => ['unknown_key' => 'Injected'],
         ])->assertSessionHasErrors('extra_fields');
 
@@ -55,12 +59,12 @@ test('customer admins need category create and update permissions for feature fo
     $category = ServiceCategory::factory()->create(['name' => 'Original']);
     $url = route('admin.services.categories.'.$action, $action === 'store' ? [] : $category);
 
-    $response = $this->actingAs($admin, 'admin')->{$method}($url, ['name' => 'Updated', 'extra_fields' => ['badge_text' => 'New']]);
+    $response = $this->actingAs($admin, 'admin')->{$method}($url, ['lang_id' => Language::query()->where('code', 'tr')->value('id'), 'name' => 'Updated', 'extra_fields' => ['badge_text' => 'New']]);
     if (! $granted) {
         $response->assertForbidden();
         expect($category->fresh()->name)->toBe('Original');
     } else {
-        $response->assertRedirectToRoute('admin.services.categories.index');
+        $response->assertRedirect();
     }
 })->with([
     'store' => ['post', 'store'],

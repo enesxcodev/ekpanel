@@ -166,27 +166,33 @@ class HomePageService
     /** @return Collection<int, array<string, mixed>> */
     private function projects(): Collection
     {
-        return $this->records('Projects')->take(3)->map(fn (Model $item): array => [
-            'id' => $item->id, 'title' => $item->title, 'category' => $item->category?->name,
-            'image' => $item->cover_url, 'description' => Str::limit($this->plainText($item->content), 240),
+        $languageCode = request()->attributes->get('pages_language') ?? 'tr';
+
+        return ($this->service('Projects')?->getAll(null, $languageCode) ?? collect())->take(3)->map(fn (Model $item): array => [
+            'id' => $item->id, 'title' => $item->selectedTranslation->title, 'category' => $item->category?->selectedTranslation?->name,
+            'image' => $item->cover_url, 'description' => Str::limit($this->plainText($item->selectedTranslation->content), 240),
         ]);
     }
 
     /** @return Collection<int, array<string, mixed>> */
     private function testimonials(): Collection
     {
-        return $this->records('Testimonials')->take(2)->map(fn (Model $item): array => [
-            'name' => $item->customer_name, 'company' => $item->company,
-            'initials' => Str::upper(collect(explode(' ', trim($item->customer_name)))->filter()->take(2)->map(fn (string $word): string => mb_substr($word, 0, 1))->implode('')),
-            'content' => $this->plainText($item->content),
+        $languageCode = request()->attributes->get('pages_language') ?? request()->route('lang');
+
+        return ($this->service('Testimonials')?->getAll($languageCode) ?? collect())->take(2)->map(fn (Model $item): array => [
+            'name' => $item->selectedTranslation->customer_name, 'company' => $item->selectedTranslation->company,
+            'initials' => Str::upper(collect(explode(' ', trim($item->selectedTranslation->customer_name)))->filter()->take(2)->map(fn (string $word): string => mb_substr($word, 0, 1))->implode('')),
+            'content' => $this->plainText($item->selectedTranslation->content),
         ]);
     }
 
     /** @return Collection<int, array<string, mixed>> */
     private function faqs(): Collection
     {
-        return $this->records('Faqs')->take(4)->map(fn (Model $item): array => [
-            'question' => $item->name, 'answer' => $this->plainText($item->content),
+        $languageCode = request()->attributes->get('pages_language') ?? request()->route('lang');
+
+        return ($this->service('Faqs')?->getAll(null, $languageCode) ?? collect())->take(4)->map(fn (Model $item): array => [
+            'question' => $item->selectedTranslation->name, 'answer' => $this->plainText($item->selectedTranslation->content),
         ]);
     }
 
@@ -311,14 +317,22 @@ class HomePageService
     private function resources(): Collection
     {
         $cards = collect();
+        $languageCode = request()->attributes->get('pages_language') ?? request()->route('lang');
         foreach (['blog' => 'Blog', 'documents' => 'Documents', 'gallery' => 'Galeriler'] as $key => $module) {
-            $item = $this->service($module)?->getFirst();
+            $service = $this->service($module);
+            $item = $module === 'Documents'
+                ? $service?->getFirst(null, $languageCode)
+                : $service?->getFirst();
             if ($item === null) {
                 continue;
             }
+            $title = $module === 'Documents' ? $item->selectedTranslation?->name : ($item->title ?: $item->name);
+            $description = $module === 'Documents'
+                ? $item->selectedTranslation?->content
+                : ($item->short_description ?: $item->description ?: $item->content);
             $cards->push([
-                'title' => $item->title ?: $item->name,
-                'description' => Str::limit($this->plainText($item->short_description ?: $item->description ?: $item->content), 130),
+                'title' => $title,
+                'description' => Str::limit($this->plainText($description), 130),
                 'icon' => match ($key) {
                     'documents' => 'file-text', 'gallery' => 'photo', default => 'book'
                 },

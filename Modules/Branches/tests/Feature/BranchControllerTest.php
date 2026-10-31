@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use Database\Seeders\AdminPermissionSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,7 @@ beforeEach(function (): void {
     $disk->put('statuses.json', json_encode(['Branches' => true, 'Konum' => true], JSON_THROW_ON_ERROR));
     config(['modules.activators.file.statuses-file' => $disk->path('statuses.json')]);
     app()->forgetInstance(ActivatorInterface::class);
+    $this->languageId = Language::query()->firstOrCreate(['code' => 'tr'], ['is_active' => true])->id;
 });
 
 test('the install seeder creates the branch and dealer categories once', function () {
@@ -38,11 +40,12 @@ test('an admin can create a branch without optional location values', function (
     $admin = Admin::factory()->superAdmin()->create();
 
     $this->actingAs($admin, 'admin')->post(route('admin.branches.store'), [
+        'lang_id' => $this->languageId,
         'branch_category_id' => $category->id,
         'name' => 'Kadıköy Ofisi',
         'is_active' => '1',
         'working_hours' => 'Hafta içi 09.00–18.00',
-    ])->assertRedirectToRoute('admin.branches.index')->assertSessionHas('notification.message', 'Şube / bayi başarıyla eklendi.');
+    ])->assertRedirect(route('admin.branches.edit', ['branch' => 1, 'lang' => 'tr']))->assertSessionHas('notification.message', 'Şube / bayi başarıyla eklendi.');
 
     $this->assertDatabaseHas('branches', [
         'name' => 'Kadıköy Ofisi', 'branch_category_id' => $category->id, 'city_id' => null, 'town_id' => null,
@@ -71,14 +74,47 @@ test('an admin can update and delete a branch', function () {
     $this->actingAs($admin, 'admin');
 
     $this->put(route('admin.branches.update', $branch), [
+        'lang_id' => $this->languageId,
         'branch_category_id' => $category->id,
         'name' => 'Yeni ad',
         'is_active' => '1',
-    ])->assertRedirectToRoute('admin.branches.index');
+    ])->assertRedirect(route('admin.branches.edit', ['branch' => $branch->id, 'lang' => 'tr']));
     $this->assertDatabaseHas('branches', ['id' => $branch->id, 'name' => 'Yeni ad']);
 
     $this->delete(route('admin.branches.destroy', $branch))->assertRedirectToRoute('admin.branches.index');
     $this->assertDatabaseMissing('branches', ['id' => $branch->id]);
+});
+
+test('branch translations update independently by active language', function () {
+    $this->seed(BranchCategorySeeder::class);
+    $english = Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $category = BranchCategory::query()->where('slug', 'branch')->firstOrFail();
+    $branch = Branch::factory()->for($category, 'category')->create(['name' => 'İstanbul Ofisi', 'phone' => '02120000000']);
+    $admin = Admin::factory()->superAdmin()->create();
+
+    $this->actingAs($admin, 'admin')->put(route('admin.branches.update', ['branch' => $branch->id, 'lang' => 'en']), [
+        'lang_id' => $english->id,
+        'branch_category_id' => $category->id,
+        'name' => 'Istanbul Office',
+        'phone' => '+90 212 000 00 00',
+        'is_active' => '1',
+    ])->assertRedirect(route('admin.branches.edit', ['branch' => $branch->id, 'lang' => 'en']));
+
+    $this->assertDatabaseHas('branch_translations', ['branch_id' => $branch->id, 'lang_id' => $this->languageId, 'name' => 'İstanbul Ofisi', 'phone' => '02120000000']);
+    $this->assertDatabaseHas('branch_translations', ['branch_id' => $branch->id, 'lang_id' => $english->id, 'name' => 'Istanbul Office', 'phone' => '+90 212 000 00 00']);
+    $this->assertDatabaseHas('branches', ['id' => $branch->id, 'name' => 'İstanbul Ofisi']);
+});
+
+test('branch edit form prefills fields from the selected translation', function () {
+    $category = BranchCategory::factory()->create(['slug' => 'branch', 'name' => 'Şubeler']);
+    $branch = Branch::factory()->for($category, 'category')->create(['name' => 'İstanbul Ofisi', 'phone' => '02120000000', 'email' => 'istanbul@example.test']);
+    $admin = Admin::factory()->superAdmin()->create();
+
+    $this->actingAs($admin, 'admin')->get(route('admin.branches.edit', ['branch' => $branch->id, 'lang' => 'tr']))
+        ->assertOk()
+        ->assertSee('value="İstanbul Ofisi"', false)
+        ->assertSee('value="02120000000"', false)
+        ->assertSee('value="istanbul@example.test"', false);
 });
 
 test('branch creation rejects an invalid location and partial coordinates', function () {
@@ -87,6 +123,7 @@ test('branch creation rejects an invalid location and partial coordinates', func
     $category = BranchCategory::query()->firstOrFail();
 
     $this->actingAs($admin, 'admin')->post(route('admin.branches.store'), [
+        'lang_id' => $this->languageId,
         'branch_category_id' => $category->id,
         'name' => 'Geçersiz adres',
         'city_id' => 99999999,
@@ -108,11 +145,12 @@ test('branch creation validates a selected location against the Konum service', 
     $admin = Admin::factory()->superAdmin()->create();
 
     $this->actingAs($admin, 'admin')->post(route('admin.branches.store'), [
+        'lang_id' => $this->languageId,
         'branch_category_id' => $category->id,
         'name' => 'Ankara Şubesi',
         'city_id' => $city->id,
         'is_active' => '1',
-    ])->assertRedirectToRoute('admin.branches.index');
+    ])->assertRedirect(route('admin.branches.edit', ['branch' => 1, 'lang' => 'tr']));
 
     $this->assertDatabaseHas('branches', ['name' => 'Ankara Şubesi', 'city_id' => $city->id]);
 });
@@ -150,6 +188,7 @@ test('branch creation rejects a child location that belongs to another city', fu
     $admin = Admin::factory()->superAdmin()->create();
 
     $this->actingAs($admin, 'admin')->post(route('admin.branches.store'), [
+        'lang_id' => $this->languageId,
         'branch_category_id' => $category->id,
         'name' => 'Uyumsuz konum',
         'city_id' => $otherCity->id,
@@ -172,7 +211,7 @@ test('branch listing filters by category through the table top bar request', fun
         'start' => 0,
         'length' => 10,
         'category_id' => $branchCategory->id,
-        'columns' => [['data' => 'name', 'name' => 'branches.name', 'searchable' => 'true', 'orderable' => 'true']],
+        'columns' => [['data' => 'name', 'name' => 'localized.name', 'searchable' => 'true', 'orderable' => 'true']],
     ]))->assertOk()->assertJsonPath('recordsFiltered', 1)->assertJsonPath('data.0.id', $branch->id);
 });
 
@@ -193,6 +232,27 @@ test('frontend reads active branches from active categories in configured order'
     expect($service->getAll('branch')->modelKeys())->toBe([$first->id, $later->id]);
     expect($service->find($first->id)?->id)->toBe($first->id);
     expect($service->find($later->id + 1000))->toBeNull();
+});
+
+test('frontend returns the selected locale translation and hides untranslated records', function () {
+    config(['konum.source.commit' => 'test-konum-source']);
+    DB::table('konum_imports')->insert([
+        'source_commit' => 'test-konum-source', 'status' => 'complete', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $english = Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $category = BranchCategory::factory()->create(['slug' => 'branch', 'is_active' => true]);
+    $category->translations()->create(['lang_id' => $english->id, 'name' => 'Branches']);
+    $translated = Branch::factory()->for($category, 'category')->create(['name' => 'İstanbul Ofisi', 'phone' => '02120000000']);
+    $translated->translations()->create(['lang_id' => $english->id, 'name' => 'Istanbul Office', 'phone' => '+90 212 000 00 00']);
+    Branch::factory()->for($category, 'category')->create(['name' => 'Çevirisiz Ofis']);
+    app()->setLocale('en');
+
+    $branches = app(BranchesFrontendService::class)->getAll('branch');
+
+    expect($branches->modelKeys())->toBe([$translated->id])
+        ->and($branches->first()->name)->toBe('Istanbul Office')
+        ->and($branches->first()->phone)->toBe('+90 212 000 00 00')
+        ->and($branches->first()->category->name)->toBe('Branches');
 });
 
 test('frontend returns no branches when Konum is disabled', function () {
@@ -222,6 +282,7 @@ test('branch write routes enforce operation permissions', function () {
     $category = BranchCategory::factory()->create();
 
     $this->actingAs($admin, 'admin')->post(route('admin.branches.store'), [
+        'lang_id' => $this->languageId,
         'branch_category_id' => $category->id,
         'name' => 'Yetkisiz kayıt',
         'is_active' => '1',

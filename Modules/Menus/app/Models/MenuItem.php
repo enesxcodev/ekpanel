@@ -2,6 +2,7 @@
 
 namespace Modules\Menus\Models;
 
+use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ class MenuItem extends Model
     /** @use HasFactory<MenuItemFactory> */
     use HasFactory;
 
-    protected $fillable = ['parent_id', 'label', 'icon', 'target_type', 'url', 'route_name', 'route_parameters', 'anchor', 'source', 'source_id', 'dynamic_children', 'is_active', 'new_tab', 'sort_order'];
+    protected $fillable = ['lang_id', 'parent_id', 'label', 'icon', 'target_type', 'url', 'route_name', 'route_parameters', 'anchor', 'source', 'source_id', 'dynamic_children', 'is_active', 'new_tab', 'sort_order'];
 
     protected function casts(): array
     {
@@ -23,6 +24,11 @@ class MenuItem extends Model
     public function menu(): BelongsTo
     {
         return $this->belongsTo(Menu::class);
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class, 'lang_id');
     }
 
     public function parent(): BelongsTo

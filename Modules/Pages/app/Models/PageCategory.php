@@ -25,6 +25,11 @@ class PageCategory extends Model
         return $this->belongsTo(self::class, 'parent_id');
     }
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(PageCategoryTranslation::class);
+    }
+
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')->orderBy('sort_order')->orderBy('name');
@@ -37,9 +42,56 @@ class PageCategory extends Model
 
     public function getUrlPathAttribute(): string
     {
+        $languageCode = request()->attributes->get('pages_language');
+        if (! is_string($languageCode) || $languageCode === '') {
+            return $this->legacyUrlPath();
+        }
+
+        $parts = [$this->translatedSlug($languageCode)];
+        $parent = $this->parent;
+        $seen = [$this->id => true];
+        while ($parent !== null) {
+            if (isset($seen[$parent->id])) {
+                return '';
+            }
+            $seen[$parent->id] = true;
+            array_unshift($parts, $parent->translatedSlug($languageCode));
+            $parent = $parent->parent;
+        }
+
+        return implode('/', $parts);
+    }
+
+    public function localizedTranslation(?int $languageId = null): ?PageCategoryTranslation
+    {
+        if ($languageId !== null && $this->relationLoaded('translations')) {
+            return $this->translations->firstWhere('lang_id', $languageId);
+        }
+
+        $languageCode = request()->attributes->get('pages_language');
+        if ($languageId !== null) {
+            return $this->translations()->where('lang_id', $languageId)->first();
+        }
+
+        return is_string($languageCode)
+            ? $this->translations()->whereHas('language', fn ($query) => $query->where('code', $languageCode))->first()
+            : null;
+    }
+
+    private function translatedSlug(string $languageCode): string
+    {
+        $translation = $this->localizedTranslation();
+
+        return $translation?->slug ?? '';
+    }
+
+    private function legacyUrlPath(): string
+    {
         $parts = [$this->slug];
         $parent = $this->parent;
-        while ($parent !== null) {
+        $seen = [$this->id => true];
+        while ($parent !== null && ! isset($seen[$parent->id])) {
+            $seen[$parent->id] = true;
             array_unshift($parts, $parent->slug);
             $parent = $parent->parent;
         }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Modules\Testimonials\Database\Factories\TestimonialFactory;
 
@@ -16,7 +17,7 @@ class Testimonial extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['customer_name', 'company', 'job_title', 'content', 'image', 'image_media_id', 'is_active', 'sort_order', 'extra_fields'];
+    protected $fillable = ['image', 'image_media_id', 'is_active', 'sort_order'];
 
     protected function casts(): array
     {
@@ -32,6 +33,11 @@ class Testimonial extends Model
     public function imageMedia(): BelongsTo
     {
         return $this->belongsTo(MediaFile::class, 'image_media_id');
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(TestimonialTranslation::class);
     }
 
     protected function imageUrl(): Attribute

@@ -1,7 +1,8 @@
 <x-admin.layout title="Katılımcı ekle">
-    <form method="post" action="{{ route('admin.events.registrations.store') }}" class="card">
+    <form method="post" action="{{ route('admin.events.registrations.store', ['lang' => $selectedLanguage?->code]) }}" class="card">
         <div class="card-body">
             @csrf
+            <input type="hidden" name="lang_id" value="{{ $selectedLanguage?->id }}">
             <x-admin.form.select name="event_id" label="Etkinlik" :options="$events->map(fn ($event) => ['value' => $event->id, 'label' => $event->title])->all()" required />
             <x-admin.form.input name="attendee_name" label="Katılımcı adı" required />
             <x-admin.form.input name="email" label="E-posta" type="email" required />

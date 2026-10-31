@@ -18,6 +18,11 @@ class StoreServiceProvider extends ModuleServiceProvider
      */
     protected string $nameLower = 'store';
 
+    protected function registerTranslations(): void
+    {
+        $this->loadTranslationsFrom(module_path($this->name, 'resources/lang'), $this->nameLower);
+    }
+
     /**
      * Command classes to register.
      *

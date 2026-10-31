@@ -2,11 +2,14 @@
 
 namespace Modules\Brand\Http\Requests;
 
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\ContentMediaService;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Brand\Services\BrandLanguageService;
 
 class SaveBrandRequest extends FormRequest
 {
@@ -19,14 +22,28 @@ class SaveBrandRequest extends FormRequest
     {
         $brand = $this->route('brand');
 
+        $language = is_numeric($this->input('lang_id')) ? Language::query()->find((int) $this->input('lang_id')) : null;
+        if ($brand && $language?->code !== BrandLanguageService::PrimaryCode) {
+            foreach (['sort_order', 'is_active', 'image_media_id', 'remove_image', 'image'] as $sharedField) {
+                $this->request->remove($sharedField);
+                $this->files->remove($sharedField);
+            }
+        }
+        $existingExtraFields = $brand && $language ? $brand->translations()->where('lang_id', $language->id)->value('extra_fields') : [];
+
         return [
-            'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
-            'is_active' => ['sometimes', 'boolean'],
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true), function (string $attribute, mixed $value, \Closure $fail) use ($brand): void {
+                if (! $brand && Language::query()->whereKey($value)->value('code') !== BrandLanguageService::PrimaryCode) {
+                    $fail('Yeni markalar Türkçe oluşturulmalıdır.');
+                }
+            }],
+            'sort_order' => $language?->code === BrandLanguageService::PrimaryCode || ! $brand ? ['nullable', 'integer', 'min:0', 'max:65535'] : ['prohibited'],
+            'is_active' => $language?->code === BrandLanguageService::PrimaryCode || ! $brand ? ['sometimes', 'boolean'] : ['prohibited'],
             'name' => ['required', 'string', 'max:255'],
-            ...$media->rules($media->definition(), ! ($brand && ! $brand->image_media_id && $brand->image)),
+            ...($language?->code === BrandLanguageService::PrimaryCode || ! $brand ? $media->rules($media->definition(), ! ($brand && ! $brand->image_media_id && $brand->image)) : ['image_media_id' => ['prohibited'], 'remove_image' => ['prohibited']]),
             'short_description' => ['nullable', 'string', 'max:500'],
-            'link' => ['nullable', 'string', 'url:http,https', 'max:2048'],
-            ...$values->rules($features->form('Brand', 'brand')['fields'], $this->all(), $brand?->extra_fields ?? []),
+            'link' => $language?->code === BrandLanguageService::PrimaryCode || ! $brand ? ['nullable', 'string', 'url:http,https', 'max:2048'] : ['prohibited'],
+            ...$values->rules($features->form('Brand', 'brand')['fields'], $this->all(), is_array($existingExtraFields) ? $existingExtraFields : []),
         ];
     }
 

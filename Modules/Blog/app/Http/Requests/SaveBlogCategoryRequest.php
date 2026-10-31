@@ -5,7 +5,6 @@ namespace Modules\Blog\Http\Requests;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -22,15 +21,10 @@ class SaveBlogCategoryRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values): array
     {
         $category = $this->route('category');
-        $parentId = $this->input('parent_id');
-        $slug = Rule::unique('blog_categories', 'slug')->where(function (Builder $query) use ($parentId): void {
-            $parentId === null || $parentId === '' ? $query->whereNull('parent_id') : $query->where('parent_id', $parentId);
-        });
-        if ($category !== null) {
-            $slug->ignore($category->id);
-        }
+        $translation = $category?->translations()->where('lang_id', $this->input('lang_id'))->first();
+        $slug = Rule::unique('blog_category_translations', 'slug')->where('lang_id', $this->input('lang_id'))->ignore($translation?->id);
 
-        return ['parent_id' => ['nullable', 'integer', 'exists:blog_categories,id'], 'name' => ['required', 'string', 'max:255'], 'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug], 'sort_order' => ['required', 'integer', 'min:0', 'max:65535'], ...$values->rules($features->form('Blog', 'category')['fields'], $this->all(), $category?->extra_fields ?? [])];
+        return ['lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)], 'parent_id' => ['nullable', 'integer', 'exists:blog_categories,id'], 'name' => ['required', 'string', 'max:255'], 'slug' => ['required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug], 'sort_order' => ['required', 'integer', 'min:0', 'max:65535'], ...$values->rules($features->form('Blog', 'category')['fields'], $this->all(), $translation?->extra_fields ?? [])];
     }
 
     /** @return list<callable(Validator): void> */

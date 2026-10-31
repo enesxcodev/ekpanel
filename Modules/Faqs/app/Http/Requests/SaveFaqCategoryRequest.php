@@ -19,10 +19,12 @@ class SaveFaqCategoryRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values): array
     {
         $category = $this->route('category');
+        $translation = $category?->translations()->where('lang_id', $this->input('lang_id'))->first();
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('faq_categories', 'name')->ignore($category?->id)],
-            ...$values->rules($features->form('Faqs', 'category')['fields'], $this->all(), $category?->extra_fields ?? []),
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('faq_category_translations', 'name')->where('lang_id', $this->input('lang_id'))->ignore($translation?->id)],
+            ...$values->rules($features->form('Faqs', 'category')['fields'], $this->all(), $translation?->extra_fields ?? []),
         ];
     }
 

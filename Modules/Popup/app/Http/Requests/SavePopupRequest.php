@@ -7,6 +7,7 @@ use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldRuleBuilder;
 use App\Services\Fields\ModuleFeatures;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SavePopupRequest extends FormRequest
 {
@@ -16,9 +17,12 @@ class SavePopupRequest extends FormRequest
     public function rules(ModuleFeatures $features, FeatureValues $values): array
     {
         $popup = $this->route('popup');
+        $languageId = $this->input('lang_id');
+        $translation = $popup?->translations()->where('lang_id', $languageId)->first();
 
         return [
             'is_active' => ['sometimes', 'boolean'],
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'title' => ['required', 'string', 'max:255'],
             'content' => ['required', 'string', 'max:100000'],
             'starts_at' => ['required', 'date_format:Y-m-d\TH:i'],
@@ -28,7 +32,7 @@ class SavePopupRequest extends FormRequest
             'repeat_unit' => ['exclude_unless:repeat_policy,interval', 'required', 'in:hours,days'],
             'image_media_id' => ['bail', 'nullable', 'integer', new SelectedMediaImage(4096)],
             'image' => ['prohibited'],
-            ...$values->rules($features->form('Popup', 'popup')['fields'], $this->all(), $popup?->extra_fields ?? []),
+            ...$values->rules($features->form('Popup', 'popup')['fields'], $this->all(), $translation?->extra_fields ?? []),
         ];
     }
 
@@ -47,7 +51,7 @@ class SavePopupRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['is_active' => 'Durum', 'title' => 'Başlık', 'content' => 'İçerik', 'image_media_id' => 'Görsel', 'starts_at' => 'Başlangıç', 'ends_at' => 'Bitiş', 'repeat_policy' => 'Tekrar gösterim politikası', 'repeat_interval' => 'Tekrar aralığı', 'repeat_unit' => 'Aralık birimi']
+        return ['is_active' => 'Durum', 'lang_id' => 'Dil', 'title' => 'Başlık', 'content' => 'İçerik', 'image_media_id' => 'Görsel', 'starts_at' => 'Başlangıç', 'ends_at' => 'Bitiş', 'repeat_policy' => 'Tekrar gösterim politikası', 'repeat_interval' => 'Tekrar aralığı', 'repeat_unit' => 'Aralık birimi']
             + app(FeatureValues::class)->labels(app(ModuleFeatures::class)->form('Popup', 'popup')['fields']);
     }
 }

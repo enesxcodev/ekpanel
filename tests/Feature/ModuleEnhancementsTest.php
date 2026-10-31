@@ -98,17 +98,18 @@ test('service categories save optional ordering and default to active', function
 
 test('page SEO fields persist through create and update and appear in the public page head', function () {
     $admin = Admin::factory()->superAdmin()->create();
-    $this->actingAs($admin, 'admin')->post(route('admin.pages.store'), [
+    $response = $this->actingAs($admin, 'admin')->post(route('admin.pages.store'), [
         'title' => 'Kurumsal', 'slug' => 'kurumsal', 'status' => 'published', 'sort_order' => 0,
         'meta_title' => 'Özel başlık', 'meta_keywords' => 'kurumsal', 'meta_description' => 'Özel açıklama',
-    ])->assertRedirectToRoute('admin.pages.index');
+    ]);
     $page = Page::query()->sole();
+    $response->assertRedirectToRoute('admin.pages.edit', ['page' => $page->id, 'lang' => 'tr']);
     $this->assertDatabaseHas('pages', ['id' => $page->id, 'meta_title' => 'Özel başlık', 'meta_description' => 'Özel açıklama']);
     $this->get('/kurumsal')->assertOk()->assertSee('<title>Özel başlık</title>', false)
         ->assertSee('<meta name="description" content="Özel açıklama">', false);
 
     $this->put(route('admin.pages.update', $page), ['title' => 'Kurumsal', 'slug' => 'kurumsal', 'status' => 'published', 'sort_order' => 0, 'meta_title' => null, 'meta_description' => null])
-        ->assertRedirectToRoute('admin.pages.index');
+        ->assertRedirectToRoute('admin.pages.edit', ['page' => $page->id, 'lang' => 'tr']);
     $this->assertDatabaseHas('pages', ['id' => $page->id, 'meta_title' => null, 'meta_description' => null]);
     $this->get('/kurumsal')->assertOk()->assertSee('Kurumsal ·', false);
 });

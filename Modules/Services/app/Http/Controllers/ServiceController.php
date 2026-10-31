@@ -3,6 +3,7 @@
 namespace Modules\Services\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\ModuleFeatures;
 use App\Services\Media\MediaService;
@@ -16,7 +17,9 @@ use Modules\Services\Http\Requests\StoreServiceRequest;
 use Modules\Services\Http\Requests\UpdateServiceRequest;
 use Modules\Services\Models\Service;
 use Modules\Services\Models\ServiceCategory;
+use Modules\Services\Models\ServiceTranslation;
 use Modules\Services\Services\ServiceService;
+use Modules\Services\Services\ServicesLanguageService;
 
 class ServiceController extends Controller
 {
@@ -50,10 +53,10 @@ class ServiceController extends Controller
             $request->user('admin'),
             'Hizmet eklendi',
             'Bir hizmet eklendi.',
-            route('admin.services.edit', ['service' => $service->id], absolute: false),
+            route('admin.services.edit', ['service' => $service->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code], absolute: false),
         );
 
-        return redirect()->route('admin.services.index')->with('notification', [
+        return redirect()->route('admin.services.edit', ['service' => $service->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code])->with('notification', [
             'type' => 'success', 'message' => 'Hizmet başarıyla eklendi.',
         ]);
     }
@@ -72,10 +75,10 @@ class ServiceController extends Controller
             $request->user('admin'),
             'Hizmet güncellendi',
             'Bir hizmet güncellendi.',
-            route('admin.services.edit', ['service' => $service->id], absolute: false),
+            route('admin.services.edit', ['service' => $service->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code], absolute: false),
         );
 
-        return redirect()->route('admin.services.index')->with('notification', ['type' => 'success', 'message' => 'Hizmet başarıyla güncellendi.']);
+        return redirect()->route('admin.services.edit', ['service' => $service->id, 'lang' => Language::query()->findOrFail($request->validated('lang_id'))->code])->with('notification', ['type' => 'success', 'message' => 'Hizmet başarıyla güncellendi.']);
     }
 
     public function destroy(Service $service, ServiceService $manager, Request $request, NotifyService $notifications): RedirectResponse
@@ -92,15 +95,33 @@ class ServiceController extends Controller
         return redirect()->route('admin.services.index')->with('notification', ['type' => 'success', 'message' => 'Hizmet başarıyla silindi.']);
     }
 
+    public function translationEdit(ServiceTranslation $translation): RedirectResponse
+    {
+        $this->authorize('services.update');
+
+        return redirect()->route('admin.services.edit', ['service' => $translation->service_id, 'lang' => $translation->language->code]);
+    }
+
+    private function languageOptions(?Service $service = null): array
+    {
+        $languages = app(ServicesLanguageService::class)->active();
+        $selectedLanguage = app(ServicesLanguageService::class)->forAdmin(request()->query('lang'));
+        $translation = $selectedLanguage ? $service?->translations()->where('lang_id', $selectedLanguage->id)->first() : null;
+        $translatedLanguageIds = $service?->translations()->pluck('lang_id')->all() ?? [];
+
+        return compact('languages', 'selectedLanguage', 'translation', 'translatedLanguageIds');
+    }
+
     private function form(ModuleFeatures $features, FeatureValues $values, ?Service $service = null): View
     {
         $service?->load('imageMedia');
         $featureForm = $features->form('Services', 'service');
-        $featureFields = $values->fields($featureForm['fields'], $service?->extra_fields ?? []);
-        $categories = ServiceCategory::query()->orderBy('sort_order')->orderBy('name')->get(['id', 'name'])
+        $options = $this->languageOptions($service);
+        $featureFields = $values->fields($featureForm['fields'], $options['translation']?->extra_fields ?? []);
+        $categories = ServiceCategory::query()->orderBy('sort_order')->orderBy('id')->get()
             ->map(fn (ServiceCategory $category): array => ['value' => $category->id, 'label' => $category->name])->all();
         $icons = collect(config('services.icons'))->map(fn (string $label, string $value): array => compact('value', 'label'))->values()->all();
 
-        return view($service === null ? 'services::create' : 'services::edit', compact('service', 'featureForm', 'featureFields', 'categories', 'icons') + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
+        return view($service === null ? 'services::create' : 'services::edit', compact('service', 'featureForm', 'featureFields', 'categories', 'icons') + $options + ['mediaConfig' => $this->media->configuration(auth('admin')->user())]);
     }
 }

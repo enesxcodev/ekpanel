@@ -91,10 +91,10 @@ test('web customers can only see their own orders and guest token is independent
 test('category CRUD uses the existing admin flow and inactive categories hide products', function () {
     storeStatuses();
     $admin = Admin::factory()->superAdmin()->create();
-    $this->actingAs($admin, 'admin')->post(route('admin.store.categories.store'), ['name' => 'Kapılar', 'sort_order' => 0, 'is_active' => 1])->assertRedirectToRoute('admin.store.categories.index');
+    $this->actingAs($admin, 'admin')->post(route('admin.store.categories.store'), ['name' => 'Kapılar', 'sort_order' => 0, 'is_active' => 1])->assertRedirectToRoute('admin.store.categories.edit', ['category' => StoreCategory::query()->latest('id')->firstOrFail(), 'lang' => 'tr']);
     $category = StoreCategory::query()->sole();
     $product = StoreProduct::factory()->create(['store_category_id' => $category->id]);
-    $this->put(route('admin.store.categories.update', $category), ['name' => 'Kapılar', 'sort_order' => 0, 'is_active' => 0])->assertRedirectToRoute('admin.store.categories.index');
+    $this->put(route('admin.store.categories.update', $category), ['name' => 'Kapılar', 'sort_order' => 0, 'is_active' => 0])->assertRedirectToRoute('admin.store.categories.edit', ['category' => $category, 'lang' => 'tr']);
     $this->get(route('store.show', $product->slug))->assertNotFound();
     $this->delete(route('admin.store.categories.destroy', $category))->assertRedirectToRoute('admin.store.categories.index');
     expect($product->fresh()->store_category_id)->toBeNull();

@@ -9,6 +9,7 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Sec
     ->name('admin.sector.')
     ->group(function (): void {
         Route::get('sector/data', [SectorController::class, 'data'])->name('data');
+        Route::get('sector/translations/{translation}', [SectorController::class, 'editTranslation'])->name('translations.edit');
         Route::resource('sector', SectorController::class)->parameters(['sector' => 'sector'])->except('show')->names([
             'index' => 'index', 'create' => 'create', 'store' => 'store',
             'edit' => 'edit', 'update' => 'update', 'destroy' => 'destroy',

@@ -19,6 +19,11 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Pag
     });
 
 Route::middleware('module.enabled:Pages')
+    ->get('/{lang}/{path}', [PageController::class, 'showLocalized'])
+    ->where(['lang' => '[a-zA-Z]{2,3}(?:-[a-zA-Z]{2,4})?', 'path' => '.*'])
+    ->name('pages.localized.show');
+
+Route::middleware('module.enabled:Pages')
     ->get('/{path}', [PageController::class, 'show'])
     ->where('path', '.*')
     ->fallback()

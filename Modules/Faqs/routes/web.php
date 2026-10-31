@@ -9,6 +9,8 @@ Route::middleware(['auth:admin', EnsureAdminIsActive::class, 'module.enabled:Faq
     ->prefix(trim((string) config('app.route_files.admin_prefix')) ?: 'admin')
     ->name('admin.')
     ->group(function (): void {
+        Route::get('faqs/translations/{translation}/edit', [FaqController::class, 'translationEdit'])->name('faqs.translations.edit')->scopeBindings();
+        Route::get('faqs/categories/translations/{translation}/edit', [FaqCategoryController::class, 'translationEdit'])->name('faqs.categories.translations.edit')->scopeBindings();
         Route::get('faqs/categories/data', [FaqCategoryController::class, 'data'])->name('faqs.categories.data');
         Route::get('faqs/data', [FaqController::class, 'data'])->name('faqs.data');
         Route::resource('faqs/categories', FaqCategoryController::class)

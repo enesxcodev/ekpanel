@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Settings\Language;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -93,4 +94,28 @@ test('publication compares explicit instants in the application timezone', funct
     $service = app(PopupFrontendService::class);
     expect($service->published(CarbonImmutable::parse('2026-10-19 09:00:00', 'UTC'))->modelKeys())->toBe([$popup->id]);
     expect($service->shouldShow($popup, at: CarbonImmutable::parse('2026-10-19 11:00:00', 'UTC')))->toBeFalse();
+});
+
+test('popup frontend selects the requested language then falls back to Turkish', function () {
+    $english = Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $translated = Popup::factory()->create();
+    $translated->translations()->create(['lang_id' => $english->id, 'title' => 'English announcement', 'content' => '<p>English</p>']);
+    $turkishOnly = Popup::factory()->create();
+    $turkishOnly->translations()->where('lang_id', Language::query()->where('code', 'tr')->value('id'))->update(['title' => 'Türkçe fallback']);
+    $service = app(PopupFrontendService::class);
+
+    $results = $service->published(language: 'en')->keyBy('id');
+    expect($results[$translated->id]->title)->toBe('English announcement');
+    expect($results[$turkishOnly->id]->title)->toBe('Türkçe fallback');
+    expect($service->shouldShow($translated, language: 'en'))->toBeTrue();
+});
+
+test('popup without requested or Turkish translation is not published or eligible', function () {
+    Language::query()->create(['code' => 'en', 'is_active' => true]);
+    $popup = Popup::factory()->create();
+    $popup->translations()->where('lang_id', Language::query()->where('code', 'tr')->value('id'))->delete();
+    $service = app(PopupFrontendService::class);
+
+    expect($service->published(language: 'en')->modelKeys())->not->toContain($popup->id);
+    expect($service->shouldShow($popup, language: 'en'))->toBeFalse();
 });

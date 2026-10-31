@@ -4,6 +4,7 @@ namespace Modules\Faqs\Services;
 
 use App\Enums\Fields\FieldValueType;
 use App\Models\Admin\Admin;
+use App\Models\Settings\Language;
 use App\Services\Fields\FeatureValues;
 use App\Services\Fields\FieldFiles;
 use App\Services\Fields\ModuleFeatures;
@@ -20,22 +21,14 @@ class FaqService
     {
         return $this->files->transaction(function (FieldFiles $files) use ($data, $faq, $actor): Faq {
             $faq = $faq === null ? new Faq : Faq::query()->lockForUpdate()->findOrFail($faq->id);
-            $faq->fill([
-                'category_id' => $data['category_id'] ?? null,
-                'name' => $data['name'],
-                'content' => $this->sanitizer->sanitize($data['content']),
-            ])->save();
-            $faq->extra_fields = $this->values->prepare(
-                $this->features->form('Faqs', 'faq')['fields'],
-                $data,
-                $faq->extra_fields ?? [],
-                'faqs/'.$faq->id.'/features',
-                $files,
-                $actor,
-            );
+            $faq->category_id = $data['category_id'] ?? null;
             $faq->save();
-
-            $this->values->syncMediaUsages($this->features->form('Faqs', 'faq')['fields'], $faq, $this->media, 'Sıkça sorulan soru / '.$faq->name, 'admin.faqs.edit');
+            $language = isset($data['lang_id']) ? Language::query()->where('is_active', true)->findOrFail($data['lang_id']) : app(FaqLanguageService::class)->forFrontend();
+            $translation = $faq->translations()->firstOrNew(['lang_id' => $language->id]);
+            $translation->fill(['name' => $data['name'], 'content' => $this->sanitizer->sanitize($data['content'])]);
+            $translation->extra_fields = $this->values->prepare($this->features->form('Faqs', 'faq')['fields'], $data, $translation->extra_fields ?? [], 'faqs/'.$faq->id.'/translations/'.$language->id.'/features', $files, $actor);
+            $translation->save();
+            $this->values->syncMediaUsages($this->features->form('Faqs', 'faq')['fields'], $translation, $this->media, 'Sıkça sorulan soru / '.$translation->name, 'admin.faqs.translations.edit');
 
             return $faq;
         });
@@ -45,10 +38,13 @@ class FaqService
     {
         $this->files->transaction(function (FieldFiles $files) use ($faq): void {
             $faq = Faq::query()->lockForUpdate()->findOrFail($faq->id);
-            foreach ($this->features->form('Faqs', 'faq')['fields'] as $key => $definition) {
-                if ($definition->input_type->isFile() && $definition->value_type !== FieldValueType::Media) {
-                    $files->replace(null, $faq->extra_fields[$key] ?? null, 'faqs/'.$faq->id.'/features', true);
+            foreach ($faq->translations()->get() as $translation) {
+                foreach ($this->features->form('Faqs', 'faq')['fields'] as $key => $definition) {
+                    if ($definition->input_type->isFile() && $definition->value_type !== FieldValueType::Media) {
+                        $files->replace(null, $translation->extra_fields[$key] ?? null, 'faqs/'.$faq->id.'/translations/'.$translation->lang_id.'/features', true);
+                    }
                 }
+                $this->media->detachUsages($translation);
             }
             $this->media->detachUsages($faq);
             $faq->delete();

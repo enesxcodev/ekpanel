@@ -5,35 +5,45 @@ namespace Modules\Menus\Services;
 use Illuminate\Routing\Exceptions\UrlGenerationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
+use Modules\Menus\Interfaces\LocalizedMenuSource;
 use Modules\Menus\Models\Menu;
 use Modules\Menus\Models\MenuItem;
 use Nwidart\Modules\Facades\Module;
 
 class NavigationService
 {
-    public function __construct(private MenuSources $sources) {}
+    public function __construct(private MenuSources $sources, private MenusLanguageService $languages) {}
 
     /** @return list<array{label: string, icon: ?string, url: ?string, new_tab: bool, children: array}> */
-    public function tree(string $menuKey): array
+    public function tree(string $menuKey, ?string $languageCode = null): array
     {
-        if (! Module::find('Menus')?->isEnabled()) {
+        if (! Module::find('Menus')?->isEnabled() || ! Schema::hasTable('menu_translations') || ! Schema::hasColumn('menu_items', 'lang_id')) {
             return [];
         }
 
-        $menu = Menu::query()->where('key', $menuKey)->where('is_active', true)->first();
+        $language = $this->languages->forFrontend($languageCode);
+        if ($language === null) {
+            return [];
+        }
+
+        $menu = Menu::query()->where('key', $menuKey)->where('is_active', true)
+            ->whereHas('translations', fn ($query) => $query->where('lang_id', $language->id))
+            ->with(['translations' => fn ($query) => $query->where('lang_id', $language->id)])
+            ->first();
 
         if ($menu === null) {
             return [];
         }
 
-        $items = $menu->items()->orderBy('sort_order')->orderBy('id')->get();
+        $items = $menu->items()->where('lang_id', $language->id)->orderBy('sort_order')->orderBy('id')->get();
 
-        return $this->branches($items->groupBy(fn (MenuItem $item): string => (string) ($item->parent_id ?? 0)));
+        return $this->branches($items->groupBy(fn (MenuItem $item): string => (string) ($item->parent_id ?? 0)), $language->code);
     }
 
     /** @return array{url: ?string, error: ?string} */
-    public function target(MenuItem $item): array
+    public function target(MenuItem $item, ?string $languageCode = null): array
     {
         if ($item->target_type === 'group') {
             return ['url' => null, 'error' => null];
@@ -41,7 +51,9 @@ class NavigationService
 
         if ($item->target_type === 'content') {
             $source = $this->sources->get((string) $item->source);
-            $target = $source?->find((string) $item->source_id);
+            $target = $source instanceof LocalizedMenuSource && $languageCode !== null
+                ? $source->findForLanguage((string) $item->source_id, $languageCode)
+                : $source?->find((string) $item->source_id);
 
             if ($target === null) {
                 return ['url' => null, 'error' => 'İçerik kaynağı veya kayıt artık kullanılamıyor.'];
@@ -175,7 +187,7 @@ class NavigationService
      * @param  list<int>  $ancestors
      * @return list<array{label: string, icon: ?string, url: ?string, new_tab: bool, children: array}>
      */
-    private function branches(Collection $byParent, int $parentId = 0, array $ancestors = []): array
+    private function branches(Collection $byParent, string $languageCode, int $parentId = 0, array $ancestors = []): array
     {
         $nodes = [];
 
@@ -184,19 +196,22 @@ class NavigationService
                 continue;
             }
 
-            $target = $this->target($item);
+            $target = $this->target($item, $languageCode);
 
             if ($target['error'] !== null) {
                 continue;
             }
 
-            $children = $this->branches($byParent, $item->id, [...$ancestors, $item->id]);
+            $children = $this->branches($byParent, $languageCode, $item->id, [...$ancestors, $item->id]);
 
             if ($item->target_type === 'content' && $item->dynamic_children) {
                 $source = $this->sources->get((string) $item->source);
 
                 if ($source?->supportsChildren()) {
-                    $children = [...$children, ...$this->safeChildren($source->children((string) $item->source_id))];
+                    $localizedChildren = $source instanceof LocalizedMenuSource
+                        ? $source->childrenForLanguage((string) $item->source_id, $languageCode)
+                        : $source->children((string) $item->source_id);
+                    $children = [...$children, ...$this->safeChildren($localizedChildren)];
                 }
             }
 

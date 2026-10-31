@@ -6,9 +6,9 @@
         @if ($errors->any())<div class="alert alert-danger m-3">{{ $errors->first() }}</div>@endif
         <x-admin.data-table id="project-categories-table" :source="route('admin.projects.categories.data')"
             :columns="[
-                ['title' => 'Kategori', 'data' => 'name', 'name' => 'name'],
-                ['title' => 'Kısa bağlantı', 'data' => 'slug', 'name' => 'slug'],
-                ['title' => 'İkon', 'data' => 'icon', 'name' => 'icon'],
+                ['title' => 'Kategori', 'data' => 'name', 'name' => 'category_translation.name'],
+                ['title' => 'Kısa bağlantı', 'data' => 'slug', 'name' => 'category_translation.slug'],
+                ['title' => 'İkon', 'data' => 'icon', 'name' => 'project_categories.icon'],
                 ['title' => 'İşlemler', 'data' => 'actions', 'orderable' => false, 'searchable' => false],
             ]" />
     </div>

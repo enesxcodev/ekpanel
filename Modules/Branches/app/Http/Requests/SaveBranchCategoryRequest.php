@@ -17,27 +17,28 @@ class SaveBranchCategoryRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $slug = $this->input('slug');
-        $name = $this->input('name');
-        if (blank($slug) && is_string($name)) {
-            $this->merge(['slug' => Str::slug($name)]);
+        if ($this->route('category') === null && blank($this->input('slug')) && is_string($this->input('name'))) {
+            $this->merge(['slug' => Str::slug($this->input('name'))]);
         }
     }
 
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
+        $category = $this->route('category');
+
         return [
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
             'name' => ['required', 'string', 'max:150'],
-            'slug' => ['required', 'string', 'max:80', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('branch_categories', 'slug')->ignore($this->route('category'))],
-            'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
-            'is_active' => ['required', 'boolean'],
+            'slug' => $category === null ? ['required', 'string', 'max:80', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('branch_categories', 'slug')] : ['prohibited'],
+            'sort_order' => $category === null ? ['required', 'integer', 'min:0', 'max:65535'] : ['prohibited'],
+            'is_active' => $category === null ? ['required', 'boolean'] : ['prohibited'],
         ];
     }
 
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['name' => 'Kategori adı', 'slug' => 'Slug', 'sort_order' => 'Sıralama', 'is_active' => 'Durum'];
+        return ['lang_id' => 'Dil', 'name' => 'Kategori adı', 'slug' => 'Slug', 'sort_order' => 'Sıralama', 'is_active' => 'Durum'];
     }
 }

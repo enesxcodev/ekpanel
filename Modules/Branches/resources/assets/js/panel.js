@@ -1,5 +1,30 @@
-export default function initialize() {
+export default function initialize(panel) {
+    document.querySelectorAll('[data-branches-language]').forEach((select) => {
+        select.addEventListener('change', () => {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', select.value);
+            window.location.assign(url.toString());
+        });
+    });
     document.querySelectorAll('[data-branches-form]').forEach((form) => {
+        let hasUnsavedChanges = false;
+        form.addEventListener('input', (event) => {
+            if (event.isTrusted && event.target.name !== 'lang_id') {
+                hasUnsavedChanges = true;
+            }
+        });
+        form.addEventListener('change', (event) => {
+            if (event.isTrusted && event.target.name !== 'lang_id') {
+                hasUnsavedChanges = true;
+            }
+        });
+        form.querySelectorAll('[data-branches-language-link]').forEach((link) => {
+            link.addEventListener('click', (event) => {
+                if (hasUnsavedChanges && !window.confirm('Kaydedilmemiş değişiklikleriniz var. Dil değiştirilirse bu değişiklikler kaybolacak. Devam edilsin mi?')) {
+                    event.preventDefault();
+                }
+            });
+        });
         const $ = window.$;
         const selects = [...form.querySelectorAll('[data-location-select]')];
         const parentsFor = (select) => Object.fromEntries((select.dataset.parents || '').split(',').filter(Boolean).map((key) => [key, form.querySelector(`[name="${key}"]`)?.value || '']));

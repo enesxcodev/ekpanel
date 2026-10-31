@@ -21,8 +21,11 @@ class StoreServiceRequest extends FormRequest
     {
         $service = $this->route('service');
 
+        $translation = $service?->translations()->where('lang_id', $this->input('lang_id'))->first();
+
         return [
-            'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('services', 'slug')->ignore($service?->id)],
+            'lang_id' => ['required', 'integer', Rule::exists('languages', 'id')->where('is_active', true)],
+            'slug' => ['nullable', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('service_translations', 'slug')->where('lang_id', $this->input('lang_id'))->ignore($translation?->id)],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'title' => ['required', 'string', 'max:255'],
             'service_category_id' => ['nullable', 'integer', 'exists:service_categories,id'],
@@ -34,7 +37,7 @@ class StoreServiceRequest extends FormRequest
             ...$media->rules($media->definition()),
             'icon' => ['nullable', 'string', Rule::in(array_keys(config('services.icons')))],
             'is_active' => ['required', 'boolean'],
-            ...$values->rules($features->form('Services', 'service')['fields'], $this->all(), $service?->extra_fields ?? []),
+            ...$values->rules($features->form('Services', 'service')['fields'], $this->all(), $translation?->extra_fields ?? []),
         ];
     }
 

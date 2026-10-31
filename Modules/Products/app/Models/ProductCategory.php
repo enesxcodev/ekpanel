@@ -14,7 +14,20 @@ class ProductCategory extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['name', 'sort_order', 'is_active', 'extra_fields'];
+    protected $fillable = ['sort_order', 'is_active'];
+
+    public function getAttribute($key): mixed
+    {
+        if (in_array($key, ['name', 'extra_fields'], true) && ! array_key_exists($key, $this->attributes)) {
+            $translations = $this->relationLoaded('translations') ? $this->getRelation('translations') : $this->translations;
+            $languageId = request()->attributes->get('products_language_id');
+            $translation = $translations->first(fn (ProductCategoryTranslation $item): bool => (int) $item->lang_id === (int) $languageId);
+
+            return $translation?->getAttribute($key);
+        }
+
+        return parent::getAttribute($key);
+    }
 
     protected function casts(): array
     {
@@ -29,5 +42,10 @@ class ProductCategory extends Model
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(ProductCategoryTranslation::class);
     }
 }

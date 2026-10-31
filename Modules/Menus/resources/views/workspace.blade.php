@@ -1,5 +1,7 @@
 <x-admin.layout title="Menü Yönetimi" :fluid="true">
     <div class="menu-workspace" data-menu-workspace>
+        <div class="row g-3">
+            <main class="col-lg-9">
         <div class="mb-4">
             <p class="text-secondary mb-0">Mevcut menüyü seçin, öğelerini düzenleyin ve ayarlarını yapılandırın.</p>
         </div>
@@ -23,10 +25,10 @@
                 <h2 class="h3" data-menu-form-title>Menü bilgileri</h2>
                 <div class="alert alert-danger" data-form-errors role="alert" hidden></div>
                 <div class="row g-3">
-                    <div class="col-md-4"><label for="menu-name" class="form-label required">Menü adı</label><input id="menu-name" name="name" class="form-control" maxlength="255" required></div>
-                    <div class="col-md-3"><label for="menu-key" class="form-label required">Menü anahtarı</label><input id="menu-key" name="key" class="form-control" maxlength="100" pattern="[a-z][a-z0-9_-]*" required><div class="form-hint">Benzersiz anahtar: main, footer, mobile-menu</div></div>
-                    <div class="col-md-3"><label for="menu-icon" class="form-label">İkon</label><input id="menu-icon" name="icon" class="form-control" maxlength="100" pattern="[a-z][a-z0-9-]*" placeholder="layout-grid"></div>
-                    <div class="col-md-2"><label for="menu-active" class="form-label">Durum</label><label class="form-check form-switch"><input id="menu-active" name="is_active" type="checkbox" class="form-check-input" checked><span class="form-check-label">Aktif</span></label></div>
+                    <div class="col-md-4"><label for="menu-name" class="form-label required">Menü adı ({{ strtoupper($selectedLanguage?->code ?? 'TR') }})</label><input id="menu-name" name="name" class="form-control" maxlength="255" required></div>
+                    <div class="col-md-3"><label for="menu-key" class="form-label required">Menü anahtarı</label><input id="menu-key" name="key" class="form-control" maxlength="100" pattern="[a-z][a-z0-9_-]*" required><div class="form-hint">Benzersiz ve tüm dillerde ortak: main, footer</div></div>
+                    <div class="col-md-3"><label for="menu-icon" class="form-label">İkon (ortak)</label><input id="menu-icon" name="icon" class="form-control" maxlength="100" pattern="[a-z][a-z0-9-]*" placeholder="layout-grid"></div>
+                    <div class="col-md-2"><label for="menu-active" class="form-label">Durum (ortak)</label><label class="form-check form-switch"><input id="menu-active" name="is_active" type="checkbox" class="form-check-input" checked><span class="form-check-label">Aktif</span></label></div>
                 </div>
                 <div class="d-flex gap-2 mt-3 flex-wrap"><button class="btn btn-primary" type="submit">Menüyü kaydet</button><button class="btn btn-outline-secondary" type="button" data-menu-cancel>Vazgeç</button>@can('menus.delete')<button class="btn btn-outline-danger ms-auto" type="button" data-menu-delete>Menüyü sil</button>@endcan</div>
             </form>
@@ -113,5 +115,20 @@
         @endforeach
         <noscript><div class="alert alert-warning">Menü düzenleyicisini kullanmak için JavaScript'i etkinleştirin.</div></noscript>
         <script type="application/json" data-menu-configuration>{!! json_encode($configuration, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+            </main>
+            <aside class="col-lg-3">
+                <nav class="card menu-language-picker" aria-label="Menü dili">
+                    <div class="card-body">
+                        <h2 class="h3">Dil</h2>
+                        <p class="small text-secondary">Her dilin menü öğeleri ve sıralaması ayrıdır.</p>
+                        <div class="d-grid gap-2">
+                            @foreach ($activeLanguages as $language)
+                                <a class="btn {{ $selectedLanguage?->id === $language->id ? 'btn-primary' : 'btn-outline-secondary' }}" data-menu-language href="{{ route('admin.menus.index', array_filter(['lang' => $language->code, 'menu' => request()->query('menu')])) }}" @if($selectedLanguage?->id === $language->id) aria-current="page" @endif>{{ strtoupper($language->code) }}</a>
+                            @endforeach
+                        </div>
+                    </div>
+                </nav>
+            </aside>
+        </div>
     </div>
 </x-admin.layout>

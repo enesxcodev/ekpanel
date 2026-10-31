@@ -2,6 +2,7 @@
 
 namespace Modules\Documents\Database\Factories;
 
+use App\Models\Settings\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Documents\Models\DocumentCategory;
 
@@ -17,6 +18,18 @@ class DocumentCategoryFactory extends Factory
      */
     public function definition(): array
     {
-        return ['name' => fake()->unique()->words(2, true), 'icon' => null, 'extra_fields' => []];
+        return ['icon' => null];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (DocumentCategory $category): void {
+            $language = Language::query()->where('code', 'tr')->firstOrFail();
+            $category->translations()->create([
+                'lang_id' => $language->id,
+                'name' => fake()->unique()->words(2, true),
+                'extra_fields' => [],
+            ]);
+        });
     }
 }
